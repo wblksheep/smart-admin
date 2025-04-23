@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Component("usable")
 public class UsableSprinklerDataProcessorImpl implements DataProcessor<UsableSprinklerCreateForm> {
 
-    private static final Set<Integer> VALID_STATUS_SET = Set.of(0, 1, 2, 3, 4);
+    private static final Set<Integer> VALID_STATUS_SET = Set.of(0);
 
     @Resource
     private SprinklerRepository sprinklerRepository;
@@ -50,57 +50,9 @@ public class UsableSprinklerDataProcessorImpl implements DataProcessor<UsableSpr
         Map<Boolean, List<UsableSprinklerCreateForm>> preprocessed = createVOs.stream()
                 .collect(Collectors.partitioningBy(
                         form -> StringUtils.isNotBlank(form.getSprinklerSerial())
-                                && VALID_STATUS_SET.contains(form.getStatus())
-                ));
-
-        //提前返回空值情况
-        if (createVOs.isEmpty()) {
-            return ResponseDTO.ok("导入数据为空");
-        }
-
-        // 校验1：收集无效数据（空值或空字符串或不在所在仓）
-        Set<String> invalidSerials = createVOs.stream()
-                .filter(vo -> StringUtils.isBlank(vo.getSprinklerSerial()) || vo.getStatus() != 0)
-                .map(UsableSprinklerCreateForm::getSprinklerSerial) // 实际会得到null或空字符串
-                .collect(Collectors.toSet());
-
-        //使用提取方法优化可读性
-        // 校验2：收集已存在数据
-        Set<String> existingSerials = getExistingSerials(sprinklerRepository.getBaseMapper(), createVOs, SprinklerEntity::getSprinklerSerial);
-
-        //合并校验结果
-        Map<Boolean, List<UsableSprinklerCreateForm>> partitionedData = createVOs.stream()
-                .collect(Collectors.partitioningBy(
-                        vo -> StringUtils.isNotBlank(vo.getSprinklerSerial()) && vo.getStatus() == 0
-                                && existingSerials.contains(vo.getSprinklerSerial())
-                ));
-        List<UsableSprinklerEntity> validData = partitionedData.get(true).stream()
-                .map(this::convertToEntity)
-                .toList();
-
-        // 错误数据合并（空值+重复值）
-        Set<String> errorData = new HashSet<>();
-        errorData.addAll(invalidSerials);
-        errorData.addAll(partitionedData.get(false).stream()
-                .map(UsableSprinklerCreateForm::getSprinklerSerial)
-                .filter(StringUtils::isNotBlank)
-                .collect(Collectors.toSet()));
-
-        Set<String> existingRepositorySerials = getExistingSerials(usableSprinklerRepository.getBaseMapper(), createVOs, UsableSprinklerEntity::getSprinklerSerial);
-        //合并校验结果
-        Map<Boolean, List<UsableSprinklerCreateForm>> partitionedData = createVOs.stream()
-                .collect(Collectors.partitioningBy(
-                        vo -> StringUtils.isNotBlank(vo.getSprinklerSerial()) && vo.getStatus() == 0
-                                && existingSerials.contains(vo.getSprinklerSerial())
-                ));
-
-        // 执行插入并返回详细信息
-        if (!validData.isEmpty()) {
-            usableSprinklerRepository.saveBatch(validData);
-            return buildResponse(validData.size(), errorData);
-        }
-
-        return ResponseDTO.userErrorParam("无有效数据可插入，错误数据：" + String.join(",", errorData));
+                                && form.getStatus()==0)
+                );
+        return ResponseDTO.ok();
 
 
     }
