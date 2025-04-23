@@ -37,7 +37,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @OperateLog
-@Tag(name = AdminSwaggerTagConst.System.SYSTEM_DEPARTMENT)
+@Tag(name = AdminSwaggerTagConst.Business.SPRINKLER)
 public class SprinklerController {
     @Resource
     private SprinklerService sprinklerService;

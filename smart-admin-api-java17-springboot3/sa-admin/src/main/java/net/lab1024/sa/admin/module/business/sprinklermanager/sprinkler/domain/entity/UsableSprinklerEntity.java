@@ -41,9 +41,6 @@ public class UsableSprinklerEntity {
     @DataTracerFieldLabel("返仓日期")
     private LocalDate retWarehouseDate;
 
-
-
-
     /**
      * 领用是否有限制
      */
