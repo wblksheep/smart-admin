@@ -1,17 +1,23 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.processor.impl;
 
 import cn.idev.excel.util.StringUtils;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.UsableSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.BaseCreateForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerCreateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.UsableSprinklerCreateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.processor.DataProcessor;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.UsableSprinklerRepository;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
+import net.lab1024.sa.base.common.domain.ValidateList;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
+import org.assertj.core.util.Arrays;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -25,6 +31,8 @@ import java.util.stream.Collectors;
 @Component("usable")
 public class UsableSprinklerDataProcessorImpl implements DataProcessor<UsableSprinklerCreateForm> {
 
+    private static final Set<Integer> VALID_STATUS_SET = Set.of(0, 1, 2, 3, 4);
+
     @Resource
     private SprinklerRepository sprinklerRepository;
 
@@ -33,6 +41,17 @@ public class UsableSprinklerDataProcessorImpl implements DataProcessor<UsableSpr
 
     @Override
     public ResponseDTO<String> process(List<UsableSprinklerCreateForm> createVOs) {
+
+        if (CollectionUtils.isEmpty(createVOs)) {
+            return ResponseDTO.ok("导入数据为空");
+        }
+
+        // 预处理阶段：过滤无效数据
+        Map<Boolean, List<UsableSprinklerCreateForm>> preprocessed = createVOs.stream()
+                .collect(Collectors.partitioningBy(
+                        form -> StringUtils.isNotBlank(form.getSprinklerSerial())
+                                && VALID_STATUS_SET.contains(form.getStatus())
+                ));
 
         //提前返回空值情况
         if (createVOs.isEmpty()) {
@@ -47,7 +66,7 @@ public class UsableSprinklerDataProcessorImpl implements DataProcessor<UsableSpr
 
         //使用提取方法优化可读性
         // 校验2：收集已存在数据
-        Set<String> existingSerials = getExistingSprinklerSerials(createVOs);
+        Set<String> existingSerials = getExistingSerials(sprinklerRepository.getBaseMapper(), createVOs, SprinklerEntity::getSprinklerSerial);
 
         //合并校验结果
         Map<Boolean, List<UsableSprinklerCreateForm>> partitionedData = createVOs.stream()
@@ -67,7 +86,13 @@ public class UsableSprinklerDataProcessorImpl implements DataProcessor<UsableSpr
                 .filter(StringUtils::isNotBlank)
                 .collect(Collectors.toSet()));
 
-        List<UsableSprinklerEntity> validIds = usableSprinklerRepository.getListBySprinklerSerials();
+        Set<String> existingRepositorySerials = getExistingSerials(usableSprinklerRepository.getBaseMapper(), createVOs, UsableSprinklerEntity::getSprinklerSerial);
+        //合并校验结果
+        Map<Boolean, List<UsableSprinklerCreateForm>> partitionedData = createVOs.stream()
+                .collect(Collectors.partitioningBy(
+                        vo -> StringUtils.isNotBlank(vo.getSprinklerSerial()) && vo.getStatus() == 0
+                                && existingSerials.contains(vo.getSprinklerSerial())
+                ));
 
         // 执行插入并返回详细信息
         if (!validData.isEmpty()) {
@@ -82,7 +107,7 @@ public class UsableSprinklerDataProcessorImpl implements DataProcessor<UsableSpr
 
     // 辅助方法：获取已存在序列号
     private <Entity> Set<String> getExistingSerials(
-            ServiceImpl<BaseMapper<Entity>, Entity> repository, // 假设使用Spring Data JPA
+            BaseMapper<Entity> mapper, // 假设使用Spring Data JPA
             List<? extends BaseCreateForm> createVOs,
             Function<Entity, String> serialExtractor) {
 
@@ -91,11 +116,14 @@ public class UsableSprinklerDataProcessorImpl implements DataProcessor<UsableSpr
                 .map(BaseCreateForm::getSprinklerSerial)
                 .toList();
 
-        // 直接调用约定方法（需所有Repository有findBySerialIn方法）
-        return repository.getListBySprinklerSerials(serials)
-                .stream()
+        List<Entity> entities = mapper.selectList(new QueryWrapper<Entity>()
+                .in("sprinkler_serial", serials) // 假设数据库字段名为sprinkler_serial
+        );
+
+        return entities.stream()
                 .map(serialExtractor)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+
     }
 
     // 辅助方法：对象转换
