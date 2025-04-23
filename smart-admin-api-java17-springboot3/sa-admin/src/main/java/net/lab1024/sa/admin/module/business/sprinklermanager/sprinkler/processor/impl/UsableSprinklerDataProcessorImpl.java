@@ -27,8 +27,6 @@ import java.util.stream.Collectors;
 @Component("usable")
 public class UsableSprinklerDataProcessorImpl implements DataProcessor<UsableSprinklerCreateForm> {
 
-    private static final Set<Integer> VALID_STATUS_SET = Set.of(0);
-
     @Resource
     private SprinklerRepository sprinklerRepository;
 
@@ -56,11 +54,7 @@ public class UsableSprinklerDataProcessorImpl implements DataProcessor<UsableSpr
                 .map(UsableSprinklerCreateForm::getSprinklerSerial)
                 .collect(Collectors.toSet());
         Map<String, SprinklerEntity> mainTableMap = getMainTableMap(serials);
-//        serials.stream().filter(serial->!mainTableMap.containsKey(serial)).collect(Collectors.toSet());
         // 分组处理（状态校验+分仓处理）
-//        Map<Byte, List<UsableSprinklerCreateForm>> statusGroups = validForms.stream()
-//                .filter(form -> validateMainRecord(form, mainTableMap)) // 主表存在性校验
-//                .collect(Collectors.groupingBy(UsableSprinklerCreateForm::getStatus));
         Map<Byte, List<UsableSprinklerCreateForm>> statusGroups = validForms.stream()
                 .filter(form -> validateMainRecord(form, mainTableMap)) // 主表存在性校验
                 .collect(Collectors.groupingBy(UsableSprinklerCreateForm::getStatus));
@@ -69,10 +63,13 @@ public class UsableSprinklerDataProcessorImpl implements DataProcessor<UsableSpr
 
         List<UsableSprinklerCreateForm> forms = statusGroups.get((byte) 0);
 
+        List<UsableSprinklerEntity> entities = null;
         // 转换仓库实体
-        List<UsableSprinklerEntity> entities = forms.stream()
-                .map(this::convertToWarehouseEntity)
-                .collect(Collectors.toList());
+        if(forms!=null && !forms.isEmpty()){
+            entities = forms.stream()
+                    .map(this::convertToWarehouseEntity)
+                    .collect(Collectors.toList());
+        }
 
         // 准备主表更新
         forms.forEach(form -> {
@@ -88,7 +85,7 @@ public class UsableSprinklerDataProcessorImpl implements DataProcessor<UsableSpr
         }
         // 遍历每个仓库类型进行数据插入
         // 通过工厂模式获取对应仓库的Mapper（先完成，再优化）
-        if (!entities.isEmpty()) {
+        if (entities!=null && !entities.isEmpty()) {
             usableSprinklerRepository.saveBatch(entities);
         }
 
@@ -104,8 +101,15 @@ public class UsableSprinklerDataProcessorImpl implements DataProcessor<UsableSpr
     // 主表记录校验（包含状态有效性）
     private boolean validateMainRecord(UsableSprinklerCreateForm form,
                                        Map<String, SprinklerEntity> mainTableMap) {
+        // 主表存在性校验
         SprinklerEntity mainRecord = mainTableMap.get(form.getSprinklerSerial());
-        return mainRecord != null;
+        if (mainRecord == null) return false;
+
+        //检查可用仓是否已存在相同序列号的记录
+        boolean exists = usableSprinklerRepository.existsBySprinklerSerial(
+                form.getSprinklerSerial()
+        );
+        return !exists;
     }
 
     // 获取主表记录映射（批量查询优化）
@@ -125,41 +129,6 @@ public class UsableSprinklerDataProcessorImpl implements DataProcessor<UsableSpr
         return usableSprinklerCreateForms.stream().map(form->form.getSprinklerSerial()).collect(Collectors.toSet());
     }
 
-    // 辅助方法：获取已存在序列号
-    private <Entity> Set<String> getExistingSerials(
-            BaseMapper<Entity> mapper, // 假设使用Spring Data JPA
-            List<? extends BaseCreateForm> createVOs,
-            Function<Entity, String> serialExtractor) {
-
-        // 提取所有序列号
-        List<String> serials = createVOs.stream()
-                .map(BaseCreateForm::getSprinklerSerial)
-                .toList();
-
-        List<Entity> entities = mapper.selectList(new QueryWrapper<Entity>()
-                .in("sprinkler_serial", serials) // 假设数据库字段名为sprinkler_serial
-        );
-
-        return entities.stream()
-                .map(serialExtractor)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-
-    }
-
-    // 辅助方法：对象转换
-    private UsableSprinklerEntity convertToEntity(UsableSprinklerCreateForm form) {
-        return SmartBeanUtil.copy(form, UsableSprinklerEntity.class);
-    }
-
-
-    private ResponseDTO<String> buildResponse(int successCount, Set<String> errorData) {
-        String msg = String.format(
-                "成功插入%d条，错误数据（空值/重复）:%s",
-                successCount,
-                errorData.isEmpty() ? "无" : String.join(",", errorData)
-        );
-        return ResponseDTO.okMsg(msg);
-    }
 
 
 }
