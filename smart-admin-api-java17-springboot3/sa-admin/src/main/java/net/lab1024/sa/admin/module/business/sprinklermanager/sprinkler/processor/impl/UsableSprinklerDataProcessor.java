@@ -2,6 +2,7 @@ package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.processo
 
 import cn.idev.excel.util.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import jakarta.annotation.Resource;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
@@ -19,20 +20,20 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 可用喷淋器数据处理实现类
- * 处理导入的可用喷淋器数据，进行数据校验、分仓存储及主表状态更新
+ * 可用喷头数据处理实现类
+ * 处理导入的可用喷头数据，进行数据校验、分仓存储及主表状态更新
  */
 @Component("usable") // Spring组件，标识为可用仓处理器
 public class UsableSprinklerDataProcessor implements DataProcessor<UsableSprinklerCreateForm> {
 
     @Resource
-    private SprinklerRepository sprinklerRepository; // 喷淋器主表仓库
+    private SprinklerRepository sprinklerRepository; // 喷头主表仓库
 
     @Resource
     private UsableSprinklerRepository usableSprinklerRepository; // 可用仓仓库
 
     /**
-     * 处理导入的可用喷淋器数据
+     * 处理导入的可用喷头数据
      * @param createVOs 前端传入的创建表单列表
      * @return 处理结果
      */
@@ -40,7 +41,7 @@ public class UsableSprinklerDataProcessor implements DataProcessor<UsableSprinkl
     public ResponseDTO<String> process(List<UsableSprinklerCreateForm> createVOs) {
         // 1. 空数据校验
         if (CollectionUtils.isEmpty(createVOs)) {
-            return ResponseDTO.ok("导入数据为空");
+            return ResponseDTO.userErrorParam("导入数据为空");
         }
 
         // 2. 数据预处理：分区有效数据（序列号非空且状态为0）和无效数据
@@ -88,9 +89,17 @@ public class UsableSprinklerDataProcessor implements DataProcessor<UsableSprinkl
             }
         });
 
-        // 8. 批量持久化操作
+        // 7.1：收集需要更新的主表ID和状态
+        List<Long> mainIdsToUpdate = mainTableUpdates.stream()
+                .map(SprinklerEntity::getSprinklerId)
+                .toList();
+
+        // 8：批量更新状态字段
         if (!mainTableUpdates.isEmpty()) {
-            sprinklerRepository.saveOrUpdateBatch(mainTableUpdates);
+            UpdateWrapper<SprinklerEntity> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.in("sprinkler_id", mainIdsToUpdate)
+                    .set("status", 0);
+            sprinklerRepository.update(updateWrapper);
         }
         if (!entities.isEmpty()) {
             usableSprinklerRepository.saveBatch(entities);

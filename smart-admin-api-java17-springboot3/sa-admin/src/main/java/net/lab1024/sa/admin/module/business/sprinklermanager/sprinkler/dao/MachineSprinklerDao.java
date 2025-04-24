@@ -1,6 +1,7 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.MachineSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.UsableSprinklerEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
@@ -12,5 +13,5 @@ import org.springframework.stereotype.Component;
  */
 @Mapper
 @Component
-public interface UsableSprinklerDao extends BaseMapper<UsableSprinklerEntity> {
+public interface MachineSprinklerDao extends BaseMapper<MachineSprinklerEntity> {
 }

@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface DataProcessor<T> {
 
-    ResponseDTO<String> process(List<T> createVO);
+    ResponseDTO<String> process(List<T> createVOs);
 }
