@@ -5,47 +5,43 @@ import cn.idev.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import net.lab1024.sa.base.module.support.datatracer.annoation.DataTracerFieldLabel;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
 
+@Data
 public class RmaSprinklerCreateForm extends BaseCreateForm{
 
-    @ExcelProperty("购入日期（合同编号）")
-    @Schema(description = "购入日期（合同编号）")
-    @Length(max = 50, message = "购入日期（合同编号）最多50字符")
-    private String purchaseDateContractNumber;
 
-    @ExcelProperty("喷头型号")
-    @Schema(description = "喷头型号")
-    @Length(max = 50, message = "喷头型号最多50字符")
-    private String sprinklerModel;
+    @ExcelProperty("返修日期")
+    @Schema(description = "返修日期")
+    private LocalDate retMaintainenceDate;
 
-    @ExcelProperty("喷头序列号")
-    @Schema(description = "喷头序列号")
-    @NotBlank(message = "喷头序列号不能为空")
-    @Length(max = 20, message = "sprinklerSerial最多20字符")
-    private String sprinklerSerial;
+    @ExcelProperty("返修原因")
+    @Schema(description = "返修原因")
+    private String retMaintainenceReason;
 
-    @ExcelProperty("发货日期")
-    @Schema(description = "发货日期")
-    private LocalDate shippingDate;
+    @ExcelProperty("返仓日期")
+    @Schema(description = "返仓日期")
+    private LocalDate retWarehouseDate;
 
-    @ExcelProperty("入仓日期")
-    @Schema(description = "入仓日期")
-    private LocalDate warehouseDate;
-
-    @ExcelProperty("电压")
-    @Schema(description = "电压")
-    private Float voltage;
-
-    @ExcelProperty("jetsout")
-    @Schema(description = "jetsout")
-    private Byte jetsout;
+    @ExcelProperty("返修客户")
+    @Schema(description = "返修客户")
+    private String customer;
 
     @ExcelProperty("历史")
     @Schema(description = "历史")
     private String history;
+
+    @ExcelProperty("RMA地点")
+    @Schema(description = "RMA地点")
+    private String rmaPosition;
+
+    @ExcelProperty("系统核对")
+    @Schema(description = "系统核对")
+    private String warehouseCheck;
 
     @ExcelProperty("所在仓status")
     @Schema(description = "所在仓status")

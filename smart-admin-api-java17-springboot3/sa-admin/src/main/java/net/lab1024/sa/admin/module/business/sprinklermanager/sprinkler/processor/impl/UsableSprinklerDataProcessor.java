@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import jakarta.annotation.Resource;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeEnum;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.UsableSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.UsableSprinklerCreateForm;
@@ -49,7 +50,7 @@ public class UsableSprinklerDataProcessor implements DataProcessor<UsableSprinkl
         Map<Boolean, List<UsableSprinklerCreateForm>> preprocessed = createVOs.stream()
                 .collect(Collectors.partitioningBy(
                         form -> StringUtils.isNotBlank(form.getSprinklerSerial())
-                                && form.getStatus() == 0)
+                                && form.getStatus() == RepositorySprinklerTypeEnum.USABLE_REPOSITORY.getValue().byteValue())
                 );
         List<UsableSprinklerCreateForm> validForms = preprocessed.get(true);
         List<UsableSprinklerCreateForm> invalidForms = preprocessed.get(false);
@@ -85,8 +86,8 @@ public class UsableSprinklerDataProcessor implements DataProcessor<UsableSprinkl
         List<SprinklerEntity> mainTableUpdates = new ArrayList<>();
         filteredForms.forEach(form -> {
             SprinklerEntity mainRecord = mainTableMap.get(form.getSprinklerSerial());
-            if (mainRecord.getStatus() != 0) {
-                mainRecord.setStatus((byte) 0);
+            if (mainRecord.getStatus() != RepositorySprinklerTypeEnum.USABLE_REPOSITORY.getValue().byteValue()) {
+                mainRecord.setStatus(RepositorySprinklerTypeEnum.USABLE_REPOSITORY.getValue().byteValue());
                 mainTableUpdates.add(mainRecord);
             }
         });
@@ -101,7 +102,7 @@ public class UsableSprinklerDataProcessor implements DataProcessor<UsableSprinkl
         if (!mainTableUpdates.isEmpty()) {
             UpdateWrapper<SprinklerEntity> updateWrapper = new UpdateWrapper<>();
             updateWrapper.in("sprinkler_id", mainIdsToUpdate)
-                    .set("status", 0);
+                    .set("status", RepositorySprinklerTypeEnum.USABLE_REPOSITORY.getValue().byteValue());
             sprinklerRepository.update(updateWrapper);
         }
         // 8.2 批量插入可用仓数据（使用MyBatis-Plus批量操作优化）

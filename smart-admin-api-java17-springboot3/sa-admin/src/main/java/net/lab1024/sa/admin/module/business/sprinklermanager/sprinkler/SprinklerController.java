@@ -8,9 +8,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.constant.AdminSwaggerTagConst;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerStockInQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerStockInExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerStockInVO;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO;
 import net.lab1024.sa.admin.util.AdminRequestUtil;
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
@@ -42,10 +44,10 @@ public class SprinklerController {
     @Resource
     private SprinklerService sprinklerService;
 
-    @Operation(summary = "分页查询喷头模块 @author 芦苇")
+    @Operation(summary = "分页查询全部喷头模块 @author 芦苇")
     @PostMapping("/sprinklermanager/sprinkler/page/query")
     @SaCheckPermission("sprinklermanager:sprinkler:query")
-    public ResponseDTO<PageResult<SprinklerStockInVO>> queryByPage(@RequestBody @Valid SprinklerStockInQueryForm queryForm) {
+    public ResponseDTO<PageResult<SprinklerVO>> queryByPage(@RequestBody @Valid SprinklerQueryForm queryForm) {
         return sprinklerService.queryByPage(queryForm);
     }
 
