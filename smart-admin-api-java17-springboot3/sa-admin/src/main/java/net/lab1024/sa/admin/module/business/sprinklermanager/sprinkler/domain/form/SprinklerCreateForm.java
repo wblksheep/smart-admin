@@ -34,6 +34,18 @@ public class SprinklerCreateForm extends BaseCreateForm{
     @Schema(description = "领用日期")
     private LocalDate allocateDate;
 
+    @ExcelProperty("领用人")
+    @Schema(description = "领用人")
+    private String allocateUser;
+
+    @ExcelProperty("领用用途")
+    @Schema(description = "领用用途")
+    private String allocatePurpose;
+
+    @ExcelProperty("位置")
+    @Schema(description = "位置")
+    private String allocatePosition;
+
     @ExcelProperty("电压")
     @Schema(description = "电压")
     private Float voltage;

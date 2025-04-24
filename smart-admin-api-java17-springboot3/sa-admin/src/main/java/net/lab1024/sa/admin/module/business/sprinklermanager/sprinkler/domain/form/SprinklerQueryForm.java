@@ -11,8 +11,6 @@ import java.time.LocalDateTime;
 @Data
 public class SprinklerQueryForm extends PageParam {
 
-    @Schema(description = "喷头ID")
-    private Long sprinklerId;
 
     @Schema(description = "购入日期（合同编号）")
     private String purchaseDateContractNumber;
@@ -41,11 +39,11 @@ public class SprinklerQueryForm extends PageParam {
     @Schema(description = "领用日期结束时间")
     private LocalDate allocateDateEndTime;
 
-    @Schema(description = "电压")
-    private Float voltage;
-
-    @Schema(description = "jetsout")
-    private Byte jetsout;
+//    @Schema(description = "电压")
+//    private Float voltage;
+//
+//    @Schema(description = "jetsout")
+//    private Byte jetsout;
 
     @Schema(description = "历史")
     private String history;

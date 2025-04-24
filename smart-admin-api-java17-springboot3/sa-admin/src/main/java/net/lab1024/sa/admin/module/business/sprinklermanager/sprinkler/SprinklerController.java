@@ -51,6 +51,13 @@ public class SprinklerController {
         return sprinklerService.queryByPage(queryForm);
     }
 
+//    @Operation(summary = "分页查询各仓喷头模块 @author 芦苇")
+//    @PostMapping("/sprinklermanager/repositorysprinkler/page/query")
+//    @SaCheckPermission("sprinklermanager:repositorysprinkler:query")
+//    public ResponseDTO<PageResult<SprinklerVO>> queryByPage(@RequestBody @Valid SprinklerQueryForm queryForm) {
+//        return sprinklerService.queryByPage(queryForm);
+//    }
+
 
     @Operation(summary = "批量新建所有喷头 @author 芦苇")
     @PostMapping("/sprinklermanager/sprinkler/create")

@@ -7,14 +7,35 @@
         FROM t_sprinkler
         <where>
             deleted_flag = #{queryForm.deletedFlag}
-            <if test="queryForm.keywords != null and queryForm.keywords != ''">
-                AND (INSTR(sprinkler_serial,#{queryForm.keywords}) OR INSTR(warehouse_date,#{queryForm.keywords}))
+            <if test="queryForm.purchaseDateContractNumber != null and queryForm.purchaseDateContractNumber != ''">
+                AND INSTR(purchase_date_contract_number,#{queryForm.purchaseDateContractNumber})
             </if>
-            <if test="queryForm.startTime != null">
-                AND DATE_FORMAT(create_time, '%Y-%m-%d') &gt;= #{queryForm.startTime}
+            <if test="queryForm.sprinklerModel != null and queryForm.sprinklerModel != ''">
+                AND INSTR(sprinkler_model,#{queryForm.sprinklerModel})
             </if>
-            <if test="queryForm.endTime != null">
-                AND DATE_FORMAT(create_time, '%Y-%m-%d') &lt;= #{queryForm.endTime}
+            <if test="queryForm.sprinklerSerial != null and queryForm.sprinklerSerial != ''">
+                AND INSTR(sprinkler_serial,#{queryForm.sprinklerSerial})
+            </if>
+            <if test="queryForm.shippingDateStartTime != null">
+                AND DATE_FORMAT(shipping_date, '%Y-%m-%d') &gt;= #{queryForm.shippingDateStartTime}
+            </if>
+            <if test="queryForm.shippingDateEndTime != null">
+                AND DATE_FORMAT(shipping_date, '%Y-%m-%d') &lt;= #{queryForm.shippingDateEndTime}
+            </if>
+            <if test="queryForm.warehouseDateStartTime != null">
+                AND DATE_FORMAT(warehouse_date, '%Y-%m-%d') &gt;= #{queryForm.warehouseDateStartTime}
+            </if>
+            <if test="queryForm.warehouseDateEndTime != null">
+                AND DATE_FORMAT(warehouse_date, '%Y-%m-%d') &lt;= #{queryForm.warehouseDateEndTime}
+            </if>
+            <if test="queryForm.allocateDateStartTime != null">
+                AND DATE_FORMAT(allocate_date, '%Y-%m-%d') &gt;= #{queryForm.allocateDateStartTime}
+            </if>
+            <if test="queryForm.warehouseDateEndTime != null">
+                AND DATE_FORMAT(allocate_date, '%Y-%m-%d') &lt;= #{queryForm.allocateDateStartTime}
+            </if>
+            <if test="queryForm.history != null and queryForm.history != ''">
+                AND INSTR(history,#{queryForm.history})
             </if>
             <if test="queryForm.disabledFlag != null">
                 AND disabled_flag = #{queryForm.disabledFlag}

@@ -37,6 +37,15 @@ public class SprinklerVO {
     @Schema(description = "领用日期")
     private LocalDate allocateDate;
 
+    @Schema(description = "领用人")
+    private String allocateUser;
+
+    @Schema(description = "领用用途")
+    private String allocatePurpose;
+
+    @Schema(description = "位置")
+    private String allocatePosition;
+
     @Schema(description = "电压")
     private Float voltage;
 

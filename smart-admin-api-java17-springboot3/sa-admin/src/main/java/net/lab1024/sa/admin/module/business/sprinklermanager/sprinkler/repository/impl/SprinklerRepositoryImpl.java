@@ -1,6 +1,7 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.dao.SprinklerDao;
@@ -23,6 +24,6 @@ public class SprinklerRepositoryImpl extends ServiceImpl<SprinklerDao, Sprinkler
 
     @Override
     public List<SprinklerVO> getListByQueryPage(Page<?> page, SprinklerQueryForm queryForm) {
-        return List.of();
+        return this.getBaseMapper().queryPage(page, queryForm);
     }
 }

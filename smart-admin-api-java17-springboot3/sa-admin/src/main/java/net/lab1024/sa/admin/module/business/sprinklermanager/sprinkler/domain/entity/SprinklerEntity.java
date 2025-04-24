@@ -62,6 +62,24 @@ public class SprinklerEntity {
     private LocalDate allocateDate;
 
     /**
+     * 领用人
+     */
+    @DataTracerFieldLabel("领用人")
+    private String allocateUser;
+
+    /**
+     * 领用用途
+     */
+    @DataTracerFieldLabel("领用用途")
+    private String allocatePurpose;
+
+    /**
+     * 位置
+     */
+    @DataTracerFieldLabel("位置")
+    private String allocatePosition;
+
+    /**
      * 电压
      */
     @DataTracerFieldLabel("电压")

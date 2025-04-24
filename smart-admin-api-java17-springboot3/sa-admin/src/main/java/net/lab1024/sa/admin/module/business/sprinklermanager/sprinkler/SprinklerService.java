@@ -55,14 +55,15 @@ public class SprinklerService {
      * 分页查询喷头模块
      *
      */
-    public ResponseDTO<PageResult<SprinklerStockInVO>> queryByPage(SprinklerQueryForm queryForm) {
+    public ResponseDTO<PageResult<SprinklerVO>> queryByPage(SprinklerQueryForm queryForm) {
         queryForm.setDeletedFlag(Boolean.FALSE);
         Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
         List<SprinklerVO> sprinklerList = sprinklerRepository.getListByQueryPage(page, queryForm);
 
-        List<SprinklerVO> sprinklerList = sprinklerStockInDao.queryPage(page, queryForm);
-        PageResult<SprinklerStockInVO> pageResult = SmartPageUtil.convert2PageResult(page, sprinklerList);
+//        List<SprinklerVO> sprinklerList = sprinklerStockInDao.queryPage(page, queryForm);
+        PageResult<SprinklerVO> pageResult = SmartPageUtil.convert2PageResult(page, sprinklerList);
         return ResponseDTO.ok(pageResult);
+//        return ResponseDTO.ok();
     }
 
 
