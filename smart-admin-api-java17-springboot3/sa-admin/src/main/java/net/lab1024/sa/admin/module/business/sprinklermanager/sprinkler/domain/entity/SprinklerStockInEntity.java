@@ -21,7 +21,6 @@ public class SprinklerStockInEntity {
     /**
      * 喷头ID
      */
-    @TableId(type = IdType.AUTO)
     private Long sprinklerId;
 
     /**

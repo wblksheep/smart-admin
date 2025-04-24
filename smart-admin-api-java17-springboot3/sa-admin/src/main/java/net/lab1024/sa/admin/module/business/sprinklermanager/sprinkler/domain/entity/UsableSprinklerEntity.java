@@ -20,7 +20,6 @@ public class UsableSprinklerEntity {
     /**
      * 喷头ID
      */
-    @TableId(type = IdType.AUTO)
     private Long sprinklerId;
 
     /**

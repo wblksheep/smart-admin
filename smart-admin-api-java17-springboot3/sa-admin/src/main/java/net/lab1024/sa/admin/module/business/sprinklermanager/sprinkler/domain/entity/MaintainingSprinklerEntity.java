@@ -10,13 +10,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * 机台喷头
+ * 维修仓喷头
  *
  * @Author 海印: 芦苇
  */
 @Data
-@TableName("t_machine_sprinkler")
-public class MachineSprinklerEntity {
+@TableName("t_maintaining_sprinkler")
+public class MaintainingSprinklerEntity {
     /**
      * 喷头ID
      */
@@ -27,6 +27,30 @@ public class MachineSprinklerEntity {
      */
     @DataTracerFieldLabel("喷头序列号")
     private String sprinklerSerial;
+
+    /**
+     * 返修日期
+     */
+    @DataTracerFieldLabel("返修日期")
+    private LocalDate retMaintainenceDate;
+
+    /**
+     * 返修原因
+     */
+    @DataTracerFieldLabel("返修原因")
+    private String retMaintainenceReason;
+
+    /**
+     * 具体原因
+     */
+    @DataTracerFieldLabel("具体原因")
+    private String realReason;
+
+    /**
+     * 返修客户
+     */
+    @DataTracerFieldLabel("返修客户")
+    private String customer;
 
     /**
      * 历史
