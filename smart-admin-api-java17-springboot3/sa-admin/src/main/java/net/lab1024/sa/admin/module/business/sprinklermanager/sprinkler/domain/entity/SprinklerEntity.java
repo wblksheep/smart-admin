@@ -1,8 +1,10 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity;
 
+import cn.idev.excel.annotation.ExcelProperty;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import net.lab1024.sa.base.module.support.datatracer.annoation.DataTracerFieldLabel;
 
@@ -102,6 +104,18 @@ public class SprinklerEntity {
      */
     @DataTracerFieldLabel("所在仓status")
     private Byte status;
+
+    /**
+     * 新旧喷头
+     */
+    @DataTracerFieldLabel("新旧喷头")
+    private Boolean isNew;
+
+    /**
+     * 喷头详情
+     */
+    @DataTracerFieldLabel("喷头详情")
+    private String sprinklerDetail;
 
     /**
      * 禁用状态

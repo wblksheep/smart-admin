@@ -63,4 +63,12 @@ public class SprinklerCreateForm extends BaseCreateForm{
     @Schema(description = "所在仓status")
     private Byte status;
 
+    @ExcelProperty("新旧喷头")
+    @Schema(description = "新旧喷头")
+    private Boolean isNew;
+
+    @ExcelProperty("喷头详情")
+    @Schema(description = "喷头详情")
+    private String sprinklerDetail;
+
 }

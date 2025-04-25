@@ -39,6 +39,12 @@ public class SprinklerQueryForm extends PageParam {
     @Schema(description = "领用日期结束时间")
     private LocalDate allocateDateEndTime;
 
+    @Schema(description = "领用人")
+    private String allocateUser;
+
+    @Schema(description = "领用用途")
+    private String allocatePurpose;
+
 //    @Schema(description = "电压")
 //    private Float voltage;
 //
