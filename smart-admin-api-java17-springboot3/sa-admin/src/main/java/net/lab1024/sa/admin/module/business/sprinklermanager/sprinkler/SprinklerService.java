@@ -22,6 +22,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.D
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.RepositorySprinklerCreateFormFactory;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.processor.DataProcessor;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.RepositorySprinklerQueryStrategy;
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
@@ -70,184 +71,31 @@ public class SprinklerService {
 //        return ResponseDTO.ok();
     }
 
-    /**
-     * 分页查询喷头信息（动态联表版）
-     * ⚠️优化点1：引入泛型支持多类型联表查询
-     * ⚠️优化点2：采用注解驱动式条件构建
-     * @param queryForm 联合查询参数
-//     * @param mainQuery 主表查询参数
-//     * @param joinQuery 联表查询参数（支持任意实现了JoinConditionBuilder的表单）
-//     * @param pageable 分页参数
-     * @return 分页结果（自动类型转换）
-     */
-    public <T extends JoinConditionBuilder> ResponseDTO<PageResult<SprinklerVO>> repositoryQueryByPage(
+    public ResponseDTO<PageResult<?>> repositoryQueryByPage(
             @Valid CombinedQueryForm queryForm) {
+        Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
 
-        SprinklerQueryForm mainQuery = queryForm.getQueryForm();
-        T joinQueryForm = (T) queryForm.getJoinQueryForm();
+        // 获取动态查询策略
+        String sceneType = queryForm.getSceneType();
+        Class<?> formType = queryForm.getJoinQueryForm().getClass();
+        Class<?> retType = retMap.get(formType);
+        RepositorySprinklerQueryStrategy<formType, retType> strategy = repositorySprinklerStrategyFactory.getStrategy(retType);
 
-        MPJLambdaWrapper<SprinklerEntity> wrapper = new MPJLambdaWrapper<>();
-
-        // 1. 安全字段映射（防止SQL注入）
-        configureFieldMapping(wrapper);
-
-        // 2. 主表动态条件（类型安全构建）
-        buildMainConditions(wrapper, mainQuery);
-
-        // 调用示例
-//        String generatedSql = getActualSqlSafely(wrapper);
-//        System.out.println("Generated SQL: " + generatedSql);
-        // 3. 动态联表条件（策略模式替代反射）
-        if (joinQueryForm != null) {
-            joinQueryForm.buildJoinConditions(wrapper);
-        }
-//
-//        // 4. 执行分页（自动Count优化）
-//        IPage<SprinklerVO> resultPage = sprinklerMapper.selectJoinPage(
-//                PageConvert.toMPPage(pageable),
-//                SprinklerVO.class,
-//                wrapper
-//        );
-//
-//        return new PageResult<>(resultPage.getRecords(), resultPage.getTotal());
-        String generatedSql = getActualSqlSafely(wrapper);
-        System.out.println("Generated SQL: " + generatedSql);
-        return ResponseDTO.ok();
-    }
-
-    public static String getActualSqlSafely(MPJLambdaWrapper<?> wrapper) {
-        try {
-            if (wrapper == null) {
-                return "[ERROR] Wrapper cannot be null";
-            }
-
-            // 获取SQL片段（处理空值）
-            String sqlSelect = Optional.ofNullable(wrapper.getSqlSelect()).orElse("*");
-            String sqlSegment = Optional.ofNullable(wrapper.getSqlSegment()).orElse("");
-
-            // 构建基础SQL（注意：需根据实际表名替换your_table）
-            StringBuilder actualSql = new StringBuilder();
-            actualSql.append(sqlSelect)
-                    .append(" FROM your_table ") // 表名应从实体类获取（需改进点）
-                    .append(sqlSegment);
-
-            // 处理参数替换
-            Map<String, Object> params = wrapper.getParamNameValuePairs();
-            if (params != null && !params.isEmpty()) {
-                for (Map.Entry<String, Object> entry : params.entrySet()) {
-                    String placeholder = "#{ew.paramNameValuePairs." + entry.getKey() + "}";
-                    String replacement = formatSqlValue(entry.getValue());
-                    int index;
-                    while ((index = actualSql.indexOf(placeholder)) != -1) {
-                        actualSql.replace(index, index + placeholder.length(), replacement);
-                    }
-                }
-            }
-
-            return actualSql.toString();
-        } catch (Exception e) {
-            // 记录异常日志
-            return "[ERROR] Failed to generate SQL: " + e.getMessage();
-        }
-    }
-
-    /**
-     * 安全处理SQL参数值（防止SQL注入式替换）
-     */
-    private static String formatSqlValue(Object value) {
-        if (value == null) {
-            return "NULL";
-        }
-
-        // 处理特殊字符转义（示例处理，根据数据库类型调整）
-        if (value instanceof String) {
-            return "'" + ((String) value).replace("'", "''") + "'"; // 转义单引号
-        }
-        if (value instanceof Number) {
-            return value.toString();
-        }
-        if (value instanceof Boolean) {
-            return ((Boolean) value) ? "1" : "0";
-        }
-        return "'" + value.toString().replace("'", "''") + "'"; // 默认处理
-    }
-
-    /**
-     * 配置字段映射关系（集中管理映射逻辑）
-     * ⚠️优化点3：使用显式字段声明替代selectAll
-     */
-    private void configureFieldMapping(MPJLambdaWrapper<SprinklerEntity> wrapper) {
-        wrapper.select(SprinklerEntity::getSprinklerId, SprinklerEntity::getSprinklerSerial)
-//                .selectAs(Warehouse::getWarehouseName, SprinklerVO::getWarehouseName)
-//                .selectAs(Warehouse::getLocation, SprinklerVO::getWarehouseLocation)
-                .leftJoin(UsableSprinklerEntity.class, UsableSprinklerEntity::getSprinklerId, UsableSprinklerEntity::getSprinklerSerial);
-    }
-
-    /**
-     * 主表条件构建（基于JSR303校验结果）
-     * ⚠️优化点4：集成参数校验结果
-     */
-    private void buildMainConditions(MPJLambdaWrapper<SprinklerEntity> wrapper,
-                                     @Valid SprinklerQueryForm queryForm) {
-        wrapper.selectAll(SprinklerEntity.class)
-                .eq(SprinklerEntity::getDeletedFlag, queryForm.getDeletedFlag())
-                // INSTR条件处理
-                .apply(queryForm.getPurchaseDateContractNumber() != null,
-                        "INSTR(purchase_date_contract_number, {0}) > 0", queryForm.getPurchaseDateContractNumber())
-                .apply(queryForm.getSprinklerModel() != null,
-                        "INSTR(sprinkler_model, {0}) > 0", queryForm.getSprinklerModel())
-                .apply(queryForm.getSprinklerSerial() != null,
-                        "INSTR(sprinkler_serial, {0}) > 0", queryForm.getSprinklerSerial())
-                // 日期范围条件
-                .ge(queryForm.getShippingDateStartTime() != null,
-                        SprinklerEntity::getShippingDate, queryForm.getShippingDateStartTime())
-                .le(queryForm.getShippingDateEndTime() != null,
-                        SprinklerEntity::getShippingDate, queryForm.getShippingDateEndTime())
-                .ge(queryForm.getWarehouseDateStartTime() != null,
-                        SprinklerEntity::getWarehouseDate, queryForm.getWarehouseDateStartTime())
-                .le(queryForm.getWarehouseDateEndTime() != null,
-                        SprinklerEntity::getWarehouseDate, queryForm.getWarehouseDateEndTime())
-                .ge(queryForm.getAllocateDateStartTime() != null,
-                        SprinklerEntity::getAllocateDate, queryForm.getAllocateDateStartTime())
-                .le(queryForm.getAllocateDateEndTime() != null,
-                        SprinklerEntity::getAllocateDate, queryForm.getAllocateDateEndTime())
-                // 其他INSTR条件
-                .apply(queryForm.getAllocateUser() != null,
-                        "INSTR(allocate_user, {0}) > 0", queryForm.getAllocateUser())
-                .apply(queryForm.getAllocatePurpose() != null,
-                        "INSTR(allocate_purpose, {0}) > 0", queryForm.getAllocatePurpose())
-                .apply(queryForm.getAllocatePosition() != null,
-                        "INSTR(allocate_position, {0}) > 0", queryForm.getAllocatePosition())
-                .apply(queryForm.getHistory() != null,
-                        "INSTR(history, {0}) > 0", queryForm.getHistory())
-                // 等值条件
-                .eq(queryForm.getStatus() != null,
-                        SprinklerEntity::getStatus, queryForm.getStatus())
-                .eq(queryForm.getIsNew() != null,
-                        SprinklerEntity::getIsNew, queryForm.getIsNew())
-                .apply(queryForm.getSprinklerDetail() != null,
-                        "INSTR(sprinkler_detail, {0}) > 0", queryForm.getSprinklerDetail())
-                .eq(queryForm.getDisabledFlag() != null,
-                        SprinklerEntity::getDisabledFlag, queryForm.getDisabledFlag())
-                // 排序处理
-                .orderByDesc(ObjectUtils.isEmpty(queryForm.getSortItemList()),
-                        SprinklerEntity::getCreateTime);
+        // 执行策略并返回结果
+        ResponseDTO<PageResult<?>> response = strategy.executeQuery(page,
+                queryForm.getQueryForm(),
+                queryForm.getJoinQueryForm());
+//        // 类型安全转换
+//        return ResponseDTO.success((PageResult<SprinklerVO>) response.getData());
+        return response;
+//        return ResponseDTO.ok();
     }
 
 
-    @Transactional(rollbackFor = Exception.class)
-    public ResponseDTO<String> createSprinklerStockIn(SprinklerStockInCreateForm createVO) {
-        //验证喷头序列号是否重复
-        SprinklerStockInEntity validateSprinkler = sprinklerStockInDao.queryBySprinklerSerial(createVO.getSprinklerSerial(), null, Boolean.FALSE);
-        if(Objects.nonNull(validateSprinkler)) {
-            return ResponseDTO.userErrorParam("喷头序列号重复");
-        }
-        //数据插入
-        SprinklerStockInEntity insertSprinkler = SmartBeanUtil.copy(createVO, SprinklerStockInEntity.class);
-        sprinklerStockInDao.insert(insertSprinkler);
 
-        return ResponseDTO.ok();
-    }
+
+
+
 
     /**
      * 查询喷头详情
