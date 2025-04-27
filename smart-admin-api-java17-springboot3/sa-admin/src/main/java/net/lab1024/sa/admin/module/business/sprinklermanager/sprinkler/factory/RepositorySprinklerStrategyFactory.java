@@ -16,9 +16,9 @@ public class RepositorySprinklerStrategyFactory {
     private final Map<Class<?>, RepositorySprinklerQueryStrategy<?, ?>> strategyMap = new HashMap<>();
 
     @Autowired
-    public void setStrategies(List<RepositorySprinklerQueryStrategy<?, ?>> strategies) {
+    public void registerStrategies(List<RepositorySprinklerQueryStrategy<?, ?>> strategies) {
         strategies.forEach(strategy -> {
-            // 通过反射获取泛型参数确定类型映射
+            // 通过泛型接口类型参数获取表单类型
             Type[] types = strategy.getClass().getGenericInterfaces();
             ParameterizedType type = (ParameterizedType) types[0];
             Class<?> formType = (Class<?>) type.getActualTypeArguments()[0];

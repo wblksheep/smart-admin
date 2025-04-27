@@ -77,24 +77,24 @@ public class SprinklerService {
 
     public ResponseDTO<PageResult<?>> repositoryQueryByPage(@Valid CombinedQueryForm queryForm) {
         Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
-
-        // 获取动态查询策略
         BaseQueryForm joinForm = queryForm.getJoinQueryForm();
-        Class<? extends BaseQueryForm> formType = joinForm.getClass();
-        Class<?> retType = retTypeMap.get(formType);
 
+        // 获取动态策略
         RepositorySprinklerQueryStrategy<BaseQueryForm, ?> strategy =
-                repositorySprinklerStrategyFactory.getStrategy(formType);
+                repositorySprinklerStrategyFactory.getStrategy(joinForm.getClass());
 
         // 执行策略查询
-
-        List<?> repositorySprinklerList = strategy.executeQuery(
-                page,
+        List<?> resultList = strategy.executeQuery(page,
                 queryForm.getQueryForm(),
                 joinForm
         );
 
-        PageResult<retType> pageResult = SmartPageUtil.convert2PageResult(page, repositorySprinklerList);
+        // 类型安全转换
+        PageResult<?> pageResult = SmartPageUtil.convert2PageResult(
+                page,
+                resultList,
+                strategy.getResultType() // 需要策略接口增加getResultType方法返回Class<R>
+        );
 
         return ResponseDTO.ok(pageResult);
     }
