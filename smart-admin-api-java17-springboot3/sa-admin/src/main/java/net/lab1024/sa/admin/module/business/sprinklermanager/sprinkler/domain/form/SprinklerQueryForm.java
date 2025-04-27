@@ -45,6 +45,9 @@ public class SprinklerQueryForm extends PageParam {
     @Schema(description = "领用用途")
     private String allocatePurpose;
 
+    @Schema(description = "位置")
+    private String allocatePosition;
+
 //    @Schema(description = "电压")
 //    private Float voltage;
 //
@@ -53,6 +56,15 @@ public class SprinklerQueryForm extends PageParam {
 
     @Schema(description = "历史")
     private String history;
+
+    @Schema(description = "所在仓status")
+    private Byte status;
+
+    @Schema(description = "新旧喷头")
+    private Boolean isNew;
+
+    @Schema(description = "喷头详情")
+    private String sprinklerDetail;
 
 //    @Schema(description = "开始时间")
 //    private LocalDate startTime;

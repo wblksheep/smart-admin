@@ -21,7 +21,6 @@ public class SprinklerCreateForm extends BaseCreateForm{
     @Length(max = 50, message = "喷头型号最多50字符")
     private String sprinklerModel;
 
-
     @ExcelProperty("发货日期")
     @Schema(description = "发货日期")
     private LocalDate shippingDate;

@@ -8,6 +8,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.constant.AdminSwaggerTagConst;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.builder.JoinConditionBuilder;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.BaseQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.CombinedQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerStockInQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerStockInExcelVO;
@@ -51,12 +54,12 @@ public class SprinklerController {
         return sprinklerService.queryByPage(queryForm);
     }
 
-//    @Operation(summary = "分页查询各仓喷头模块 @author 芦苇")
-//    @PostMapping("/sprinklermanager/repositorysprinkler/page/query")
-//    @SaCheckPermission("sprinklermanager:repositorysprinkler:query")
-//    public ResponseDTO<PageResult<SprinklerVO>> queryByPage(@RequestBody @Valid SprinklerQueryForm queryForm) {
-//        return sprinklerService.queryByPage(queryForm);
-//    }
+    @Operation(summary = "分页查询各仓喷头模块 @author 芦苇")
+    @PostMapping("/sprinklermanager/repositorysprinkler/page/query")
+    @SaCheckPermission("sprinklermanager:repositorysprinkler:query")
+    public ResponseDTO<PageResult<SprinklerVO>> repositoryQueryByPage(@RequestBody @Valid CombinedQueryForm queryForm) {
+        return sprinklerService.repositoryQueryByPage(queryForm);
+    }
 
 
     @Operation(summary = "批量新建所有喷头 @author 芦苇")

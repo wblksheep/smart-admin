@@ -31,11 +31,29 @@
             <if test="queryForm.allocateDateStartTime != null">
                 AND DATE_FORMAT(allocate_date, '%Y-%m-%d') &gt;= #{queryForm.allocateDateStartTime}
             </if>
-            <if test="queryForm.warehouseDateEndTime != null">
-                AND DATE_FORMAT(allocate_date, '%Y-%m-%d') &lt;= #{queryForm.allocateDateStartTime}
+            <if test="queryForm.allocateDateEndTime != null">
+                AND DATE_FORMAT(allocate_date, '%Y-%m-%d') &lt;= #{queryForm.allocateDateEndTime}
+            </if>
+            <if test="queryForm.allocateUser != null and queryForm.allocateUser != ''">
+                AND INSTR(allocate_user,#{queryForm.allocateUser})
+            </if>
+            <if test="queryForm.allocatePurpose != null and queryForm.allocatePurpose != ''">
+                AND INSTR(allocate_purpose,#{queryForm.allocatePurpose})
+            </if>
+            <if test="queryForm.allocatePosition != null and queryForm.allocatePosition != ''">
+                AND INSTR(allocate_position,#{queryForm.allocatePosition})
             </if>
             <if test="queryForm.history != null and queryForm.history != ''">
                 AND INSTR(history,#{queryForm.history})
+            </if>
+            <if test="queryForm.status != null">
+                AND status = #{queryForm.status}
+            </if>
+            <if test="queryForm.isNew != null">
+                AND is_new = #{queryForm.isNew}
+            </if>
+            <if test="queryForm.sprinklerDetail != null and queryForm.sprinklerDetail != ''">
+                AND INSTR(sprinkler_detail,#{queryForm.sprinklerDetail})
             </if>
             <if test="queryForm.disabledFlag != null">
                 AND disabled_flag = #{queryForm.disabledFlag}
