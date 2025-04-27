@@ -6,6 +6,6 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.fo
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
 
-public interface RepositorySprinklerQueryStrategy<T, R>{
-    ResponseDTO<PageResult<R>> executeQuery(Page<T> page, SprinklerQueryForm queryForm, BaseQueryForm joinQueryForm);
+public interface RepositorySprinklerQueryStrategy<T extends BaseQueryForm, R> {
+    ResponseDTO<PageResult<?>> executeQuery(Page<?> page, SprinklerQueryForm queryForm, T joinForm);
 }

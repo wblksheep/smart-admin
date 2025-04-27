@@ -20,6 +20,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.DataProcessorFactory;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.RepositorySprinklerCreateFormFactory;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.RepositorySprinklerStrategyFactory;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.processor.DataProcessor;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.RepositorySprinklerQueryStrategy;
@@ -54,6 +55,9 @@ public class SprinklerService {
     @Resource
     private SprinklerRepository sprinklerRepository;
 
+    @Resource
+    private RepositorySprinklerStrategyFactory repositorySprinklerStrategyFactory;
+
 
 
     /**
@@ -71,24 +75,28 @@ public class SprinklerService {
 //        return ResponseDTO.ok();
     }
 
-    public ResponseDTO<PageResult<?>> repositoryQueryByPage(
-            @Valid CombinedQueryForm queryForm) {
+    public ResponseDTO<PageResult<?>> repositoryQueryByPage(@Valid CombinedQueryForm queryForm) {
         Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
 
         // 获取动态查询策略
-        String sceneType = queryForm.getSceneType();
-        Class<?> formType = queryForm.getJoinQueryForm().getClass();
-        Class<?> retType = retMap.get(formType);
-        RepositorySprinklerQueryStrategy<formType, retType> strategy = repositorySprinklerStrategyFactory.getStrategy(retType);
+        BaseQueryForm joinForm = queryForm.getJoinQueryForm();
+        Class<? extends BaseQueryForm> formType = joinForm.getClass();
+        Class<?> retType = retTypeMap.get(formType);
 
-        // 执行策略并返回结果
-        ResponseDTO<PageResult<?>> response = strategy.executeQuery(page,
+        RepositorySprinklerQueryStrategy<BaseQueryForm, ?> strategy =
+                repositorySprinklerStrategyFactory.getStrategy(formType);
+
+        // 执行策略查询
+
+        List<?> repositorySprinklerList = strategy.executeQuery(
+                page,
                 queryForm.getQueryForm(),
-                queryForm.getJoinQueryForm());
-//        // 类型安全转换
-//        return ResponseDTO.success((PageResult<SprinklerVO>) response.getData());
-        return response;
-//        return ResponseDTO.ok();
+                joinForm
+        );
+
+        PageResult<retType> pageResult = SmartPageUtil.convert2PageResult(page, repositorySprinklerList);
+
+        return ResponseDTO.ok(pageResult);
     }
 
 

@@ -1,5 +1,6 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory;
 
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.BaseQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.RepositorySprinklerQueryStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,18 +15,19 @@ import java.util.Map;
 public class RepositorySprinklerStrategyFactory {
     private final Map<Class<?>, RepositorySprinklerQueryStrategy<?, ?>> strategyMap = new HashMap<>();
 
-    // 自动注入所有策略实现
     @Autowired
-    public void initStrategies(List<RepositorySprinklerQueryStrategy<?, ?>> strategies) {
-        for (RepositorySprinklerQueryStrategy<?, ?> strategy : strategies) {
-            Type type = ((ParameterizedType) strategy.getClass()
-                    .getGenericInterfaces()[0]).getActualTypeArguments()[0];
-            strategyMap.put((Class<?>) type, strategy);
-        }
+    public void setStrategies(List<RepositorySprinklerQueryStrategy<?, ?>> strategies) {
+        strategies.forEach(strategy -> {
+            // 通过反射获取泛型参数确定类型映射
+            Type[] types = strategy.getClass().getGenericInterfaces();
+            ParameterizedType type = (ParameterizedType) types[0];
+            Class<?> formType = (Class<?>) type.getActualTypeArguments()[0];
+            strategyMap.put(formType, strategy);
+        });
     }
 
     @SuppressWarnings("unchecked")
-    public <T, R> RepositorySprinklerQueryStrategy<T, R> getStrategy(Class<R> voType) {
-        return (RepositorySprinklerQueryStrategy<T, R>) strategyMap.get(voType);
+    public <T extends BaseQueryForm, R> RepositorySprinklerQueryStrategy<T, R> getStrategy(Class<T> formType) {
+        return (RepositorySprinklerQueryStrategy<T, R>) strategyMap.get(formType);
     }
 }
