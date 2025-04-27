@@ -15,10 +15,10 @@ import org.hibernate.validator.constraints.Length;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "sceneType") // 根据sceneType字段识别子类
 @JsonSubTypes({
         @JsonSubTypes.Type(value = UsableSprinklerQueryForm.class, name = "USABLE_REPOSITORY"),
-//        @JsonSubTypes.Type(value = MachineSprinklerQueryForm.class, name = "MACHINE_REPOSITORY"),
+        @JsonSubTypes.Type(value = MachineSprinklerQueryForm.class, name = "MACHINE_REPOSITORY"),
 //        @JsonSubTypes.Type(value = MaintainingSprinklerQueryForm.class, name = "MAINTAINING_REPOSITORY"),
 //        @JsonSubTypes.Type(value = DamagedSprinklerQueryForm.class, name = "DAMAGED_REPOSITORY"),
 //        @JsonSubTypes.Type(value = RmaSprinklerQueryForm.class, name = "RMA_REPOSITORY")
 })
-public abstract class BaseQueryForm extends PageParam implements JoinConditionBuilder {
+public abstract class BaseQueryForm extends PageParam {
 }

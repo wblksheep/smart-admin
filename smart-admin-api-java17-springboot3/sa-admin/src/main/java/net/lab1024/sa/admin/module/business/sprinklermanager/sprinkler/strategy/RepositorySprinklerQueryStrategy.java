@@ -9,6 +9,9 @@ import net.lab1024.sa.base.common.domain.ResponseDTO;
 import java.util.List;
 
 public interface RepositorySprinklerQueryStrategy<T extends BaseQueryForm, R> {
+
     List<R> executeQuery(Page<?> page, SprinklerQueryForm queryForm, T joinForm);
+
+    // 新增方法用于获取返回类型
     Class<R> getResultType();
 }

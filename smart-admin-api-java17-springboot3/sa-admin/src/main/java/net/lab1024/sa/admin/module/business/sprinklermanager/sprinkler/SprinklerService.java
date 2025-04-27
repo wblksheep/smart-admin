@@ -79,21 +79,24 @@ public class SprinklerService {
         Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
         BaseQueryForm joinForm = queryForm.getJoinQueryForm();
 
-        // 获取动态策略
+        // 获取具体策略
+        @SuppressWarnings("unchecked")
         RepositorySprinklerQueryStrategy<BaseQueryForm, ?> strategy =
-                repositorySprinklerStrategyFactory.getStrategy(joinForm.getClass());
+                (RepositorySprinklerQueryStrategy<BaseQueryForm, ?>)
+                        repositorySprinklerStrategyFactory.getStrategy(joinForm.getClass());
 
         // 执行策略查询
-        List<?> resultList = strategy.executeQuery(page,
+        List<?> resultList = strategy.executeQuery(
+                page,
                 queryForm.getQueryForm(),
                 joinForm
         );
 
-        // 类型安全转换
+        // 带类型转换的分页结果构建
         PageResult<?> pageResult = SmartPageUtil.convert2PageResult(
                 page,
                 resultList,
-                strategy.getResultType() // 需要策略接口增加getResultType方法返回Class<R>
+                strategy.getResultType()  // 使用策略提供的类型信息
         );
 
         return ResponseDTO.ok(pageResult);

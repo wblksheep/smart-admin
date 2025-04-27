@@ -7,7 +7,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.dao.SprinklerDao;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.UsableSprinklerQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.UsableSprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,11 @@ public class SprinklerRepositoryImpl extends ServiceImpl<SprinklerDao, Sprinkler
 
     @Override
     public List<SprinklerVO> getListByQueryPage(Page<?> page, SprinklerQueryForm queryForm) {
-        return this.getBaseMapper().queryPage(page, queryForm);
+        return this.getBaseMapper().queryPage1(page, queryForm);
+    }
+
+    @Override
+    public List<UsableSprinklerVO> getListByQueryPage(Page<?> page, SprinklerQueryForm queryForm, UsableSprinklerQueryForm joinForm) {
+        return this.getBaseMapper().queryPage2(page, queryForm, joinForm);
     }
 }

@@ -10,19 +10,29 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RepositorySprinklerStrategyFactory {
-    private final Map<Class<?>, RepositorySprinklerQueryStrategy<?, ?>> strategyMap = new HashMap<>();
+    private final Map<Class<? extends BaseQueryForm>, RepositorySprinklerQueryStrategy<?, ?>> strategyMap = new ConcurrentHashMap<>();
 
     @Autowired
     public void registerStrategies(List<RepositorySprinklerQueryStrategy<?, ?>> strategies) {
         strategies.forEach(strategy -> {
-            // 通过泛型接口类型参数获取表单类型
-            Type[] types = strategy.getClass().getGenericInterfaces();
-            ParameterizedType type = (ParameterizedType) types[0];
-            Class<?> formType = (Class<?>) type.getActualTypeArguments()[0];
-            strategyMap.put(formType, strategy);
+            // 通过反射获取泛型参数
+            Type[] genericInterfaces = strategy.getClass().getGenericInterfaces();
+            for (Type type : genericInterfaces) {
+                if (type instanceof ParameterizedType) {
+                    ParameterizedType pType = (ParameterizedType) type;
+                    if (pType.getRawType().equals(RepositorySprinklerQueryStrategy.class)) {
+                        Type[] actualTypeArgs = pType.getActualTypeArguments();
+                        if (actualTypeArgs.length >= 1) {
+                            Class<? extends BaseQueryForm> formType = (Class<? extends BaseQueryForm>) actualTypeArgs[0];
+                            strategyMap.put(formType, strategy);
+                        }
+                    }
+                }
+            }
         });
     }
 
