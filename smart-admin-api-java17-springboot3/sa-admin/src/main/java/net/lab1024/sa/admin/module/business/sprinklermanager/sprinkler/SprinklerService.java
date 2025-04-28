@@ -15,6 +15,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.en
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerStockInEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.UsableSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.*;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerStockInExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerStockInVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO;
@@ -47,7 +48,6 @@ public class SprinklerService {
 
     @Resource
     private SprinklerStockInDao sprinklerStockInDao;
-
 
     @Resource
     private DataTracerService dataTracerService;
@@ -120,10 +120,11 @@ public class SprinklerService {
     /**
      * 获取导出数据
      */
-    public List<SprinklerStockInExcelVO> getExcelExportData(@Valid SprinklerStockInQueryForm queryForm) {
+    public List<SprinklerExcelVO> getSprinklerExcelExportData(@Valid SprinklerQueryForm queryForm) {
         queryForm.setDeletedFlag(false);
-        return sprinklerStockInDao.selectExcelExportData(queryForm);
+        return sprinklerRepository.selectSprinklerExcelExportData(queryForm);
     }
+
 
     @Resource
     private RepositorySprinklerCreateFormFactory createFormFactory;

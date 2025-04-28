@@ -1,11 +1,7 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.annotation.ConditionField;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.ConditionType;
 import net.lab1024.sa.base.module.support.datatracer.annoation.DataTracerFieldLabel;
 
 import java.time.LocalDate;

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.dao.MaintainingSprinklerDao">
+    <select id="queryPage"
+            resultType="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.MaintainingSprinklerVO">
+        SELECT t_maintaining_sprinkler.*,
+        t_sprinkler.*
+        FROM t_maintaining_sprinkler
+        LEFT JOIN t_sprinkler ON t_maintaining_sprinkler.sprinkler_id = t_sprinkler.sprinkler_id
+        <where>
+            t_sprinkler.deleted_flag = #{queryForm.deletedFlag}
+            <if test="queryForm.sprinklerSerial != null and queryForm.sprinklerSerial != ''">
+                AND INSTR(t_sprinkler.sprinkler_serial,#{queryForm.sprinklerSerial})
+            </if>
+            <if test="queryForm.history != null and queryForm.history != ''">
+                AND INSTR(t_sprinkler.history,#{queryForm.history})
+            </if>
+            <if test="queryForm.disabledFlag != null">
+                AND t_sprinkler.disabled_flag = #{queryForm.disabledFlag}
+            </if>
+
+            <if test="joinForm.retMaintainenceDateStartTime != null">
+                AND DATE_FORMAT(t_maintaining_sprinkler.ret_maintainence_date, '%Y-%m-%d') &gt;= #{joinForm.retMaintainenceDateStartTime}
+            </if>
+            <if test="joinForm.retMaintainenceDateEndTime != null">
+                AND DATE_FORMAT(t_maintaining_sprinkler.ret_maintainence_date, '%Y-%m-%d') &lt;= #{joinForm.retMaintainenceDateEndTime}
+            </if>
+
+            <if test="joinForm.retMaintainenceReason != null and joinForm.retMaintainenceReason != ''">
+                AND INSTR(t_maintaining_sprinkler.ret_maintainence_reason,#{joinForm.retMaintainenceReason})
+            </if>
+
+            <if test="joinForm.realReason != null and joinForm.realReason != ''">
+                AND INSTR(t_maintaining_sprinkler.real_reason,#{joinForm.realReason})
+            </if>
+
+            <if test="joinForm.customer != null and joinForm.customer != ''">
+                AND INSTR(t_maintaining_sprinkler.customer,#{joinForm.customer})
+            </if>
+            <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
+                ORDER BY t_sprinkler.create_time DESC
+            </if>
+        </where>
+    </select>
+
+</mapper>

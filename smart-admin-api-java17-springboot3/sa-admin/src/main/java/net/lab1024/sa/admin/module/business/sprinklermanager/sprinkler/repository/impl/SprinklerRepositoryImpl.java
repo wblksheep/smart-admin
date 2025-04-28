@@ -8,6 +8,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.dao.Sprin
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.UsableSprinklerQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.UsableSprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
@@ -26,11 +27,12 @@ public class SprinklerRepositoryImpl extends ServiceImpl<SprinklerDao, Sprinkler
 
     @Override
     public List<SprinklerVO> getListByQueryPage(Page<?> page, SprinklerQueryForm queryForm) {
-        return this.getBaseMapper().queryPage1(page, queryForm);
+        return this.getBaseMapper().queryPage(page, queryForm);
     }
 
     @Override
-    public List<UsableSprinklerVO> getListByQueryPage(Page<?> page, SprinklerQueryForm queryForm, UsableSprinklerQueryForm joinForm) {
-        return this.getBaseMapper().queryPage2(page, queryForm, joinForm);
+    public List<SprinklerExcelVO> selectExcelExportData(SprinklerQueryForm queryForm) {
+        return this.getBaseMapper().selectExcelExportData(queryForm);
     }
+
 }

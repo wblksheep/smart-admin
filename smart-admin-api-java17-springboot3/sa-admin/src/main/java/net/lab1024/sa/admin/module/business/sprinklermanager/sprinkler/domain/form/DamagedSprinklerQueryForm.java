@@ -6,7 +6,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class UsableSprinklerQueryForm extends BaseQueryForm{
+public class DamagedSprinklerQueryForm extends BaseQueryForm{
 
     @Schema(description = "返仓日期开始时间")
     private LocalDate retWarehouseDateStartTime;
@@ -14,11 +14,14 @@ public class UsableSprinklerQueryForm extends BaseQueryForm{
     @Schema(description = "返仓日期结束时间")
     private LocalDate retWarehouseDateEndTime;
 
-    @Schema(description = "领用是否有限制")
-    private String allocateLimitation;
+    @Schema(description = "备注1")
+    private String note1;
 
-    @Schema(description = "领用时备注1")
-    private String allocateNote1;
+    @Schema(description = "破损原因分类")
+    private String damagedReasonType;
+
+    @Schema(description = "具体破损原因")
+    private String realDamagedReason;
 
     @Schema(description = "禁用状态")
     private Boolean disabledFlag;

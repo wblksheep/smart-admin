@@ -13,5 +13,5 @@ import org.hibernate.validator.constraints.Length;
 import java.util.List;
 
 public interface UsableSprinklerRepository extends IService<UsableSprinklerEntity> {
-    List<UsableSprinklerVO> getListByQueryPage(Page<?> page, @Param("queryForm") SprinklerQueryForm queryForm,@Param("joinForm") UsableSprinklerQueryForm joinForm);
+    List<UsableSprinklerVO> getListByQueryPage(Page<?> page, @Param("queryForm") SprinklerQueryForm queryForm, @Param("joinForm") UsableSprinklerQueryForm joinForm);
 }

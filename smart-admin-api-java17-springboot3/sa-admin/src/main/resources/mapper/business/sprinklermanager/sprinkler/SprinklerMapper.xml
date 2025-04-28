@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.dao.SprinklerDao">
-    <select id="queryPage1"
+    <select id="queryPage"
             resultType="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO">
         SELECT t_sprinkler.*
         FROM t_sprinkler
@@ -64,85 +64,6 @@
         </if>
     </select>
 
-    <select id="queryPage2"
-            resultType="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.UsableSprinklerVO">
-        SELECT t_sprinkler.*,
-        t_usable_sprinkler.allocate_limitation
-        FROM t_sprinkler
-        LEFT JOIN t_usable_sprinkler ON t_sprinkler.sprinkler_id = t_usable_sprinkler.sprinkler_id
-        <where>
-            t_sprinkler.deleted_flag = #{queryForm.deletedFlag}
-            <if test="queryForm.purchaseDateContractNumber != null and queryForm.purchaseDateContractNumber != ''">
-                AND INSTR(t_sprinkler.purchase_date_contract_number,#{queryForm.purchaseDateContractNumber})
-            </if>
-            <if test="queryForm.sprinklerModel != null and queryForm.sprinklerModel != ''">
-                AND INSTR(t_sprinkler.sprinkler_model,#{queryForm.sprinklerModel})
-            </if>
-            <if test="queryForm.sprinklerSerial != null and queryForm.sprinklerSerial != ''">
-                AND INSTR(t_sprinkler.sprinkler_serial,#{queryForm.sprinklerSerial})
-            </if>
-            <if test="queryForm.shippingDateStartTime != null">
-                AND DATE_FORMAT(t_sprinkler.shipping_date, '%Y-%m-%d') &gt;= #{queryForm.shippingDateStartTime}
-            </if>
-            <if test="queryForm.shippingDateEndTime != null">
-                AND DATE_FORMAT(t_sprinkler.shipping_date, '%Y-%m-%d') &lt;= #{queryForm.shippingDateEndTime}
-            </if>
-            <if test="queryForm.warehouseDateStartTime != null">
-                AND DATE_FORMAT(t_sprinkler.warehouse_date, '%Y-%m-%d') &gt;= #{queryForm.warehouseDateStartTime}
-            </if>
-            <if test="queryForm.warehouseDateEndTime != null">
-                AND DATE_FORMAT(t_sprinkler.warehouse_date, '%Y-%m-%d') &lt;= #{queryForm.warehouseDateEndTime}
-            </if>
-            <if test="queryForm.allocateDateStartTime != null">
-                AND DATE_FORMAT(t_sprinkler.allocate_date, '%Y-%m-%d') &gt;= #{queryForm.allocateDateStartTime}
-            </if>
-            <if test="queryForm.allocateDateEndTime != null">
-                AND DATE_FORMAT(t_sprinkler.allocate_date, '%Y-%m-%d') &lt;= #{queryForm.allocateDateEndTime}
-            </if>
-            <if test="queryForm.allocateUser != null and queryForm.allocateUser != ''">
-                AND INSTR(t_sprinkler.allocate_user,#{queryForm.allocateUser})
-            </if>
-            <if test="queryForm.allocatePurpose != null and queryForm.allocatePurpose != ''">
-                AND INSTR(t_sprinkler.allocate_purpose,#{queryForm.allocatePurpose})
-            </if>
-            <if test="queryForm.allocatePosition != null and queryForm.allocatePosition != ''">
-                AND INSTR(t_sprinkler.allocate_position,#{queryForm.allocatePosition})
-            </if>
-            <if test="queryForm.history != null and queryForm.history != ''">
-                AND INSTR(t_sprinkler.history,#{queryForm.history})
-            </if>
-            <if test="queryForm.status != null">
-                AND t_sprinkler.status = #{queryForm.status}
-            </if>
-            <if test="queryForm.isNew != null">
-                AND t_sprinkler.is_new = #{queryForm.isNew}
-            </if>
-            <if test="queryForm.sprinklerDetail != null and queryForm.sprinklerDetail != ''">
-                AND INSTR(t_sprinkler.sprinkler_detail,#{queryForm.sprinklerDetail})
-            </if>
-            <if test="queryForm.disabledFlag != null">
-                AND t_sprinkler.disabled_flag = #{queryForm.disabledFlag}
-            </if>
-
-            <if test="joinForm.retWarehouseDateStartTime != null">
-                AND DATE_FORMAT(t_usable_sprinkler.ret_warehouse_date, '%Y-%m-%d') &gt;= #{joinForm.retWarehouseDateStartTime}
-            </if>
-            <if test="joinForm.retWarehouseDateEndTime != null">
-                AND DATE_FORMAT(t_usable_sprinkler.ret_warehouse_date, '%Y-%m-%d') &lt;= #{joinForm.retWarehouseDateEndTime}
-            </if>
-
-            <if test="joinForm.allocateLimitation != null and joinForm.allocateLimitation != ''">
-                AND INSTR(t_usable_sprinkler.allocate_limitation,#{joinForm.allocateLimitation})
-            </if>
-
-            <if test="joinForm.allocateNote1 != null and joinForm.allocateNote1 != ''">
-                AND INSTR(t_usable_sprinkler.allocate_note1,#{joinForm.allocateNote1})
-            </if>
-            <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
-                ORDER BY create_time DESC
-            </if>
-        </where>
-    </select>
 
     <select id="queryBySprinklerSerial"
             resultType="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity">
@@ -160,6 +81,68 @@
         FROM t_sprinkler s
         WHERE s.sprinkler_id = #{sprinklerId} AND
               s.deleted_flag = #{deletedFlag}
+    </select>
+    <select id="selectExcelExportData"
+            resultType="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerExcelVO">
+        SELECT t_sprinkler.*
+        FROM t_sprinkler
+        <where>
+            deleted_flag = #{queryForm.deletedFlag}
+            <if test="queryForm.purchaseDateContractNumber != null and queryForm.purchaseDateContractNumber != ''">
+                AND INSTR(purchase_date_contract_number,#{queryForm.purchaseDateContractNumber})
+            </if>
+            <if test="queryForm.sprinklerModel != null and queryForm.sprinklerModel != ''">
+                AND INSTR(sprinkler_model,#{queryForm.sprinklerModel})
+            </if>
+            <if test="queryForm.sprinklerSerial != null and queryForm.sprinklerSerial != ''">
+                AND INSTR(sprinkler_serial,#{queryForm.sprinklerSerial})
+            </if>
+            <if test="queryForm.shippingDateStartTime != null">
+                AND DATE_FORMAT(shipping_date, '%Y-%m-%d') &gt;= #{queryForm.shippingDateStartTime}
+            </if>
+            <if test="queryForm.shippingDateEndTime != null">
+                AND DATE_FORMAT(shipping_date, '%Y-%m-%d') &lt;= #{queryForm.shippingDateEndTime}
+            </if>
+            <if test="queryForm.warehouseDateStartTime != null">
+                AND DATE_FORMAT(warehouse_date, '%Y-%m-%d') &gt;= #{queryForm.warehouseDateStartTime}
+            </if>
+            <if test="queryForm.warehouseDateEndTime != null">
+                AND DATE_FORMAT(warehouse_date, '%Y-%m-%d') &lt;= #{queryForm.warehouseDateEndTime}
+            </if>
+            <if test="queryForm.allocateDateStartTime != null">
+                AND DATE_FORMAT(allocate_date, '%Y-%m-%d') &gt;= #{queryForm.allocateDateStartTime}
+            </if>
+            <if test="queryForm.allocateDateEndTime != null">
+                AND DATE_FORMAT(allocate_date, '%Y-%m-%d') &lt;= #{queryForm.allocateDateEndTime}
+            </if>
+            <if test="queryForm.allocateUser != null and queryForm.allocateUser != ''">
+                AND INSTR(allocate_user,#{queryForm.allocateUser})
+            </if>
+            <if test="queryForm.allocatePurpose != null and queryForm.allocatePurpose != ''">
+                AND INSTR(allocate_purpose,#{queryForm.allocatePurpose})
+            </if>
+            <if test="queryForm.allocatePosition != null and queryForm.allocatePosition != ''">
+                AND INSTR(allocate_position,#{queryForm.allocatePosition})
+            </if>
+            <if test="queryForm.history != null and queryForm.history != ''">
+                AND INSTR(history,#{queryForm.history})
+            </if>
+            <if test="queryForm.status != null">
+                AND status = #{queryForm.status}
+            </if>
+            <if test="queryForm.isNew != null">
+                AND is_new = #{queryForm.isNew}
+            </if>
+            <if test="queryForm.sprinklerDetail != null and queryForm.sprinklerDetail != ''">
+                AND INSTR(sprinkler_detail,#{queryForm.sprinklerDetail})
+            </if>
+            <if test="queryForm.disabledFlag != null">
+                AND disabled_flag = #{queryForm.disabledFlag}
+            </if>
+        </where>
+        <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
+            ORDER BY create_time DESC
+        </if>
     </select>
 
     <update id="deleteSprinkler">

@@ -16,9 +16,9 @@ import org.hibernate.validator.constraints.Length;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = UsableSprinklerQueryForm.class, name = "USABLE_REPOSITORY"),
         @JsonSubTypes.Type(value = MachineSprinklerQueryForm.class, name = "MACHINE_REPOSITORY"),
-//        @JsonSubTypes.Type(value = MaintainingSprinklerQueryForm.class, name = "MAINTAINING_REPOSITORY"),
-//        @JsonSubTypes.Type(value = DamagedSprinklerQueryForm.class, name = "DAMAGED_REPOSITORY"),
-//        @JsonSubTypes.Type(value = RmaSprinklerQueryForm.class, name = "RMA_REPOSITORY")
+        @JsonSubTypes.Type(value = MaintainingSprinklerQueryForm.class, name = "MAINTAINING_REPOSITORY"),
+        @JsonSubTypes.Type(value = DamagedSprinklerQueryForm.class, name = "DAMAGED_REPOSITORY"),
+        @JsonSubTypes.Type(value = RmaSprinklerQueryForm.class, name = "RMA_REPOSITORY")
 })
-public abstract class BaseQueryForm extends PageParam {
+public abstract class BaseQueryForm{
 }

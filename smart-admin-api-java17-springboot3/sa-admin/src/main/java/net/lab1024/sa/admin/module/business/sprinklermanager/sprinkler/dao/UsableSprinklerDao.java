@@ -25,5 +25,5 @@ public interface UsableSprinklerDao extends BaseMapper<UsableSprinklerEntity> {
      * 可用仓喷头分页查询
      *
      */
-    List<UsableSprinklerVO> queryPage(Page page, @Param("queryForm") SprinklerQueryForm queryForm, @Param("joinForm") UsableSprinklerQueryForm joinForm);
+    List<UsableSprinklerVO> queryPage(Page<?> page, @Param("queryForm") SprinklerQueryForm queryForm, @Param("joinForm") UsableSprinklerQueryForm joinForm);
 }

@@ -4,9 +4,9 @@
     <select id="queryPage"
             resultType="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.UsableSprinklerVO">
         SELECT t_sprinkler.*,
-        t_usable_sprinkler.allocate_limitation
-        FROM t_sprinkler
-        LEFT JOIN t_usable_sprinkler ON t_sprinkler.sprinkler_id = t_usable_sprinkler.sprinkler_id
+        t_usable_sprinkler.*
+        FROM t_usable_sprinkler
+        LEFT JOIN t_sprinkler ON t_sprinkler.sprinkler_id = t_usable_sprinkler.sprinkler_id
         <where>
             t_sprinkler.deleted_flag = #{queryForm.deletedFlag}
             <if test="queryForm.purchaseDateContractNumber != null and queryForm.purchaseDateContractNumber != ''">
@@ -76,7 +76,7 @@
                 AND INSTR(t_usable_sprinkler.allocate_note1,#{joinForm.allocateNote1})
             </if>
             <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
-                ORDER BY create_time DESC
+                ORDER BY t_sprinkler.create_time DESC
             </if>
         </where>
     </select>

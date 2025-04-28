@@ -3,8 +3,8 @@
 <mapper namespace="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.dao.SprinklerStockInDao">
     <select id="queryPage"
             resultType="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerStockInVO">
-        SELECT t_sprinkler_instock.*
-        FROM t_sprinkler_instock
+        SELECT t_sprinkler.*
+        FROM t_sprinkler
         <where>
             deleted_flag = #{queryForm.deletedFlag}
             <if test="queryForm.keywords != null and queryForm.keywords != ''">
@@ -27,7 +27,7 @@
     <select id="queryBySprinklerSerial"
             resultType="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerStockInEntity">
             SELECT *
-            FROM t_sprinkler_instock
+            FROM t_sprinkler
             WHERE sprinkler_serial = #{sprinklerSerial}
             AND deleted_flag = #{deletedFlag}
             <if test="excludeSprinklerId != null">
@@ -36,9 +36,9 @@
     </select>
 
     <select id="selectExcelExportData"
-            resultType="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerStockInExcelVO">
-        SELECT t_sprinkler_instock.*
-        FROM t_sprinkler_instock
+            resultType="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerExcelVO">
+        SELECT t_sprinkler.*
+        FROM t_sprinkler
         <where>
             deleted_flag = #{queryForm.deletedFlag}
             <if test="queryForm.keywords != null and queryForm.keywords != ''">
@@ -61,13 +61,13 @@
     <select id="getDetail"
             resultType="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerStockInVO">
         SELECT s.*
-        FROM t_sprinkler_instock s
+        FROM t_sprinkler s
         WHERE s.sprinkler_id = #{sprinklerId} AND
               s.deleted_flag = #{deletedFlag}
     </select>
 
     <update id="deleteSprinkler">
-        UPDATE t_sprinkler_instock
+        UPDATE t_sprinkler
         SET deleted_flag = #{deletedFlag}
         WHERE sprinkler_id = #{sprinklerId}
     </update>

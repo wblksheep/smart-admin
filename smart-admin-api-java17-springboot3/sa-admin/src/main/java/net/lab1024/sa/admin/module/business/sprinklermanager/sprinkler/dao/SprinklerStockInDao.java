@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerStockInEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerStockInQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerStockInExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerStockInVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO;
@@ -51,5 +52,5 @@ public interface SprinklerStockInDao extends BaseMapper<SprinklerStockInEntity> 
      * 查询导出的数据
      *
      */
-    List<SprinklerStockInExcelVO> selectExcelExportData(@Param("queryForm")  SprinklerStockInQueryForm queryForm);
+    List<SprinklerExcelVO> selectExcelExportData(@Param("queryForm")  SprinklerQueryForm queryForm);
 }

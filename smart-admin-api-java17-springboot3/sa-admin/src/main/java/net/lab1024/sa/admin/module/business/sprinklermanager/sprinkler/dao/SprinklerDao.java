@@ -30,7 +30,7 @@ public interface SprinklerDao extends BaseMapper<SprinklerEntity> {
      * 喷头分页查询
      *
      */
-    List<SprinklerVO> queryPage1(Page page, @Param("queryForm") SprinklerQueryForm queryForm);
+    List<SprinklerVO> queryPage(Page<?> page, @Param("queryForm") SprinklerQueryForm queryForm);
 
     /**
      * 根据喷头序列号查询
@@ -48,11 +48,12 @@ public interface SprinklerDao extends BaseMapper<SprinklerEntity> {
      */
     void deleteSprinkler(@Param("sprinklerId") Long sprinklerId,@Param("deletedFlag") Boolean deletedFlag);
 
+    List<SprinklerExcelVO> selectExcelExportData(@Param("queryForm") SprinklerQueryForm queryForm);
+
 //    /**
 //     * 查询导出的数据
 //     *
 //     */
 //    List<SprinklerExcelVO> selectExcelExportData(@Valid SprinklerQueryForm queryForm);
 
-    List<UsableSprinklerVO> queryPage2(Page<?> page, SprinklerQueryForm queryForm, UsableSprinklerQueryForm joinForm);
 }
