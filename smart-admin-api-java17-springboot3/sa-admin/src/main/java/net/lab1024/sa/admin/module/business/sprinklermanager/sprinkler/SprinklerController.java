@@ -8,14 +8,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.constant.AdminSwaggerTagConst;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.builder.JoinConditionBuilder;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.BaseQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.CombinedQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerStockInQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerExcelVO;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerStockInExcelVO;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerStockInVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO;
 import net.lab1024.sa.admin.util.AdminRequestUtil;
 import net.lab1024.sa.base.common.domain.PageResult;
@@ -28,8 +23,6 @@ import net.lab1024.sa.base.common.util.SmartRequestUtil;
 import net.lab1024.sa.base.common.util.SmartResponseUtil;
 import net.lab1024.sa.base.module.support.operatelog.annotation.OperateLog;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -77,8 +70,6 @@ public class SprinklerController {
     @PostMapping("/sprinklermanager/repositorysprinkler/create")
     @SaCheckPermission("sprinklermanager:repositorysprinkler:add")
     public ResponseDTO<String> createRepositorySprinkler(
-//            @RequestPart("file") @Valid MultipartFile file,
-//            @RequestPart("type") @Valid Integer type
             MultipartFile file,
             Integer type
     ) {
@@ -87,12 +78,6 @@ public class SprinklerController {
     }
 
 
-    @Operation(summary = "查询喷头详情 @author 芦苇")
-    @GetMapping("/sprinklermanager/sprinkler/get/{sprinklerId}")
-    @SaCheckPermission("sprinklermanager:sprinkler:detail")
-    public ResponseDTO<SprinklerStockInVO> getDetail(@PathVariable Long sprinklerId) {
-        return ResponseDTO.ok(sprinklerService.getDetail(sprinklerId));
-    }
 
 
     @Operation(summary = "导出全部喷头信息 @author 芦苇")
@@ -111,10 +96,10 @@ public class SprinklerController {
 
     }
 
-    @Operation(summary = "导出全部喷头信息 @author 芦苇")
-    @PostMapping("/sprinklermanager/sprinkler/exportExcel")
-    public void exportExcel(@RequestBody @Valid SprinklerQueryForm queryForm, HttpServletResponse response) throws IOException {
-        List<SprinklerExcelVO> data = sprinklerService.getExcelExportData(queryForm);
+    @Operation(summary = "导出各仓喷头信息 @author 芦苇")
+    @PostMapping("/sprinklermanager/sprinkler/exportRepositorySprinklerExcel")
+    public void exportRepositorySprinklerExcel(@RequestBody @Valid CombinedQueryForm queryForm, HttpServletResponse response) throws IOException {
+        List<?> data = sprinklerService.getRepositorySprinklerExcelExportData(queryForm);
         if (CollectionUtils.isEmpty(data)) {
             SmartResponseUtil.write(response, ResponseDTO.userErrorParam("暂无数据"));
             return;
@@ -122,8 +107,13 @@ public class SprinklerController {
 
         String watermark = AdminRequestUtil.getRequestUser().getActualName();
         watermark += SmartLocalDateUtil.format(LocalDateTime.now(), SmartDateFormatterEnum.YMD_HMS);
+        if (!data.isEmpty()) {
+            Object firstElement = data.get(0);
+            Class<?> elementClass = firstElement.getClass();
+            System.out.println("元素类名: " + elementClass.getName());
+            SmartExcelUtil.exportExcelWithWatermark(response,"喷头信息.xlsx","喷头信息", elementClass,data,watermark);
+        }
 
-        SmartExcelUtil.exportExcelWithWatermark(response,"喷头基本信息.xlsx","喷头信息", SprinklerExcelVO.class,data,watermark);
 
     }
 

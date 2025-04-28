@@ -14,10 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RepositorySprinklerStrategyFactory {
-    private final Map<Class<? extends BaseQueryForm>, RepositorySprinklerQueryStrategy<?, ?>> strategyMap = new ConcurrentHashMap<>();
+    private final Map<Class<? extends BaseQueryForm>, RepositorySprinklerQueryStrategy<?, ?, ?>> strategyMap = new ConcurrentHashMap<>();
 
     @Autowired
-    public void registerStrategies(List<RepositorySprinklerQueryStrategy<?, ?>> strategies) {
+    public void registerStrategies(List<RepositorySprinklerQueryStrategy<?, ?, ?>> strategies) {
         strategies.forEach(strategy -> {
             // 通过反射获取泛型参数
             Type[] genericInterfaces = strategy.getClass().getGenericInterfaces();
@@ -37,7 +37,7 @@ public class RepositorySprinklerStrategyFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends BaseQueryForm, R> RepositorySprinklerQueryStrategy<T, R> getStrategy(Class<T> formType) {
-        return (RepositorySprinklerQueryStrategy<T, R>) strategyMap.get(formType);
+    public <T extends BaseQueryForm, R, EXCEL> RepositorySprinklerQueryStrategy<T, R, EXCEL> getStrategy(Class<T> formType) {
+        return (RepositorySprinklerQueryStrategy<T, R, EXCEL>) strategyMap.get(formType);
     }
 }

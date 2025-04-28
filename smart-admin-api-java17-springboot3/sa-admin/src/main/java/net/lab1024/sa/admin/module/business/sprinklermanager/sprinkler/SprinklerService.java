@@ -1,23 +1,14 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler;
 
-import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.github.yulichang.wrapper.MPJLambdaWrapper;
-import jakarta.annotation.Nullable;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.builder.JoinConditionBuilder;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeEnum;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.dao.SprinklerStockInDao;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerStockInEntity;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.UsableSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.*;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerExcelVO;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerStockInExcelVO;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerStockInVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.DataProcessorFactory;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.RepositorySprinklerCreateFormFactory;
@@ -32,13 +23,9 @@ import net.lab1024.sa.base.common.util.ExcelUtil;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
 import net.lab1024.sa.base.common.util.SmartPageUtil;
 import net.lab1024.sa.base.module.support.datatracer.service.DataTracerService;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,8 +33,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SprinklerService {
 
-    @Resource
-    private SprinklerStockInDao sprinklerStockInDao;
 
     @Resource
     private DataTracerService dataTracerService;
@@ -69,10 +54,8 @@ public class SprinklerService {
         Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
         List<SprinklerVO> sprinklerList = sprinklerRepository.getListByQueryPage(page, queryForm);
 
-//        List<SprinklerVO> sprinklerList = sprinklerStockInDao.queryPage(page, queryForm);
         PageResult<SprinklerVO> pageResult = SmartPageUtil.convert2PageResult(page, sprinklerList);
         return ResponseDTO.ok(pageResult);
-//        return ResponseDTO.ok();
     }
 
     public ResponseDTO<PageResult<?>> repositoryQueryByPage(@Valid CombinedQueryForm queryForm) {
@@ -81,8 +64,8 @@ public class SprinklerService {
 
         // 获取具体策略
         @SuppressWarnings("unchecked")
-        RepositorySprinklerQueryStrategy<BaseQueryForm, ?> strategy =
-                (RepositorySprinklerQueryStrategy<BaseQueryForm, ?>)
+        RepositorySprinklerQueryStrategy<BaseQueryForm, ?, ?> strategy =
+                (RepositorySprinklerQueryStrategy<BaseQueryForm, ?, ?>)
                         repositorySprinklerStrategyFactory.getStrategy(joinForm.getClass());
 
         // 执行策略查询
@@ -101,21 +84,6 @@ public class SprinklerService {
 
         return ResponseDTO.ok(pageResult);
     }
-
-
-
-
-
-
-
-    /**
-     * 查询喷头详情
-     *
-     */
-    public SprinklerStockInVO getDetail(Long sprinklerId) {
-        return sprinklerStockInDao.getDetail(sprinklerId, Boolean.FALSE);
-    }
-
 
     /**
      * 获取导出数据
@@ -225,4 +193,22 @@ public class SprinklerService {
     }
 
 
+    public List<?> getRepositorySprinklerExcelExportData(@Valid CombinedQueryForm queryForm) {
+        Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
+        BaseQueryForm joinForm = queryForm.getJoinQueryForm();
+
+        // 获取具体策略
+        @SuppressWarnings("unchecked")
+        RepositorySprinklerQueryStrategy<BaseQueryForm, ?, ?> strategy =
+                (RepositorySprinklerQueryStrategy<BaseQueryForm, ?, ?>)
+                        repositorySprinklerStrategyFactory.getStrategy(joinForm.getClass());
+
+        // 执行策略查询
+        List<?> resultList = strategy.executeExport(
+                queryForm.getQueryForm(),
+                joinForm
+        );
+
+        return resultList;
+    }
 }

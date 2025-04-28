@@ -44,7 +44,7 @@ public class UsableSprinklerVO {
     @Schema(description = "领用时备注1")
     private String allocateNote1;
 
-    @DataTracerFieldLabel("喷头详情")
+    @Schema(description = "喷头详情")
     private String sprinklerDetail;
 
     @Schema(description = "禁用状态")

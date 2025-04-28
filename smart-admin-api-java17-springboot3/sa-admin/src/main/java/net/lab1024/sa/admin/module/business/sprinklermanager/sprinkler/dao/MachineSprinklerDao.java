@@ -6,6 +6,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.en
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.UsableSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.MachineSprinklerQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.MachineSprinklerExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.MachineSprinklerVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -26,4 +27,6 @@ public interface MachineSprinklerDao extends BaseMapper<MachineSprinklerEntity> 
      *
      */
     List<MachineSprinklerVO> queryPage(Page<?> page, @Param("queryForm") SprinklerQueryForm queryForm,@Param("joinForm") MachineSprinklerQueryForm joinForm);
+
+    List<MachineSprinklerExcelVO> queryExcel(@Param("queryForm") SprinklerQueryForm queryForm,@Param("joinForm") MachineSprinklerQueryForm joinForm);
 }

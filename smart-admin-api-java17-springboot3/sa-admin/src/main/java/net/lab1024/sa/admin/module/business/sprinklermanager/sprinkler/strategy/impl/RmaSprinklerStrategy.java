@@ -3,6 +3,7 @@ package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.RmaSprinklerQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.RmaSprinklerExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.RmaSprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.RmaSprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.RepositorySprinklerQueryStrategy;
@@ -12,11 +13,17 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class RmaSprinklerStrategy implements RepositorySprinklerQueryStrategy<RmaSprinklerQueryForm, RmaSprinklerVO> {
+public class RmaSprinklerStrategy implements RepositorySprinklerQueryStrategy<RmaSprinklerQueryForm, RmaSprinklerVO, RmaSprinklerExcelVO> {
 
     @Autowired
     private RmaSprinklerRepository rmaSprinklerRepository;
 
+
+    @Override
+    public List<RmaSprinklerExcelVO> executeExport(SprinklerQueryForm queryForm, RmaSprinklerQueryForm joinForm) {
+        queryForm.setDeletedFlag(Boolean.FALSE);
+        return rmaSprinklerRepository.getListByQueryPage(queryForm, joinForm);
+    }
 
     @Override
     public List<RmaSprinklerVO> executeQuery(Page<?> page, SprinklerQueryForm queryForm, RmaSprinklerQueryForm joinForm) {
@@ -27,5 +34,10 @@ public class RmaSprinklerStrategy implements RepositorySprinklerQueryStrategy<Rm
     @Override
     public Class<RmaSprinklerVO> getResultType() {
         return RmaSprinklerVO.class;
+    }
+
+    @Override
+    public Class<RmaSprinklerExcelVO> getExcelResultType() {
+        return RmaSprinklerExcelVO.class;
     }
 }

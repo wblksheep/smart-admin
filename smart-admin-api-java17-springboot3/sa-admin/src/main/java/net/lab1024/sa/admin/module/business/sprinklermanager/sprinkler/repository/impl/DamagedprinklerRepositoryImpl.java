@@ -6,6 +6,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.dao.Damag
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.DamagedSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.DamagedSprinklerQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.DamagedSprinklerExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.DamagedSprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.DamagedSprinklerRepository;
 import org.springframework.stereotype.Service;
@@ -17,5 +18,10 @@ public class DamagedprinklerRepositoryImpl extends ServiceImpl<DamagedSprinklerD
     @Override
     public List<DamagedSprinklerVO> getListByQueryPage(Page<?> page, SprinklerQueryForm queryForm, DamagedSprinklerQueryForm joinForm) {
         return this.getBaseMapper().queryPage(page, queryForm, joinForm);
+    }
+
+    @Override
+    public List<DamagedSprinklerExcelVO> getListByQueryPage(SprinklerQueryForm queryForm, DamagedSprinklerQueryForm joinForm) {
+        return this.getBaseMapper().queryExcel(queryForm, joinForm);
     }
 }

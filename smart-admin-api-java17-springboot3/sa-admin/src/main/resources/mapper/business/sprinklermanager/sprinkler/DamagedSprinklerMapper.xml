@@ -42,5 +42,46 @@
             </if>
         </where>
     </select>
+    <select id="queryExcel"
+            resultType="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.DamagedSprinklerExcelVO">
+        SELECT t_sprinkler.*,
+        t_damaged_sprinkler.*
+        FROM t_damaged_sprinkler
+        LEFT JOIN t_sprinkler ON t_sprinkler.sprinkler_id = t_damaged_sprinkler.sprinkler_id
+        <where>
+            t_sprinkler.deleted_flag = #{queryForm.deletedFlag}
+            <if test="queryForm.sprinklerSerial != null and queryForm.sprinklerSerial != ''">
+                AND INSTR(t_sprinkler.sprinkler_serial,#{queryForm.sprinklerSerial})
+            </if>
+            <if test="queryForm.history != null and queryForm.history != ''">
+                AND INSTR(t_sprinkler.history,#{queryForm.history})
+            </if>
+            <if test="queryForm.disabledFlag != null">
+                AND t_sprinkler.disabled_flag = #{queryForm.disabledFlag}
+            </if>
+
+            <if test="joinForm.retWarehouseDateStartTime != null">
+                AND DATE_FORMAT(t_damaged_sprinkler.ret_warehouse_date, '%Y-%m-%d') &gt;= #{joinForm.retWarehouseDateStartTime}
+            </if>
+            <if test="joinForm.retWarehouseDateEndTime != null">
+                AND DATE_FORMAT(t_damaged_sprinkler.ret_warehouse_date, '%Y-%m-%d') &lt;= #{joinForm.retWarehouseDateEndTime}
+            </if>
+
+            <if test="joinForm.note1 != null and joinForm.note1 != ''">
+                AND INSTR(t_damaged_sprinkler.note1,#{joinForm.note1})
+            </if>
+
+            <if test="joinForm.damagedReasonType != null and joinForm.damagedReasonType != ''">
+                AND INSTR(t_damaged_sprinkler.damaged_reason_type,#{joinForm.damagedReasonType})
+            </if>
+
+            <if test="joinForm.realDamagedReason != null and joinForm.realDamagedReason != ''">
+                AND INSTR(t_damaged_sprinkler.real_damaged_reason,#{joinForm.realDamagedReason})
+            </if>
+            <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
+                ORDER BY t_sprinkler.create_time DESC
+            </if>
+        </where>
+    </select>
 
 </mapper>

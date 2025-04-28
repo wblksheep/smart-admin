@@ -3,6 +3,7 @@ package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.UsableSprinklerQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.UsableSprinklerExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.UsableSprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.UsableSprinklerRepository;
@@ -14,10 +15,16 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class UsableSprinklerStrategy implements RepositorySprinklerQueryStrategy<UsableSprinklerQueryForm, UsableSprinklerVO> {
+public class UsableSprinklerStrategy implements RepositorySprinklerQueryStrategy<UsableSprinklerQueryForm, UsableSprinklerVO, UsableSprinklerExcelVO> {
 
     @Autowired
     private UsableSprinklerRepository usableSprinklerRepository;
+
+    @Override
+    public List<UsableSprinklerExcelVO> executeExport(SprinklerQueryForm queryForm, UsableSprinklerQueryForm joinForm) {
+        queryForm.setDeletedFlag(Boolean.FALSE);
+        return usableSprinklerRepository.getListByQueryPage(queryForm, joinForm);
+    }
 
     @Override
     public List<UsableSprinklerVO> executeQuery(Page<?> page, SprinklerQueryForm queryForm, UsableSprinklerQueryForm joinForm) {
@@ -28,5 +35,10 @@ public class UsableSprinklerStrategy implements RepositorySprinklerQueryStrategy
     @Override
     public Class<UsableSprinklerVO> getResultType() {
         return UsableSprinklerVO.class;
+    }
+
+    @Override
+    public Class<UsableSprinklerExcelVO> getExcelResultType() {
+        return UsableSprinklerExcelVO.class;
     }
 }

@@ -8,6 +8,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.en
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.MaintainingSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.MaintainingSprinklerQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.MaintainingSprinklerExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.MaintainingSprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.MachineSprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.MaintainingSprinklerRepository;
@@ -20,5 +21,10 @@ public class MaintainingSprinklerRepositoryImpl extends ServiceImpl<MaintainingS
     @Override
     public List<MaintainingSprinklerVO> getListByQueryPage(Page<?> page, SprinklerQueryForm queryForm, MaintainingSprinklerQueryForm joinForm) {
         return this.getBaseMapper().queryPage(page, queryForm, joinForm);
+    }
+
+    @Override
+    public List<MaintainingSprinklerExcelVO> getListByQueryPage(SprinklerQueryForm queryForm, MaintainingSprinklerQueryForm joinForm) {
+        return this.getBaseMapper().queryExcel(queryForm, joinForm);
     }
 }

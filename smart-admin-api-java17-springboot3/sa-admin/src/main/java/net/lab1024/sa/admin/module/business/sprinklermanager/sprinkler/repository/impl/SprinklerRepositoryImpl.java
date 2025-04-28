@@ -31,7 +31,7 @@ public class SprinklerRepositoryImpl extends ServiceImpl<SprinklerDao, Sprinkler
     }
 
     @Override
-    public List<SprinklerExcelVO> selectExcelExportData(SprinklerQueryForm queryForm) {
+    public List<SprinklerExcelVO> selectSprinklerExcelExportData(SprinklerQueryForm queryForm) {
         return this.getBaseMapper().selectExcelExportData(queryForm);
     }
 
