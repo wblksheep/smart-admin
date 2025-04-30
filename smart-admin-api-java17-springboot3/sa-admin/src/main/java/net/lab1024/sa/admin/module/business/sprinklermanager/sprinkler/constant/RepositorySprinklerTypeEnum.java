@@ -4,6 +4,10 @@ package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant
 import lombok.Getter;
 import net.lab1024.sa.base.common.enumeration.BaseEnum;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 /**
  * 喷头仓库类型
  *
@@ -38,6 +42,15 @@ public enum RepositorySprinklerTypeEnum implements BaseEnum {
     RMA_REPOSITORY(4, "rma"),
     ;
 
+    // 状态值映射缓存（优化查询性能）
+    private static final Map<Integer, RepositorySprinklerTypeEnum> STATUS_MAP = new HashMap<>();
+
+    static {
+        for (RepositorySprinklerTypeEnum type : values()) {
+            STATUS_MAP.put(type.value, type);
+        }
+    }
+
     private Integer value;
     private String desc;
 
@@ -47,4 +60,10 @@ public enum RepositorySprinklerTypeEnum implements BaseEnum {
     }
 
 
+    /**
+     * 根据状态值获取枚举（优化点：缓存加速/Optional安全返回）
+     */
+    public static Optional<RepositorySprinklerTypeEnum> fromStatus(int status) {
+        return Optional.ofNullable(STATUS_MAP.get(status));
+    }
 }

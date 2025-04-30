@@ -12,7 +12,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-public interface DamagedSprinklerRepository extends IService<DamagedSprinklerEntity> {
+public interface DamagedSprinklerRepository extends BaseIService<DamagedSprinklerEntity> {
     List<DamagedSprinklerVO> getListByQueryPage(Page<?> page, @Param("queryForm") SprinklerQueryForm queryForm, @Param("joinForm") DamagedSprinklerQueryForm joinForm);
 
     List<DamagedSprinklerExcelVO> getListByQueryPage(@Param("queryForm") SprinklerQueryForm queryForm, @Param("joinForm") DamagedSprinklerQueryForm joinForm);

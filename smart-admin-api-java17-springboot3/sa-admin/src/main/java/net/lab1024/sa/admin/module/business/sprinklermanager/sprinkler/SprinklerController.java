@@ -8,8 +8,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.constant.AdminSwaggerTagConst;
+import net.lab1024.sa.admin.module.business.oa.enterprise.domain.vo.EnterpriseVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.CombinedQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.BaseSprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO;
 import net.lab1024.sa.admin.util.AdminRequestUtil;
@@ -23,10 +25,7 @@ import net.lab1024.sa.base.common.util.SmartRequestUtil;
 import net.lab1024.sa.base.common.util.SmartResponseUtil;
 import net.lab1024.sa.base.module.support.operatelog.annotation.OperateLog;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -51,8 +50,15 @@ public class SprinklerController {
     @Operation(summary = "分页查询各仓喷头模块 @author 芦苇")
     @PostMapping("/sprinklermanager/repositorysprinkler/page/query")
     @SaCheckPermission("sprinklermanager:repositorysprinkler:query")
-    public ResponseDTO<PageResult<?>> repositoryQueryByPage(@RequestBody @Valid CombinedQueryForm queryForm) {
+    public <R> ResponseDTO<PageResult<R>> repositoryQueryByPage(@RequestBody @Valid CombinedQueryForm queryForm) {
         return sprinklerService.repositoryQueryByPage(queryForm);
+    }
+
+    @Operation(summary = "查询各仓喷头详情 @author 芦苇")
+    @GetMapping("/sprinklermanager/repositorysprinkler/get/{sprinklerId}")
+    @SaCheckPermission("sprinklermanager:repositorysprinkler:detail")
+    public ResponseDTO<BaseSprinklerVO> getDetail(@PathVariable Long sprinklerId) {
+        return ResponseDTO.ok(sprinklerService.getDetail(sprinklerId));
     }
 
 
@@ -95,6 +101,8 @@ public class SprinklerController {
         SmartExcelUtil.exportExcelWithWatermark(response,"喷头基本信息.xlsx","喷头信息", SprinklerExcelVO.class,data,watermark);
 
     }
+
+
 
     @Operation(summary = "导出各仓喷头信息 @author 芦苇")
     @PostMapping("/sprinklermanager/sprinkler/exportRepositorySprinklerExcel")

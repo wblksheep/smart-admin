@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  * @Author 海印: 芦苇
  */
 @Data
-public class SprinklerVO {
+public class SprinklerVO extends BaseSprinklerVO {
 
     @Schema(description = "喷头ID")
     private Long sprinklerId;

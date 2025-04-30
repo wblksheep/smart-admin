@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  * @Author 海印: 芦苇
  */
 @Data
-public class UsableSprinklerExcelVO {
+public class UsableSprinklerExcelVO extends BaseSprinklerExcelVO{
 
     @ExcelProperty("喷头型号")
     private String sprinklerModel;

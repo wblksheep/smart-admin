@@ -17,5 +17,4 @@ public interface SprinklerRepository extends IService<SprinklerEntity> {
 
     List<SprinklerExcelVO> selectSprinklerExcelExportData(@Param("queryForm") SprinklerQueryForm queryForm);
 
-//    List<UsableSprinklerVO> getListByQueryPage(Page<?> page, @Param("queryForm") SprinklerQueryForm queryForm, @Param("joinForm") UsableSprinklerQueryForm joinForm);
 }

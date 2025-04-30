@@ -20,6 +20,7 @@ public class MaintainingSprinklerEntity {
     /**
      * 喷头ID
      */
+    @TableId
     private Long sprinklerId;
 
     /**

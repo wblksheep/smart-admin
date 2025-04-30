@@ -11,7 +11,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-public interface MaintainingSprinklerRepository extends IService<MaintainingSprinklerEntity> {
+public interface MaintainingSprinklerRepository extends BaseIService<MaintainingSprinklerEntity> {
     List<MaintainingSprinklerVO> getListByQueryPage(Page<?> page, @Param("queryForm") SprinklerQueryForm queryForm, @Param("joinForm") MaintainingSprinklerQueryForm joinForm);
 
     List<MaintainingSprinklerExcelVO> getListByQueryPage(@Param("queryForm") SprinklerQueryForm queryForm, @Param("joinForm") MaintainingSprinklerQueryForm joinForm);

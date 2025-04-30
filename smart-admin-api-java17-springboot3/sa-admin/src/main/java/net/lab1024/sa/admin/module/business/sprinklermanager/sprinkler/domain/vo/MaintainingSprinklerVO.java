@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
  * @Author 海印: 芦苇
  */
 @Data
-public class MaintainingSprinklerVO {
+public class MaintainingSprinklerVO extends BaseSprinklerVO{
 
     @Schema(description = "喷头ID")
     private Long sprinklerId;

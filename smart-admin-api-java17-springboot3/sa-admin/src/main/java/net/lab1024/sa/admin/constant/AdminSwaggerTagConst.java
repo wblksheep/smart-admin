@@ -26,7 +26,9 @@ public class AdminSwaggerTagConst extends SwaggerTagConst {
 
         public static final String OA_NOTICE = "OA办公-通知公告";
 
-        public static final String SPRINKLER = "喷头";
+        public static final String SPRINKLER = "喷头-喷头管理";
+
+        public static final String SPRINKLER_MAINTAININGRECORD = "喷头-维修记录";
 
     }
 

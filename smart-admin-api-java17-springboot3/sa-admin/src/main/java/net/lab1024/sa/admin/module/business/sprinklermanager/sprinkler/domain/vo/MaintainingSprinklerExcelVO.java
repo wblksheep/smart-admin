@@ -12,7 +12,7 @@ import java.time.LocalDate;
  * @Author 海印: 芦苇
  */
 @Data
-public class MaintainingSprinklerExcelVO {
+public class MaintainingSprinklerExcelVO extends BaseSprinklerExcelVO{
      @ExcelProperty("喷头序列号")
     private String sprinklerSerial;
 

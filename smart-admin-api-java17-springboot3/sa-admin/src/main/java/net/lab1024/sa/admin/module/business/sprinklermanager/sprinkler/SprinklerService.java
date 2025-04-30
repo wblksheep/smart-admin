@@ -1,20 +1,29 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import net.lab1024.sa.admin.module.business.oa.enterprise.domain.vo.EnterpriseVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeEnum;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.UsableSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.*;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.BaseSprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.DataProcessorFactory;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.RepositorySprinklerCreateFormFactory;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.RepositorySprinklerStrategyFactory;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.SprinklerRepositoryFactory;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.processor.DataProcessor;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.UsableSprinklerRepository;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.abstractimpl.BaseServiceImpl;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.RepositorySprinklerQueryStrategy;
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
@@ -23,7 +32,10 @@ import net.lab1024.sa.base.common.util.ExcelUtil;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
 import net.lab1024.sa.base.common.util.SmartPageUtil;
 import net.lab1024.sa.base.module.support.datatracer.service.DataTracerService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
@@ -43,11 +55,14 @@ public class SprinklerService {
     @Resource
     private RepositorySprinklerStrategyFactory repositorySprinklerStrategyFactory;
 
+    @Resource
+    private SprinklerRepositoryFactory sprinklerRepositoryFactory;
+    @Autowired
+    private UsableSprinklerRepository usableSprinklerRepository;
 
 
     /**
      * 分页查询全部喷头模块
-     *
      */
     public ResponseDTO<PageResult<SprinklerVO>> queryByPage(SprinklerQueryForm queryForm) {
         queryForm.setDeletedFlag(Boolean.FALSE);
@@ -58,31 +73,52 @@ public class SprinklerService {
         return ResponseDTO.ok(pageResult);
     }
 
-    public ResponseDTO<PageResult<?>> repositoryQueryByPage(@Valid CombinedQueryForm queryForm) {
+    /**
+     * 分页查询各仓喷头模块
+     */
+    public <R, EXCEL> ResponseDTO<PageResult<R>> repositoryQueryByPage(@Valid CombinedQueryForm queryForm) {
         Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
         BaseQueryForm joinForm = queryForm.getJoinQueryForm();
 
         // 获取具体策略
         @SuppressWarnings("unchecked")
-        RepositorySprinklerQueryStrategy<BaseQueryForm, ?, ?> strategy =
-                (RepositorySprinklerQueryStrategy<BaseQueryForm, ?, ?>)
+        RepositorySprinklerQueryStrategy<BaseQueryForm, R, EXCEL> strategy =
+                (RepositorySprinklerQueryStrategy<BaseQueryForm, R, EXCEL>)
                         repositorySprinklerStrategyFactory.getStrategy(joinForm.getClass());
 
         // 执行策略查询
-        List<?> resultList = strategy.executeQuery(
+        List<R> resultList = strategy.executeQuery(
                 page,
                 queryForm.getQueryForm(),
                 joinForm
         );
 
         // 带类型转换的分页结果构建
-        PageResult<?> pageResult = SmartPageUtil.convert2PageResult(
+        PageResult<R> pageResult = SmartPageUtil.convert2PageResult(
                 page,
                 resultList,
                 strategy.getResultType()  // 使用策略提供的类型信息
         );
 
         return ResponseDTO.ok(pageResult);
+    }
+
+    /**
+     * 查询各仓喷头详情
+     *
+     */
+    public BaseSprinklerVO getDetail(Long sprinklerId) {
+        // 1. 获取喷头实体
+        SprinklerEntity sprinklerEntity = sprinklerRepository.getById(sprinklerId);
+        // 2. 根据状态值获取枚举类型（核心优化点）
+        RepositorySprinklerTypeEnum type = RepositorySprinklerTypeEnum.fromStatus(sprinklerEntity.getStatus())
+                .orElseThrow(() -> new IllegalArgumentException("无效的状态值：" + sprinklerEntity.getStatus()));
+
+        // 3. 类型安全获取仓库实现类
+        BaseServiceImpl<?, ?> repository = sprinklerRepositoryFactory.getRepository(type);
+
+        // 4. 执行详情查询
+        return repository.getDetail(sprinklerEntity, Boolean.FALSE);
     }
 
     /**
@@ -102,8 +138,13 @@ public class SprinklerService {
 
     public ResponseDTO<String> batchRepositorySprinklerCreate(@Valid MultipartFile file, RequestUser requestUser, @Valid Integer type) {
         Class<? extends BaseCreateForm> createVOClazz = createFormFactory.getSprinklerClass(type);
-        List<? extends BaseCreateForm> list = ExcelUtil.importExcelByClass(file, createVOClazz).stream().peek(vo->initCreateVO(vo, requestUser)).toList();
-        DataProcessor dataProcessor = processorFactory.getProcessor(RepositorySprinklerTypeEnum.values()[type].getDesc());
+        List<? extends BaseCreateForm> list = ExcelUtil
+                .importExcelByClass(file, createVOClazz)
+                .stream()
+                .peek(vo -> initCreateVO(vo, requestUser))
+                .toList();
+        DataProcessor dataProcessor = processorFactory
+                .getProcessor(RepositorySprinklerTypeEnum.values()[type].getDesc());
         dataProcessor.process(list);
         return ResponseDTO.ok();
     }
@@ -211,4 +252,6 @@ public class SprinklerService {
 
         return resultList;
     }
+
+
 }

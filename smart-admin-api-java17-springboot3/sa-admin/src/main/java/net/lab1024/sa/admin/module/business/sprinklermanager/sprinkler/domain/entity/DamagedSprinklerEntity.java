@@ -1,5 +1,6 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import net.lab1024.sa.base.module.support.datatracer.annoation.DataTracerFieldLabel;
@@ -18,6 +19,7 @@ public class DamagedSprinklerEntity {
     /**
      * 喷头ID
      */
+    @TableId
     private Long sprinklerId;
 
     /**
