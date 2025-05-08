@@ -45,15 +45,6 @@ public class MaintainingRecordVO {
     @Schema(description = "领用是否有限制")
     private String allocateLimitation;
 
-    @Schema(description = "所在仓status")
-    private Byte status;
-
-    @Schema(description = "新旧喷头")
-    private Boolean isNew;
-
-    @Schema(description = "喷头详情")
-    private String sprinklerDetail;
-
     @Schema(description = "禁用状态")
     private Boolean disabledFlag;
 

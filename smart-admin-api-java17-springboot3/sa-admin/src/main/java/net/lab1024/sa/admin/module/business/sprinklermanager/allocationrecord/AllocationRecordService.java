@@ -1,4 +1,4 @@
-package net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord;
+package net.lab1024.sa.admin.module.business.sprinklermanager.allocationrecord;
 
 import cn.idev.excel.util.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -7,8 +7,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import net.lab1024.sa.admin.module.business.oa.enterprise.domain.entity.EnterpriseEntity;
-import net.lab1024.sa.admin.module.business.oa.enterprise.domain.form.EnterpriseCreateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.entity.MaintainingRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordCreateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordQueryForm;
@@ -32,7 +30,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class MaintainingRecordService {
+public class AllocationRecordService {
 
     @Resource
     private SprinklerRepository sprinklerRepository;

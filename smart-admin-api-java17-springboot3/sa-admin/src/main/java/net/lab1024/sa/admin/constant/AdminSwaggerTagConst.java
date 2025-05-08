@@ -30,6 +30,7 @@ public class AdminSwaggerTagConst extends SwaggerTagConst {
 
         public static final String SPRINKLER_MAINTAININGRECORD = "喷头-维修记录";
 
+        public static final String SPRINKLER_ALLOCATIONRECORD = "喷头-领用记录";
     }
 
 

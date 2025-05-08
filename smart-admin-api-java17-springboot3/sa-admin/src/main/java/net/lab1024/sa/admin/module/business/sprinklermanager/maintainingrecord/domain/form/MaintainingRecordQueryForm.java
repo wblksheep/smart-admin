@@ -32,8 +32,12 @@ public class MaintainingRecordQueryForm extends PageParam {
     @Schema(description = "返修客户")
     private String customer;
 
-    @Schema(description = "返仓日期")
-    private LocalDate retWarehouseDate;
+    @Schema(description = "返仓日期开始时间")
+    private LocalDate retWarehouseDateStartTime;
+
+    @Schema(description = "返仓日期结束时间")
+    private LocalDate retWarehouseDateEndTime;
+
 
     @Schema(description = "返仓类型")
     private String retWarehouseType;

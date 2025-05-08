@@ -7,6 +7,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.d
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo.MaintainingRecordVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.repository.MaintainingRecordRepository;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,5 +17,10 @@ public class MaintainingRecordRepositoryImpl extends ServiceImpl<MaintainingReco
     @Override
     public List<MaintainingRecordVO> getListByQueryPage(Page<?> page, MaintainingRecordQueryForm queryForm) {
         return this.getBaseMapper().queryPage(page, queryForm);
+    }
+
+    @Override
+    public MaintainingRecordVO getDetail(Long recordId, Boolean deletedFlag) {
+        return this.getBaseMapper().getDetail(recordId, deletedFlag);
     }
 }

@@ -11,16 +11,14 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.d
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo.MaintainingRecordVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.BaseSprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO;
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
 import net.lab1024.sa.base.common.util.SmartRequestUtil;
 import net.lab1024.sa.base.module.support.operatelog.annotation.OperateLog;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 /**
  * 维修记录
@@ -47,7 +45,7 @@ public class MaintainingRecordController {
     }
 
     @Operation(summary = "分页查询维修记录模块 @author 芦苇")
-    @PostMapping("/sprinklermanager/maintainingrecord/page/query")
+        @PostMapping("/sprinklermanager/maintainingrecord/page/query")
     @SaCheckPermission("sprinklermanager:maintainingrecord:query")
     public ResponseDTO<PageResult<MaintainingRecordVO>> queryByPage(@RequestBody @Valid MaintainingRecordQueryForm queryForm) {
         return maintainingRecordService.queryByPage(queryForm);
@@ -63,5 +61,12 @@ public class MaintainingRecordController {
         createVO.setCreateUserId(requestUser.getUserId());
         createVO.setCreateUserName(requestUser.getUserName());
         return maintainingRecordService.createMaintainingRecord(createVO);
+    }
+
+    @Operation(summary = "查询维修记录详情 @author 芦苇")
+    @GetMapping("/sprinklermanager/maintainingrecord/get/{recordId}")
+    @SaCheckPermission("sprinklermanager:maintainingrecord:detail")
+    public ResponseDTO<MaintainingRecordVO> getDetail(@PathVariable Long recordId) {
+        return ResponseDTO.ok(maintainingRecordService.getDetail(recordId));
     }
 }
