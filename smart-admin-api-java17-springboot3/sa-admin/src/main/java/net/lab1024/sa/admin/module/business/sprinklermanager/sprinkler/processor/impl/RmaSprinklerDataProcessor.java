@@ -86,8 +86,8 @@ public class RmaSprinklerDataProcessor implements DataProcessor<RmaSprinklerCrea
         List<SprinklerEntity> mainTableUpdates = new ArrayList<>();
         filteredForms.forEach(form -> {
             SprinklerEntity mainRecord = mainTableMap.get(form.getSprinklerSerial());
-            if (mainRecord.getStatus() != RepositorySprinklerTypeEnum.MAINTAINING_REPOSITORY.getValue().byteValue()) {
-                mainRecord.setStatus(RepositorySprinklerTypeEnum.MAINTAINING_REPOSITORY.getValue().byteValue());
+            if (mainRecord.getStatus() != RepositorySprinklerTypeEnum.RMA_REPOSITORY.getValue().byteValue()) {
+                mainRecord.setStatus(RepositorySprinklerTypeEnum.RMA_REPOSITORY.getValue().byteValue());
                 mainTableUpdates.add(mainRecord);
             }
         });
@@ -102,7 +102,7 @@ public class RmaSprinklerDataProcessor implements DataProcessor<RmaSprinklerCrea
         if (!mainTableUpdates.isEmpty()) {
             UpdateWrapper<SprinklerEntity> updateWrapper = new UpdateWrapper<>();
             updateWrapper.in("sprinkler_id", mainIdsToUpdate)
-                    .set("status", RepositorySprinklerTypeEnum.MAINTAINING_REPOSITORY.getValue().byteValue());
+                    .set("status", RepositorySprinklerTypeEnum.RMA_REPOSITORY.getValue().byteValue());
             sprinklerRepository.update(updateWrapper);
         }
         // 8.2 批量插入rma数据（使用MyBatis-Plus批量操作优化）

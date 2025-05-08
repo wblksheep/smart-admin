@@ -1,47 +1,55 @@
-package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo;
+package net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.BaseSprinklerVO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * rma喷头所有信息
+ * 维修记录
  * @Author 海印: 芦苇
  */
 @Data
-public class RmaSprinklerVO extends BaseSprinklerVO{
+public class MaintainingRecordVO {
 
-    @Schema(description = "喷头ID")
-    private Long sprinklerId;
-
-    @Schema(description = "喷头序列号")
-    private String sprinklerSerial;
+    @Schema(description = "维修信息记录ID")
+    private Long recordId;
 
     @Schema(description = "返修日期")
     private LocalDate retMaintainenceDate;
 
+    @Schema(description = "喷头ID")
+    private String sprinklerId;
+
+    @Schema(description = "喷头序列号")
+    private String sprinklerSerial;
+
     @Schema(description = "返修原因")
     private String retMaintainenceReason;
 
-    @Schema(description = "返仓日期")
-    private LocalDate retWarehouseDate;
+    @Schema(description = "具体原因")
+    private String realReason;
+
 
     @Schema(description = "返修客户")
     private String customer;
 
-    @Schema(description = "历史")
-    private String history;
+    @Schema(description = "返仓日期")
+    private LocalDate retWarehouseDate;
+
+    @Schema(description = "返仓类型")
+    private String retWarehouseType;
+
+    @Schema(description = "领用是否有限制")
+    private String allocateLimitation;
 
     @Schema(description = "所在仓status")
     private Byte status;
 
-    @Schema(description = "RMA地点")
-    private String rmaPosition;
-
-    @Schema(description = "系统核对")
-    private String warehouseCheck;
+    @Schema(description = "新旧喷头")
+    private Boolean isNew;
 
     @Schema(description = "喷头详情")
     private String sprinklerDetail;

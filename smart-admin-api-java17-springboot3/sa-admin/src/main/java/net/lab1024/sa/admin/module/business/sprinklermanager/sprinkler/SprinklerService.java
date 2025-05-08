@@ -39,6 +39,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -113,7 +116,6 @@ public class SprinklerService {
         // 2. 根据状态值获取枚举类型（核心优化点）
         RepositorySprinklerTypeEnum type = RepositorySprinklerTypeEnum.fromStatus(sprinklerEntity.getStatus())
                 .orElseThrow(() -> new IllegalArgumentException("无效的状态值：" + sprinklerEntity.getStatus()));
-
         // 3. 类型安全获取仓库实现类
         BaseServiceImpl<?, ?> repository = sprinklerRepositoryFactory.getRepository(type);
 
@@ -191,6 +193,11 @@ public class SprinklerService {
                 .filter(StringUtils::isNotBlank)
                 .collect(Collectors.toSet()));
 
+        // 重复数据去重
+        validData = validData.stream()
+                .filter(distinctByKey(SprinklerEntity::getSprinklerSerial))
+                .collect(Collectors.toList());
+
         // 执行插入并返回详细信息
         if (!validData.isEmpty()) {
             sprinklerRepository.saveBatch(validData);
@@ -198,6 +205,14 @@ public class SprinklerService {
         }
         return ResponseDTO.userErrorParam("无有效数据可插入，错误数据：" + String.join(",", errorData));
 
+    }
+
+
+
+    // 辅助方法
+    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
     }
 
     private ResponseDTO<String> buildResponse(int successCount, Set<String> errorData) {

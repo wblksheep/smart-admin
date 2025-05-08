@@ -32,6 +32,9 @@ public class UsableSprinklerVO extends BaseSprinklerVO {
     @Schema(description = "历史")
     private String history;
 
+    @Schema(description = "所在仓status")
+    private Byte status;
+
     @Schema(description = "新旧喷头")
     private Boolean isNew;
 

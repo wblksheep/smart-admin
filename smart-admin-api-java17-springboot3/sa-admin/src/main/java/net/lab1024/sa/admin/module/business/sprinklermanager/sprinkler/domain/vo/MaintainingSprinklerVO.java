@@ -38,6 +38,9 @@ public class MaintainingSprinklerVO extends BaseSprinklerVO{
     @Schema(description = "历史")
     private String history;
 
+    @Schema(description = "所在仓status")
+    private Byte status;
+
     @Schema(description = "禁用状态")
     private Boolean disabledFlag;
 

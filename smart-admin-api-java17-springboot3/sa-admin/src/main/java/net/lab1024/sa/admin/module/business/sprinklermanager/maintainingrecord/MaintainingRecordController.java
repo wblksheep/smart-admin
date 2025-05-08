@@ -7,15 +7,26 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.constant.AdminSwaggerTagConst;
+import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordCreateForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo.MaintainingRecordVO;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO;
+import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
 import net.lab1024.sa.base.common.util.SmartRequestUtil;
 import net.lab1024.sa.base.module.support.operatelog.annotation.OperateLog;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
+/**
+ * 维修记录
+ *
+ * @Author 海印: 芦苇
+ */
 @Slf4j
 @RestController
 @OperateLog
@@ -25,13 +36,32 @@ public class MaintainingRecordController {
     @Resource
     private MaintainingRecordService maintainingRecordService;
 
-    @Operation(summary = "批量新建维修记录 @author 芦苇")
-    @PostMapping("/sprinklermanager/maintainingrecord/create")
-    @SaCheckPermission("sprinklermanager:maintainingrecord:add")
-    public ResponseDTO<String> createSprinkler(
+    @Operation(summary = "批量导入维修记录 @author 芦苇")
+    @PostMapping("/sprinklermanager/maintainingrecord/import")
+    @SaCheckPermission("sprinklermanager:maintainingrecord:import")
+    public ResponseDTO<String> importMaintainingRecord(
             @RequestPart("file") @Valid MultipartFile file
     ) {
         RequestUser requestUser = SmartRequestUtil.getRequestUser();
-        return maintainingRecordService.batchMaintainingRecordCreate(file, requestUser);
+        return maintainingRecordService.batchMaintainingRecordImport(file, requestUser);
+    }
+
+    @Operation(summary = "分页查询维修记录模块 @author 芦苇")
+    @PostMapping("/sprinklermanager/maintainingrecord/page/query")
+    @SaCheckPermission("sprinklermanager:maintainingrecord:query")
+    public ResponseDTO<PageResult<MaintainingRecordVO>> queryByPage(@RequestBody @Valid MaintainingRecordQueryForm queryForm) {
+        return maintainingRecordService.queryByPage(queryForm);
+    }
+
+    @Operation(summary = "新建维修记录 @author 芦苇")
+    @PostMapping("/sprinklermanager/maintainingrecord/create")
+    @SaCheckPermission("sprinklermanager:maintainingrecord:add")
+    public ResponseDTO<String> createMaintainingRecord(
+            @RequestBody @Valid MaintainingRecordCreateForm createVO
+    ) {
+        RequestUser requestUser = SmartRequestUtil.getRequestUser();
+        createVO.setCreateUserId(requestUser.getUserId());
+        createVO.setCreateUserName(requestUser.getUserName());
+        return maintainingRecordService.createMaintainingRecord(createVO);
     }
 }
