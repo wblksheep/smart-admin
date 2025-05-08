@@ -31,7 +31,7 @@ public interface MaintainingRecordDao extends BaseMapper<MaintainingRecordEntity
      */
     List<MaintainingRecordVO> queryPage(Page<?> page, @Param("queryForm") MaintainingRecordQueryForm queryForm);
 
-    MaintainingRecordVO getDetail(@Param("enterpriseId") Long recordId,@Param("deletedFlag") Boolean deletedFlag);
+    MaintainingRecordVO getDetail(@Param("recordId") Long recordId,@Param("deletedFlag") Boolean deletedFlag);
 
 //    List<UsableSprinklerExcelVO> queryExcel(@Param("queryForm") SprinklerQueryForm queryForm, @Param("joinForm") UsableSprinklerQueryForm joinForm);
 }

@@ -20,7 +20,6 @@ public class AllocationRecordCreateForm {
     private String allocateUser;
 
     @Schema(description = "禁用状态")
-    @NotNull(message = "禁用状态不能为空")
     private Boolean disabledFlag;
 
     @Schema(description = "创建人ID", hidden = true)

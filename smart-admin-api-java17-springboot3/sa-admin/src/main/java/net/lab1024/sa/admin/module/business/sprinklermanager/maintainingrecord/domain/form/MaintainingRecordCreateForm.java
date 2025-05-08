@@ -54,7 +54,6 @@ public class MaintainingRecordCreateForm {
 
     @ExcelIgnore
     @Schema(description = "禁用状态")
-    @NotNull(message = "禁用状态不能为空")
     private Boolean disabledFlag;
 
     @ExcelIgnore
