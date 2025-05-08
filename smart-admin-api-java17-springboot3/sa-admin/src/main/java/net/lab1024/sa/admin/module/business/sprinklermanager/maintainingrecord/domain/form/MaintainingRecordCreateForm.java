@@ -58,7 +58,7 @@ public class MaintainingRecordCreateForm {
     private Boolean disabledFlag;
 
     @ExcelIgnore
-    @Schema(description = "创建人", hidden = true)
+    @Schema(description = "创建人ID", hidden = true)
     private Long createUserId;
 
     @ExcelIgnore

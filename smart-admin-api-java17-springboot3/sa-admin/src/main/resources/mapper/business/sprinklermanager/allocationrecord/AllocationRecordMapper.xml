@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.lab1024.sa.admin.module.business.sprinklermanager.allocationrecord.dao.AllocationRecordDao">
+    <select id="queryPage"
+            resultType="net.lab1024.sa.admin.module.business.sprinklermanager.allocationrecord.domain.vo.AllocationRecordVO">
+        SELECT t_allocation_record.*
+        FROM t_allocation_record
+        <where>
+            deleted_flag = #{queryForm.deletedFlag}
+            <if test="queryForm.sprinklerSerial != null and queryForm.sprinklerSerial != ''">
+                AND INSTR(sprinkler_serial,#{queryForm.sprinklerSerial})
+            </if>
+
+            <if test="queryForm.allocateUser != null and queryForm.allocateUser != ''">
+                AND INSTR(allocate_user,#{queryForm.allocateUser})
+            </if>
+            <if test="queryForm.disabledFlag != null">
+                AND disabled_flag = #{queryForm.disabledFlag}
+            </if>
+        </where>
+        <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
+            ORDER BY create_time DESC
+        </if>
+    </select>
+
+    <select id="getDetail"
+            resultType="net.lab1024.sa.admin.module.business.sprinklermanager.allocationrecord.domain.vo.AllocationRecordVO">
+        SELECT ar.*
+        FROM t_allocation_record ar
+        WHERE ar.record_id = #{recordId} AND ar.deleted_flag = #{deletedFlag}
+    </select>
+
+</mapper>

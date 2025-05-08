@@ -52,6 +52,7 @@
             ORDER BY create_time DESC
         </if>
     </select>
+
     <select id="getDetail"
             resultType="net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo.MaintainingRecordVO">
         SELECT mr.*

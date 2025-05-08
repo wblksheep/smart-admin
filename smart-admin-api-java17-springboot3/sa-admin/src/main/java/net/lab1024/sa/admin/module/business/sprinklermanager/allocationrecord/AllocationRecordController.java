@@ -16,7 +16,6 @@ import net.lab1024.sa.base.common.domain.ResponseDTO;
 import net.lab1024.sa.base.common.util.SmartRequestUtil;
 import net.lab1024.sa.base.module.support.operatelog.annotation.OperateLog;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 /**
  * 领用记录
  *
@@ -30,16 +29,6 @@ public class AllocationRecordController {
 
     @Resource
     private AllocationRecordService allocationRecordService;
-
-    @Operation(summary = "批量导入领用记录 @author 芦苇")
-    @PostMapping("/sprinklermanager/allocationrecord/import")
-    @SaCheckPermission("sprinklermanager:allocationrecord:import")
-    public ResponseDTO<String> importAllocationRecord(
-            @RequestPart("file") @Valid MultipartFile file
-    ) {
-        RequestUser requestUser = SmartRequestUtil.getRequestUser();
-        return allocationRecordService.batchAllocationRecordImport(file, requestUser);
-    }
 
     @Operation(summary = "分页查询领用记录模块 @author 芦苇")
         @PostMapping("/sprinklermanager/allocationrecord/page/query")
@@ -60,10 +49,4 @@ public class AllocationRecordController {
         return allocationRecordService.createAllocationRecord(createVO);
     }
 
-    @Operation(summary = "查询领用记录详情 @author 芦苇")
-    @GetMapping("/sprinklermanager/allocationrecord/get/{recordId}")
-    @SaCheckPermission("sprinklermanager:allocationrecord:detail")
-    public ResponseDTO<AllocationRecordVO> getDetail(@PathVariable Long recordId) {
-        return ResponseDTO.ok(allocationRecordService.getDetail(recordId));
-    }
 }
