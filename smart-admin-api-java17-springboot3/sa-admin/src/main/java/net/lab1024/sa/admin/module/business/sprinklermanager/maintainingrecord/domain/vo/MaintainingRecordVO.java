@@ -21,7 +21,7 @@ public class MaintainingRecordVO {
     private LocalDate retMaintainenceDate;
 
     @Schema(description = "喷头ID")
-    private String sprinklerId;
+    private Long sprinklerId;
 
     @Schema(description = "喷头序列号")
     private String sprinklerSerial;

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.dao.AllocationRetWarehouseDao">
+    <select id="queryPage"
+            resultType="net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseVO">
+        SELECT t_allocation_ret_warehouse.*
+        FROM t_allocation_ret_warehouse
+        <where>
+            deleted_flag = #{queryForm.deletedFlag}
+            <if test="queryForm.allocateSprinklerSerial != null and queryForm.allocateSprinklerSerial != ''">
+                AND INSTR(allocate_sprinkler_serial,#{queryForm.allocateSprinklerSerial})
+            </if>
+
+            <if test="queryForm.allocateSprinklerModel != null and queryForm.allocateSprinklerModel != ''">
+                AND INSTR(allocate_sprinkler_model,#{queryForm.allocateSprinklerModel})
+            </if>
+
+            <if test="queryForm.allocatePurpose != null and queryForm.allocatePurpose != ''">
+                AND INSTR(allocate_purpose,#{queryForm.allocatePurpose})
+            </if>
+
+            <if test="queryForm.allocateColor != null and queryForm.allocateColor != ''">
+                AND INSTR(allocate_color,#{queryForm.allocateColor})
+            </if>
+
+            <if test="queryForm.allocatePosition != null">
+                AND allocate_position = #{queryForm.allocatePosition}
+            </if>
+
+            <if test="queryForm.allocateSprinklerIsNew != null">
+                AND allocate_sprinkler_is_new = #{queryForm.allocateSprinklerIsNew}
+            </if>
+
+            <if test="queryForm.retWarehouseSprinklerSerial != null and queryForm.retWarehouseSprinklerSerial != ''">
+                AND INSTR(ret_warehouse_sprinkler_serial,#{queryForm.retWarehouseSprinklerSerial})
+            </if>
+
+            <if test="queryForm.retWarehouseSprinklerModel != null and queryForm.retWarehouseSprinklerModel != ''">
+                AND INSTR(ret_warehouse_sprinkler_model,#{queryForm.retWarehouseSprinklerModel})
+            </if>
+
+            <if test="queryForm.retWarehouseMachine != null and queryForm.retWarehouseMachine != ''">
+                AND INSTR(ret_warehouse_machine,#{queryForm.retWarehouseMachine})
+            </if>
+
+            <if test="queryForm.retWarehouseColor != null and queryForm.retWarehouseColor != ''">
+                AND INSTR(ret_warehouse_color,#{queryForm.retWarehouseColor})
+            </if>
+
+            <if test="queryForm.retWarehousePosition != null">
+                AND ret_warehouse_position = #{queryForm.retWarehousePosition}
+            </if>
+
+            <if test="queryForm.retWarehouseSprinklerIsNew != null">
+                AND ret_warehouse_sprinkler_is_new = #{queryForm.retWarehouseSprinklerIsNew}
+            </if>
+
+            <if test="queryForm.retWarehouseReason != null and queryForm.retWarehouseReason != ''">
+                AND INSTR(ret_warehouse_reason,#{queryForm.retWarehouseReason})
+            </if>
+
+            <if test="queryForm.note != null and queryForm.note != ''">
+                AND INSTR(note,#{queryForm.note})
+            </if>
+            <if test="queryForm.disabledFlag != null">
+                AND disabled_flag = #{queryForm.disabledFlag}
+            </if>
+        </where>
+        <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
+            ORDER BY create_time DESC
+        </if>
+    </select>
+
+    <select id="getDetail"
+            resultType="net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseVO">
+        SELECT arw.*
+        FROM t_allocation_ret_warehouse arw
+        WHERE arw.record_id = #{recordId} AND arw.deleted_flag = #{deletedFlag}
+    </select>
+
+</mapper>

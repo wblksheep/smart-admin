@@ -1,13 +1,12 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form;
 
-import cn.idev.excel.annotation.ExcelIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class AllocationRetWarehouseRecordCreateForm {
+public class AllocationRetWarehouseRecordQueryForm {
 
     @Schema(description = "领用与返仓表单")
     private List<AllocationRetWarehouseCreateForm> allocationRetWarehouseCreateForm;
@@ -15,10 +14,6 @@ public class AllocationRetWarehouseRecordCreateForm {
     @Schema(description = "禁用状态")
     private Boolean disabledFlag;
 
-    @Schema(description = "创建人ID", hidden = true)
-    private Long createUserId;
-
-    @Schema(description = "创建人", hidden = true)
-    private String createUserName;
-
+    @Schema(description = "删除状态", hidden = true)
+    private Boolean deletedFlag;
 }

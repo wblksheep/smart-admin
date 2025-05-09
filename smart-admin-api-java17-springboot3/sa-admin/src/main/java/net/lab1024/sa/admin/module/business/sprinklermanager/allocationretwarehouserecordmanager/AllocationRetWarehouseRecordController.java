@@ -7,17 +7,21 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.constant.AdminSwaggerTagConst;
+import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordCreateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.AllocationRetWarehouseRecordService;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordCreateForm;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordQueryForm;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseRecordVO;
+import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseVO;
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
 import net.lab1024.sa.base.common.util.SmartRequestUtil;
 import net.lab1024.sa.base.module.support.operatelog.annotation.OperateLog;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 领用与返仓记录
@@ -40,11 +44,29 @@ public class AllocationRetWarehouseRecordController {
             @RequestBody @Valid AllocationRetWarehouseRecordCreateForm createVO
     ) {
         RequestUser requestUser = SmartRequestUtil.getRequestUser();
+        Long userId = requestUser.getUserId();
+        String userName = requestUser.getUserName();
+        createVO.setCreateUserId(userId);
+        createVO.setCreateUserName(userName);
         createVO.getAllocationRetWarehouseCreateForm().stream().forEach(form->{
-            form.setCreateUserId(requestUser.getUserId());
-            form.setCreateUserName(requestUser.getUserName());
+            form.setCreateUserId(userId);
+            form.setCreateUserName(userName);
         });
         return allocationRetWarehouseRecordService.createAllocationRetWarehouseRecord(createVO);
+    }
+
+    @Operation(summary = "分页查询领用与返仓记录模块 @author 芦苇")
+    @PostMapping("/sprinklermanager/allocationretwarehouserecord/page/query")
+    @SaCheckPermission("sprinklermanager:allocationretwarehouserecord:query")
+    public ResponseDTO<PageResult<AllocationRetWarehouseVO>> queryByPage(@RequestBody @Valid AllocationRetWarehouseQueryForm queryForm) {
+        return allocationRetWarehouseRecordService.queryByPage(queryForm);
+    }
+
+    @Operation(summary = "查询领用与返仓记录详情 @author 芦苇")
+    @GetMapping("/sprinklermanager/allocationretwarehouserecord/get/{recordId}")
+    @SaCheckPermission("sprinklermanager:allocationretwarehouserecord:detail")
+    public ResponseDTO<List<AllocationRetWarehouseVO>> getDetail(@PathVariable Long recordId) {
+        return ResponseDTO.ok(allocationRetWarehouseRecordService.getDetail(recordId));
     }
 
 }

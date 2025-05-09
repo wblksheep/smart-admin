@@ -22,6 +22,9 @@ public class AllocationRetWarehouseEntity {
     @TableId(type = IdType.AUTO)
     private Long allocationRetWarehouseId;
 
+    /**
+     * 领用与返仓信息记录ID
+     */
     private Long recordId;
 
     /**

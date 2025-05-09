@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 public interface MaintainingRecordRepository extends IService<MaintainingRecordEntity> {
-    List<MaintainingRecordVO> getListByQueryPage(Page<?> page,@Param("queryForm") MaintainingRecordQueryForm queryForm);
+    List<MaintainingRecordVO> getListByQueryPage(Page<?> page, @Param("queryForm") MaintainingRecordQueryForm queryForm);
 
     MaintainingRecordVO getDetail(@Param("recordId") Long recordId, @Param("deletedFlag") Boolean deletedFlag);
 }

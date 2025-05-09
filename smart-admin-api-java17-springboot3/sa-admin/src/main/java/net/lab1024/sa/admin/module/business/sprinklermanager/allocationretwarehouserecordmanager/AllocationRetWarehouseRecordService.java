@@ -10,10 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.entity.AllocationRetWarehouseEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.entity.AllocationRetWarehouseRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseCreateForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordCreateForm;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordQueryForm;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseRecordVO;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.repository.AllocationRetWarehouseRecordRepository;
+import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.repository.AllocationRetWarehouseRecordRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.repository.AllocationRetWarehouseRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
@@ -70,10 +72,10 @@ public class AllocationRetWarehouseRecordService {
                 .collect(Collectors.toMap(SprinklerEntity::getSprinklerSerial, Function.identity()));
 
         // 1.3. 有效性校验
-        if (serialsToCheck.size() > sprinklerMap.size()){
+        if (serialsToCheck.size() > sprinklerMap.size()) {
             Set<String> missingSerials = new HashSet<>(serialsToCheck);
             missingSerials.removeAll(sprinklerMap.keySet());
-            return ResponseDTO.userErrorParam("领用喷头不存在:"+String.join(",", missingSerials));
+            return ResponseDTO.userErrorParam("领用喷头不存在:" + String.join(",", missingSerials));
         }
 
         // 2.1. 提取需要校验的返仓喷头序列号
@@ -86,10 +88,10 @@ public class AllocationRetWarehouseRecordService {
                 .stream()
                 .collect(Collectors.toMap(SprinklerEntity::getSprinklerSerial, Function.identity()));
         // 2.3. 有效性校验
-        if(retWarehouseSerialsToCheck.size() > retWarehouseSprinklerMap.size()){
+        if (retWarehouseSerialsToCheck.size() > retWarehouseSprinklerMap.size()) {
             Set<String> missingSerials = new HashSet<>(retWarehouseSerialsToCheck);
             missingSerials.removeAll(retWarehouseSprinklerMap.keySet());
-            return ResponseDTO.userErrorParam("返仓喷头不存在:"+String.join(",", missingSerials));
+            return ResponseDTO.userErrorParam("返仓喷头不存在:" + String.join(",", missingSerials));
         }
         RequestUser requestUser = SmartRequestUtil.getRequestUser();
 
@@ -132,9 +134,28 @@ public class AllocationRetWarehouseRecordService {
 
         return entity;
     }
+    /**
+     * 分页查询领用与返仓模块
+     */
+    public ResponseDTO<PageResult<AllocationRetWarehouseVO>> queryByPage(AllocationRetWarehouseQueryForm queryForm) {
+        queryForm.setDeletedFlag(Boolean.FALSE);
+        Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
+        List<AllocationRetWarehouseVO> allocationRetWarehouseList = allocationRetWarehouseRepository.getListByQueryPage(page, queryForm);
+
+        PageResult<AllocationRetWarehouseVO> pageResult = SmartPageUtil.convert2PageResult(page, allocationRetWarehouseList);
+        return ResponseDTO.ok(pageResult);
+    }
+    /**
+     * 查询领用与返仓记录详情
+     *
+     */
+    public List<AllocationRetWarehouseVO> getDetail(Long recordId) {
+        return allocationRetWarehouseRepository.getDetail(recordId, Boolean.FALSE);
+    }
+
 
 //    /**
-//     * 分页查询领用与返仓记录模块
+//     * 分页查询领用与返仓模块
 //     */
 //    public ResponseDTO<PageResult<AllocationRetWarehouseRecordVO>> queryByPage(AllocationRetWarehouseRecordQueryForm queryForm) {
 //        queryForm.setDeletedFlag(Boolean.FALSE);
