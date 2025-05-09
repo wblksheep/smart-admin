@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import net.lab1024.sa.base.module.support.datatracer.annoation.DataTracerFieldLabel;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -15,19 +14,20 @@ import java.time.LocalDateTime;
  * @Author 海印: 芦苇
  */
 @Data
-@TableName("t_allocation_ret_warehouse_record")
-public class AllocationRetWarehouseRecordEntity {
+@TableName("t_allocation_ret_warehouse")
+public class AllocationRetWarehouseEntity {
     /**
-     * 领用与返仓信息记录ID
+     * 领用与返仓信息ID
      */
     @TableId(type = IdType.AUTO)
-    private Long recordId;
+    private Long allocationRetWarehouseId;
 
+    private Long recordId;
 
     /**
      * 领用喷头ID
      */
-    private Long allocationSprinklerId;
+    private Long allocateSprinklerId;
 
     /**
      * 领用喷头序列号
@@ -86,7 +86,7 @@ public class AllocationRetWarehouseRecordEntity {
     @DataTracerFieldLabel("返仓机台")
     private String retWarehouseMachine;
     /**
-     * 返仓机台
+     * 返仓颜色
      */
     @DataTracerFieldLabel("返仓颜色")
     private String retWarehouseColor;
@@ -105,6 +105,12 @@ public class AllocationRetWarehouseRecordEntity {
      */
     @DataTracerFieldLabel("返仓原因")
     private String retWarehouseReason;
+
+    /**
+     * 备注
+     */
+    @DataTracerFieldLabel("备注")
+    private String note;
 
 
     /**
