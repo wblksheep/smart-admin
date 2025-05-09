@@ -36,7 +36,7 @@ public class AllocationRetWarehouseCreateForm {
     private Byte allocatePosition;
 
     @Schema(description = "领用喷头类型")
-    private Boolean allocateIsNew;
+    private Boolean allocateSprinklerIsNew;
 
     @Schema(description = "返仓喷头序列号")
     @Length(max = 255, message = "领用喷头序列号最多255字符")
@@ -62,6 +62,9 @@ public class AllocationRetWarehouseCreateForm {
     @Min(0)
     @Max(40)
     private Byte retWarehousePosition;
+
+    @Schema(description = "返仓喷头类型")
+    private Boolean retWarehouseSprinklerIsNew;
 
     @Schema(description = "返仓原因")
     @Length(max = 255, message = "返仓原因最多255字符")

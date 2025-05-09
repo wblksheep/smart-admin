@@ -10,8 +10,8 @@ import net.lab1024.sa.admin.constant.AdminSwaggerTagConst;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordCreateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.AllocationRetWarehouseRecordService;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordCreateForm;
-import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordQueryForm;
-import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseRecordVO;
+//import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordQueryForm;
+//import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseRecordVO;
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
@@ -33,13 +33,6 @@ public class AllocationRetWarehouseRecordController {
     @Resource
     private AllocationRetWarehouseRecordService allocationRetWarehouseRecordService;
 
-    @Operation(summary = "分页查询领用与返仓记录模块 @author 芦苇")
-    @PostMapping("/sprinklermanager/allocationretwarehouserecord/page/query")
-    @SaCheckPermission("sprinklermanager:allocationretwarehouserecord:query")
-    public ResponseDTO<PageResult<AllocationRetWarehouseRecordVO>> queryByPage(@RequestBody @Valid AllocationRetWarehouseRecordQueryForm queryForm) {
-        return allocationRetWarehouseRecordService.queryByPage(queryForm);
-    }
-
     @Operation(summary = "新建领用与返仓记录 @author 芦苇")
     @PostMapping("/sprinklermanager/allocationretwarehouserecord/create")
     @SaCheckPermission("sprinklermanager:allocationretwarehouserecord:add")
@@ -54,10 +47,4 @@ public class AllocationRetWarehouseRecordController {
         return allocationRetWarehouseRecordService.createAllocationRetWarehouseRecord(createVO);
     }
 
-    @Operation(summary = "查询领用与返仓记录详情 @author 芦苇")
-    @GetMapping("/sprinklermanager/allocationretwarehouserecord/get/{recordId}")
-    @SaCheckPermission("sprinklermanager:allocationretwarehouserecord:detail")
-    public ResponseDTO<AllocationRetWarehouseRecordVO> getDetail(@PathVariable Long recordId) {
-        return ResponseDTO.ok(allocationRetWarehouseRecordService.getDetail(recordId));
-    }
 }

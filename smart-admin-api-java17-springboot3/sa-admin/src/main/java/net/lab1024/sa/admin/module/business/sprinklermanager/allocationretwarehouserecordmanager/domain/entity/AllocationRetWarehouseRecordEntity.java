@@ -10,70 +10,102 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * 维修信息记录表
+ * 领用与返仓信息记录表
  *
  * @Author 海印: 芦苇
  */
 @Data
-@TableName("t_maintaining_record")
+@TableName("t_allocation_ret_warehouse_record")
 public class AllocationRetWarehouseRecordEntity {
     /**
-     * 维修信息记录ID
+     * 领用与返仓信息记录ID
      */
     @TableId(type = IdType.AUTO)
     private Long recordId;
 
-    /**
-     * 返修日期
-     */
-    @DataTracerFieldLabel("返修日期")
-    private LocalDate retMaintainenceDate;
 
     /**
-     * 喷头ID
+     * 领用喷头ID
      */
-    private Long sprinklerId;
+    private Long allocationSprinklerId;
 
     /**
-     * 喷头序列号
+     * 领用喷头序列号
      */
-    @DataTracerFieldLabel("喷头序列号")
-    private String sprinklerSerial;
+    @DataTracerFieldLabel("领用喷头序列号")
+    private String allocateSprinklerSerial;
 
     /**
-     * 返修原因
+     * 领用喷头型号
      */
-    @DataTracerFieldLabel("返修原因")
-    private String retMaintainenceReason;
+    @DataTracerFieldLabel("领用喷头型号")
+    private String allocateSprinklerModel;
 
     /**
-     * 具体原因
+     * 领用用途
      */
-    @DataTracerFieldLabel("具体原因")
-    private String realReason;
+    @DataTracerFieldLabel("领用用途")
+    private String allocatePurpose;
 
     /**
-     * 返修客户
+     * 领用颜色
      */
-    @DataTracerFieldLabel("返修客户")
-    private String customer;
+    @DataTracerFieldLabel("领用颜色")
+    private String allocateColor;
 
     /**
-     * 返仓日期
+     * 领用位置
      */
-    @DataTracerFieldLabel("返仓日期")
-    private LocalDate retWarehouseDate;
+    @DataTracerFieldLabel("领用位置")
+    private Byte allocatePosition;
 
     /**
-     * 返仓类型
+     * 领用喷头类型
      */
-    @DataTracerFieldLabel("返仓类型")
-    private String retWarehouseType;
+    @DataTracerFieldLabel("领用喷头类型")
+    private Boolean allocateSprinklerIsNew;
+
     /**
-     * 领用是否有限制
+     * 返仓喷头ID
      */
-    @DataTracerFieldLabel("领用是否有限制")
-    private String allocateLimitation;
+    private Long retWarehouseSprinklerId;
+
+    /**
+     * 返仓喷头序列号
+     */
+    @DataTracerFieldLabel("返仓喷头序列号")
+    private String retWarehouseSprinklerSerial;
+    /**
+     * 返仓喷头型号
+     */
+    @DataTracerFieldLabel("返仓喷头型号")
+    private String retWarehouseSprinklerModel;
+    /**
+     * 返仓机台
+     */
+    @DataTracerFieldLabel("返仓机台")
+    private String retWarehouseMachine;
+    /**
+     * 返仓机台
+     */
+    @DataTracerFieldLabel("返仓颜色")
+    private String retWarehouseColor;
+    /**
+     * 返仓位置
+     */
+    @DataTracerFieldLabel("返仓位置")
+    private Byte retWarehousePosition;
+    /**
+     * 返仓喷头类型
+     */
+    @DataTracerFieldLabel("返仓喷头类型")
+    private Boolean retWarehouseSprinklerIsNew;
+    /**
+     * 返仓原因
+     */
+    @DataTracerFieldLabel("返仓原因")
+    private String retWarehouseReason;
+
 
     /**
      * 禁用状态
