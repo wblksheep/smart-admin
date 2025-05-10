@@ -1,5 +1,6 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.repository.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.dao.AllocationRetWarehouseDao;
@@ -21,5 +22,12 @@ public class AllocationRetWarehouseRepositoryImpl extends ServiceImpl<Allocation
     @Override
     public List<AllocationRetWarehouseVO> getDetail(Long recordId, Boolean deletedFlag) {
         return this.getBaseMapper().getDetail(recordId, deletedFlag);
+    }
+
+    @Override
+    public List<AllocationRetWarehouseEntity> getListByRecordId(Long recordId) {
+        LambdaQueryWrapper<AllocationRetWarehouseEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(AllocationRetWarehouseEntity::getRecordId, recordId);
+        return this.list(lqw);
     }
 }

@@ -7,18 +7,9 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class AllocationRetWarehouseRecordCreateForm {
+public class AllocationRetWarehouseRecordCreateForm extends AllocationRetWarehouseRecordBaseForm{
 
     @Schema(description = "领用与返仓表单")
     private List<AllocationRetWarehouseCreateForm> allocationRetWarehouseCreateForm;
-
-    @Schema(description = "禁用状态")
-    private Boolean disabledFlag;
-
-    @Schema(description = "创建人ID", hidden = true)
-    private Long createUserId;
-
-    @Schema(description = "创建人", hidden = true)
-    private String createUserName;
 
 }

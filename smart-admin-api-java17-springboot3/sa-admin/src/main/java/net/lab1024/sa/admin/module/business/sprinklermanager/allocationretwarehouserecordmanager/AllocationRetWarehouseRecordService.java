@@ -7,11 +7,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import net.lab1024.sa.admin.module.business.oa.enterprise.domain.entity.EnterpriseEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.entity.AllocationRetWarehouseEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.entity.AllocationRetWarehouseRecordEntity;
-import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseCreateForm;
-import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseQueryForm;
-import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordCreateForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.*;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordQueryForm;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseRecordVO;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.repository.AllocationRetWarehouseRecordRepository;
@@ -153,23 +152,70 @@ public class AllocationRetWarehouseRecordService {
         return allocationRetWarehouseRepository.getDetail(recordId, Boolean.FALSE);
     }
 
+    /**
+     * 编辑领用与返仓记录
+     *
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseDTO<String> updateAllocationRetWarehouseRecord(AllocationRetWarehouseRecordUpdateForm updateVO) {
+        Long recordId = updateVO.getRecordId();
+        // 校验领用与返仓记录是否存在
+        AllocationRetWarehouseRecordEntity recordDetail = allocationRetWarehouseRecordRepository.getById(recordId);
+        if (Objects.isNull(recordDetail) || recordDetail.getDeletedFlag()) {
+            return ResponseDTO.userErrorParam("领用与返仓记录不存在");
+        }
+        // 数据编辑
+        AllocationRetWarehouseRecordEntity updateEntity = SmartBeanUtil.copy(recordDetail, AllocationRetWarehouseRecordEntity.class);
+        SmartBeanUtil.copyProperties(updateVO, updateEntity);
+        allocationRetWarehouseRecordRepository.updateById(updateEntity);
+        List<AllocationRetWarehouseUpdateForm> updateVOs =  updateVO.getAllocationRetWarehouseUpdateForm();
+        for (AllocationRetWarehouseUpdateForm form : updateVOs) {
+            Long allocationRetWarehouseId = form.getAllocationRetWarehouseId();
+            // 校验记录是否存在
+            AllocationRetWarehouseEntity entityDetail = allocationRetWarehouseRepository.getById(allocationRetWarehouseId);
+            if (Objects.isNull(entityDetail) || entityDetail.getDeletedFlag()) {
+                return ResponseDTO.userErrorParam("领用与返仓详情不存在");
+            }
+            // 数据编辑
+            AllocationRetWarehouseEntity updateEntityEntity = SmartBeanUtil.copy(entityDetail, AllocationRetWarehouseEntity.class);
+            SmartBeanUtil.copyProperties(form, updateEntityEntity);
+            allocationRetWarehouseRepository.updateById(updateEntityEntity);
+        }
+        return ResponseDTO.ok();
+    }
 
-//    /**
-//     * 分页查询领用与返仓模块
-//     */
-//    public ResponseDTO<PageResult<AllocationRetWarehouseRecordVO>> queryByPage(AllocationRetWarehouseRecordQueryForm queryForm) {
-//        queryForm.setDeletedFlag(Boolean.FALSE);
-//        Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
-//        List<AllocationRetWarehouseRecordVO> allocationRetWarehouseRecordList = allocationRetWarehouseRecordRepository.getListByQueryPage(page, queryForm);
-//
-//        PageResult<AllocationRetWarehouseRecordVO> pageResult = SmartPageUtil.convert2PageResult(page, allocationRetWarehouseRecordList);
-//        return ResponseDTO.ok(pageResult);
-//    }
+    public ResponseDTO<String> approveAllocationRetWarehouseRecord(AllocationRetWarehouseRecordApproveForm approveVO) {
+        Long recordId = approveVO.getRecordId();
+        List<AllocationRetWarehouseEntity> approvedEntities = allocationRetWarehouseRepository.getListByRecordId(recordId);
+        for(AllocationRetWarehouseEntity approvedEntity : approvedEntities) {
+            Long allocateSprinklerId = approvedEntity.getAllocateSprinklerId();
+            if(allocateSprinklerId != null) {
+                return allocateSprinkler(allocateSprinklerId, approvedEntity);
+            }
+            Long retWarehouseSprinklerId = approvedEntity.getRetWarehouseSprinklerId();
+            if(retWarehouseSprinklerId!=null){
+                // 校验喷头是否存在
+                SprinklerEntity sprinklerDetail = sprinklerRepository.getById(retWarehouseSprinklerId);
+                if (Objects.isNull(sprinklerDetail) || sprinklerDetail.getDeletedFlag()) {
+                    return ResponseDTO.userErrorParam("返仓喷头不存在："+approvedEntity.getAllocateSprinklerSerial());
+                }
+            }
 
-//    /**
-//     * 查询领用与返仓记录详情
-//     */
-//    public AllocationRetWarehouseRecordVO getDetail(Long recordId) {
-//        return allocationRetWarehouseRecordRepository.getDetail(recordId, Boolean.FALSE);
-//    }
+        }
+        return ResponseDTO.ok();
+    }
+
+    private ResponseDTO<String> allocateSprinkler(Long allocateSprinklerId, AllocationRetWarehouseEntity approvedEntity){
+        SprinklerEntity sprinklerDetail = sprinklerRepository.getById(allocateSprinklerId);
+        if (Objects.isNull(sprinklerDetail) || sprinklerDetail.getDeletedFlag()) {
+            return ResponseDTO.userErrorParam("领用喷头不存在："+approvedEntity.getAllocateSprinklerSerial());
+        }
+        // 数据编辑
+        AllocationRetWarehouseRecordEntity updateEntity = SmartBeanUtil.copy(sprinklerDetail, AllocationRetWarehouseRecordEntity.class);
+//        SmartBeanUtil.copyProperties(updateVO, updateEntity);
+//        allocationRetWarehouseRecordRepository.updateById(updateEntity);
+        return ResponseDTO.ok();
+    }
+
+
 }

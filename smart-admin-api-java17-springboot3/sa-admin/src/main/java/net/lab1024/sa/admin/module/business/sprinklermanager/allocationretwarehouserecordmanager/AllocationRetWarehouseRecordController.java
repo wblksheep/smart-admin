@@ -7,8 +7,8 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.constant.AdminSwaggerTagConst;
-import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseQueryForm;
-import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordCreateForm;
+import net.lab1024.sa.admin.module.business.oa.enterprise.domain.form.EnterpriseUpdateForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.*;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.AllocationRetWarehouseRecordService;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordCreateForm;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordQueryForm;
@@ -67,6 +67,20 @@ public class AllocationRetWarehouseRecordController {
     @SaCheckPermission("sprinklermanager:allocationretwarehouserecord:detail")
     public ResponseDTO<List<AllocationRetWarehouseVO>> getDetail(@PathVariable Long recordId) {
         return ResponseDTO.ok(allocationRetWarehouseRecordService.getDetail(recordId));
+    }
+
+    @Operation(summary = "编辑领用与返仓记录 @author 芦苇")
+    @PostMapping("/sprinklermanager/allocationretwarehouserecord/update")
+    @SaCheckPermission("sprinklermanager:allocationretwarehouserecord:update")
+    public ResponseDTO<String> updateAllocationRetWarehouseRecord(@RequestBody @Valid AllocationRetWarehouseRecordUpdateForm updateVO) {
+        return allocationRetWarehouseRecordService.updateAllocationRetWarehouseRecord(updateVO);
+    }
+
+    @Operation(summary = "领用与返仓记录通过与否 @author 芦苇")
+    @PostMapping("/sprinklermanager/allocationretwarehouserecord/approve")
+    @SaCheckPermission("sprinklermanager:allocationretwarehouserecord:approve")
+    public ResponseDTO<String> updateAllocationRetWarehouseRecord(@RequestBody @Valid AllocationRetWarehouseRecordApproveForm approveVO) {
+        return allocationRetWarehouseRecordService.approveAllocationRetWarehouseRecord(approveVO);
     }
 
 }

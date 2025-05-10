@@ -25,6 +25,9 @@ public class AllocationRetWarehouseVO {
     @Schema(description = "领用喷头序列号")
     private String allocateSprinklerSerial;
 
+    @Schema(description = "领用喷头型号")
+    private String allocateSprinklerModel;
+
     @Schema(description = "领用用途")
     private String allocatePurpose;
 
