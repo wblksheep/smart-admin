@@ -63,7 +63,7 @@ public enum RepositorySprinklerTypeEnum implements BaseEnum {
     /**
      * 根据状态值获取枚举（优化点：缓存加速/Optional安全返回）
      */
-    public static Optional<RepositorySprinklerTypeEnum> fromStatus(int status) {
+    public static Optional<RepositorySprinklerTypeEnum> fromStatus(byte status) {
         return Optional.ofNullable(STATUS_MAP.get(status));
     }
 }

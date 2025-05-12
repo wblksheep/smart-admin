@@ -114,7 +114,7 @@ public class SprinklerService {
         // 1. 获取喷头实体
         SprinklerEntity sprinklerEntity = sprinklerRepository.getById(sprinklerId);
         // 2. 根据状态值获取枚举类型（核心优化点）
-        RepositorySprinklerTypeEnum type = RepositorySprinklerTypeEnum.fromStatus(sprinklerEntity.getStatus())
+        RepositorySprinklerTypeEnum type = RepositorySprinklerTypeEnum.fromStatus(sprinklerEntity.getStatus().byteValue())
                 .orElseThrow(() -> new IllegalArgumentException("无效的状态值：" + sprinklerEntity.getStatus()));
         // 3. 类型安全获取仓库实现类
         BaseServiceImpl<?, ?> repository = sprinklerRepositoryFactory.getRepository(type);
