@@ -17,7 +17,9 @@ import net.lab1024.sa.base.common.util.SmartBeanUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -76,15 +78,22 @@ public class RmaSprinklerDataProcessor implements DataProcessor<RmaSprinklerCrea
                 })
                 .toList();
 
+        // 5.3 过滤重复数据（使用Map快速查找优化性能）
+        List<RmaSprinklerCreateForm> validData = filteredForms.stream()
+                .filter(distinctByKey(RmaSprinklerCreateForm::getSprinklerSerial))
+                .collect(Collectors.toList());
+
+
+
         // 6. 实体转换（使用Bean拷贝工具优化代码简洁性）
-        List<RmaSprinklerEntity> entities = filteredForms.stream()
+        List<RmaSprinklerEntity> entities = validData.stream()
                 .map(form -> convertToWarehouseEntity(form, mainTableMap))
                 .filter(entity -> entity.getSprinklerId() != null)
                 .toList();
 
         // 7. 准备主表更新数据（状态更新优化）
         List<SprinklerEntity> mainTableUpdates = new ArrayList<>();
-        filteredForms.forEach(form -> {
+        validData.forEach(form -> {
             SprinklerEntity mainRecord = mainTableMap.get(form.getSprinklerSerial());
             if (mainRecord.getStatus() != RepositorySprinklerTypeEnum.RMA_REPOSITORY.getValue().byteValue()) {
                 mainRecord.setStatus(RepositorySprinklerTypeEnum.RMA_REPOSITORY.getValue().byteValue());
@@ -112,6 +121,12 @@ public class RmaSprinklerDataProcessor implements DataProcessor<RmaSprinklerCrea
 
         // 9. 返回处理结果（结果信息优化）
         return ResponseDTO.ok("处理成功，无效数据：" + invalidSerials);
+    }
+
+    // 辅助方法
+    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
     }
 
     /**

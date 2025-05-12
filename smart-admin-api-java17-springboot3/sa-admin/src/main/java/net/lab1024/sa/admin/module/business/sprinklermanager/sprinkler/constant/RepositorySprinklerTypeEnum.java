@@ -19,31 +19,31 @@ public enum RepositorySprinklerTypeEnum implements BaseEnum {
     /**
      * 可用仓
      */
-    USABLE_REPOSITORY(0, "usable"),
+    USABLE_REPOSITORY((byte)0, "usable"),
 
     /**
      * 机台
      */
-    MACHINE_REPOSITORY(1, "machine"),
+    MACHINE_REPOSITORY((byte)1, "machine"),
 
     /**
      * 维修仓
      */
-    MAINTAINING_REPOSITORY(2, "maintaining"),
+    MAINTAINING_REPOSITORY((byte)2, "maintaining"),
 
     /**
      * 破损仓
      */
-    DAMAGED_REPOSITORY(3, "damaged"),
+    DAMAGED_REPOSITORY((byte)3, "damaged"),
 
     /**
      * RMA
      */
-    RMA_REPOSITORY(4, "rma"),
+    RMA_REPOSITORY((byte)4, "rma"),
     ;
 
     // 状态值映射缓存（优化查询性能）
-    private static final Map<Integer, RepositorySprinklerTypeEnum> STATUS_MAP = new HashMap<>();
+    private static final Map<Byte, RepositorySprinklerTypeEnum> STATUS_MAP = new HashMap<>();
 
     static {
         for (RepositorySprinklerTypeEnum type : values()) {
@@ -51,10 +51,10 @@ public enum RepositorySprinklerTypeEnum implements BaseEnum {
         }
     }
 
-    private Integer value;
+    private Byte value;
     private String desc;
 
-    RepositorySprinklerTypeEnum(Integer value, String desc) {
+    RepositorySprinklerTypeEnum(Byte value, String desc) {
         this.value = value;
         this.desc = desc;
     }

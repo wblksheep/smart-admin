@@ -138,6 +138,10 @@ public class SprinklerService {
     @Resource
     private DataProcessorFactory processorFactory;
 
+    /**
+     * 导入各仓喷头模块
+     *
+     */
     public ResponseDTO<String> batchRepositorySprinklerCreate(@Valid MultipartFile file, RequestUser requestUser, @Valid Integer type) {
         Class<? extends BaseCreateForm> createVOClazz = createFormFactory.getSprinklerClass(type);
         List<? extends BaseCreateForm> list = ExcelUtil
@@ -151,7 +155,10 @@ public class SprinklerService {
         return ResponseDTO.ok();
     }
 
-
+    /**
+     * 导入全部喷头模块
+     *
+     */
     public ResponseDTO<String> batchSprinklerCreate(@Valid MultipartFile file, RequestUser requestUser) {
         //使用收集器一次性完成字段设置，避免冗余操作
         List<SprinklerCreateForm> createVOs = ExcelUtil.importExcelByClass(file, SprinklerCreateForm.class)

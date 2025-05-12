@@ -11,6 +11,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwareho
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class AllocationRetWarehouseRepositoryImpl extends ServiceImpl<AllocationRetWarehouseDao, AllocationRetWarehouseEntity> implements AllocationRetWarehouseRepository {
@@ -28,6 +29,13 @@ public class AllocationRetWarehouseRepositoryImpl extends ServiceImpl<Allocation
     public List<AllocationRetWarehouseEntity> getListByRecordId(Long recordId) {
         LambdaQueryWrapper<AllocationRetWarehouseEntity> lqw = new LambdaQueryWrapper<>();
         lqw.eq(AllocationRetWarehouseEntity::getRecordId, recordId);
+        return this.list(lqw);
+    }
+
+    @Override
+    public List<AllocationRetWarehouseEntity> getListByAllocationRetWarehouseId(Set<Long> allocationRetWarehouseIds) {
+        LambdaQueryWrapper<AllocationRetWarehouseEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.in(AllocationRetWarehouseEntity::getAllocationRetWarehouseId, allocationRetWarehouseIds);
         return this.list(lqw);
     }
 }

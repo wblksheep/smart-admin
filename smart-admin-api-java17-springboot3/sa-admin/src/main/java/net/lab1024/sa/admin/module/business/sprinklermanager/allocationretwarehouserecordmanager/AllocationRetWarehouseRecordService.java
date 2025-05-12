@@ -8,6 +8,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.module.business.oa.enterprise.domain.entity.EnterpriseEntity;
+import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.constant.AllocationRetWarehouseTypeEnum;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.entity.AllocationRetWarehouseEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.entity.AllocationRetWarehouseRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.*;
@@ -17,6 +18,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwareho
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.repository.AllocationRetWarehouseRecordRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.repository.AllocationRetWarehouseRepository;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeEnum;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerCreateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
@@ -98,6 +100,7 @@ public class AllocationRetWarehouseRecordService {
         AllocationRetWarehouseRecordEntity recordEntity = new AllocationRetWarehouseRecordEntity();
         recordEntity.setCreateUserId(requestUser.getUserId());
         recordEntity.setCreateUserName(requestUser.getUserName());
+        recordEntity.setStatus(AllocationRetWarehouseTypeEnum.UNDER_REVIEW.getValue());
         allocationRetWarehouseRecordRepository.save(recordEntity);
 
         // 使用 Stream API 的 map 操作进行数据转换，并通过 collect 直接生成列表
@@ -133,6 +136,8 @@ public class AllocationRetWarehouseRecordService {
 
         return entity;
     }
+
+
     /**
      * 分页查询领用与返仓模块
      */
@@ -144,9 +149,9 @@ public class AllocationRetWarehouseRecordService {
         PageResult<AllocationRetWarehouseVO> pageResult = SmartPageUtil.convert2PageResult(page, allocationRetWarehouseList);
         return ResponseDTO.ok(pageResult);
     }
+
     /**
      * 查询领用与返仓记录详情
-     *
      */
     public List<AllocationRetWarehouseVO> getDetail(Long recordId) {
         return allocationRetWarehouseRepository.getDetail(recordId, Boolean.FALSE);
@@ -154,7 +159,6 @@ public class AllocationRetWarehouseRecordService {
 
     /**
      * 编辑领用与返仓记录
-     *
      */
     @Transactional(rollbackFor = Exception.class)
     public ResponseDTO<String> updateAllocationRetWarehouseRecord(AllocationRetWarehouseRecordUpdateForm updateVO) {
@@ -164,58 +168,110 @@ public class AllocationRetWarehouseRecordService {
         if (Objects.isNull(recordDetail) || recordDetail.getDeletedFlag()) {
             return ResponseDTO.userErrorParam("领用与返仓记录不存在");
         }
+        List<AllocationRetWarehouseUpdateForm> updateVOs = updateVO.getAllocationRetWarehouseUpdateForm();
+        // 0.1. 提取需要校验的领用与返仓信息ID
+        Set<Long> idsToCheck = updateVOs.stream()
+                .map(AllocationRetWarehouseUpdateForm::getAllocationRetWarehouseId)
+                .collect(Collectors.toSet());
+        // 0.2. 批量查询数据库（避免N+1问题）
+        Map<Long, AllocationRetWarehouseEntity> allocationRetWarehouseEntityMap = allocationRetWarehouseRepository.getListByAllocationRetWarehouseId(idsToCheck)
+                .stream()
+                .collect(Collectors.toMap(AllocationRetWarehouseEntity::getAllocationRetWarehouseId, Function.identity()));
+        // 0.3. 有效性校验
+        if (idsToCheck.size() > allocationRetWarehouseEntityMap.size()) {
+            Set<Long> missingIds = new HashSet<>(idsToCheck);
+            missingIds.removeAll(allocationRetWarehouseEntityMap.keySet());
+            return ResponseDTO.userErrorParam("领用与返仓信息不存在:" + missingIds);
+        }
+        // 1.1. 提取需要校验的领用喷头序列号
+        Set<String> serialsToCheck = updateVOs.stream()
+                .map(AllocationRetWarehouseUpdateForm::getAllocateSprinklerSerial)
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toSet());
+        // 1.2. 批量查询数据库（避免N+1问题）
+        Map<String, SprinklerEntity> sprinklerMap = sprinklerRepository.getListBySprinklerSerials(new ArrayList<>(serialsToCheck))
+                .stream()
+                .collect(Collectors.toMap(SprinklerEntity::getSprinklerSerial, Function.identity()));
+
+        // 1.3. 有效性校验
+        if (serialsToCheck.size() > sprinklerMap.size()) {
+            Set<String> missingSerials = new HashSet<>(serialsToCheck);
+            missingSerials.removeAll(sprinklerMap.keySet());
+            return ResponseDTO.userErrorParam("领用喷头不存在:" + String.join(",", missingSerials));
+        }
+
+        // 2.1. 提取需要校验的返仓喷头序列号
+        Set<String> retWarehouseSerialsToCheck = updateVOs.stream()
+                .map(AllocationRetWarehouseUpdateForm::getRetWarehouseSprinklerSerial)
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toSet());
+        // 2.2. 批量查询数据库（避免N+1问题）
+        Map<String, SprinklerEntity> retWarehouseSprinklerMap = sprinklerRepository.getListBySprinklerSerials(new ArrayList<>(retWarehouseSerialsToCheck))
+                .stream()
+                .collect(Collectors.toMap(SprinklerEntity::getSprinklerSerial, Function.identity()));
+        // 2.3. 有效性校验
+        if (retWarehouseSerialsToCheck.size() > retWarehouseSprinklerMap.size()) {
+            Set<String> missingSerials = new HashSet<>(retWarehouseSerialsToCheck);
+            missingSerials.removeAll(retWarehouseSprinklerMap.keySet());
+            return ResponseDTO.userErrorParam("返仓喷头不存在:" + String.join(",", missingSerials));
+        }
+
+        RequestUser requestUser = SmartRequestUtil.getRequestUser();
+
         // 数据编辑
         AllocationRetWarehouseRecordEntity updateEntity = SmartBeanUtil.copy(recordDetail, AllocationRetWarehouseRecordEntity.class);
         SmartBeanUtil.copyProperties(updateVO, updateEntity);
         allocationRetWarehouseRecordRepository.updateById(updateEntity);
-        List<AllocationRetWarehouseUpdateForm> updateVOs =  updateVO.getAllocationRetWarehouseUpdateForm();
-        for (AllocationRetWarehouseUpdateForm form : updateVOs) {
-            Long allocationRetWarehouseId = form.getAllocationRetWarehouseId();
-            // 校验记录是否存在
-            AllocationRetWarehouseEntity entityDetail = allocationRetWarehouseRepository.getById(allocationRetWarehouseId);
-            if (Objects.isNull(entityDetail) || entityDetail.getDeletedFlag()) {
-                return ResponseDTO.userErrorParam("领用与返仓详情不存在");
-            }
-            // 数据编辑
-            AllocationRetWarehouseEntity updateEntityEntity = SmartBeanUtil.copy(entityDetail, AllocationRetWarehouseEntity.class);
-            SmartBeanUtil.copyProperties(form, updateEntityEntity);
-            allocationRetWarehouseRepository.updateById(updateEntityEntity);
-        }
+
+        // 使用 Stream API 的 map 操作进行数据转换，并通过 collect 直接生成列表
+        List<AllocationRetWarehouseEntity> updateAllocationRetWarehouseEntities = updateVOs.stream()
+                .map(form -> convertToEntity(form, sprinklerMap, retWarehouseSprinklerMap))
+                .collect(Collectors.toList());
+
+        allocationRetWarehouseRepository.updateBatchById(updateAllocationRetWarehouseEntities);
         return ResponseDTO.ok();
+    }
+
+    // 转换逻辑封装为独立方法
+    private AllocationRetWarehouseEntity convertToEntity(AllocationRetWarehouseUpdateForm form,
+                                                         Map<String, SprinklerEntity> sprinklerMap, Map<String, SprinklerEntity> retWarehouseSprinklerMap) {
+        AllocationRetWarehouseEntity entity = SmartBeanUtil.copy(form, AllocationRetWarehouseEntity.class);
+        // 提前获取 serial 避免重复调用
+        String allocateSerial = entity.getAllocateSprinklerSerial();
+        SprinklerEntity allocateSprinkler = sprinklerMap.get(allocateSerial);
+        // 添加空值检查防止 NPE
+        if (allocateSprinkler == null) {
+            throw new IllegalStateException("Allocate Sprinkler not found for serial: " + allocateSerial);
+        }
+        entity.setAllocateSprinklerId(allocateSprinkler.getSprinklerId());
+
+        String retWarehouseSerial = entity.getRetWarehouseSprinklerSerial();
+        SprinklerEntity retWarehouseSprinkler = retWarehouseSprinklerMap.get(retWarehouseSerial);
+        if (retWarehouseSprinkler == null) {
+            throw new IllegalStateException("Ret Warehouse Sprinkler not found for serial: " + retWarehouseSerial);
+        }
+        entity.setRetWarehouseSprinklerId(retWarehouseSprinkler.getSprinklerId());
+
+        return entity;
     }
 
     public ResponseDTO<String> approveAllocationRetWarehouseRecord(AllocationRetWarehouseRecordApproveForm approveVO) {
         Long recordId = approveVO.getRecordId();
-        List<AllocationRetWarehouseEntity> approvedEntities = allocationRetWarehouseRepository.getListByRecordId(recordId);
-        for(AllocationRetWarehouseEntity approvedEntity : approvedEntities) {
-            Long allocateSprinklerId = approvedEntity.getAllocateSprinklerId();
-            if(allocateSprinklerId != null) {
-                return allocateSprinkler(allocateSprinklerId, approvedEntity);
-            }
-            Long retWarehouseSprinklerId = approvedEntity.getRetWarehouseSprinklerId();
-            if(retWarehouseSprinklerId!=null){
-                // 校验喷头是否存在
-                SprinklerEntity sprinklerDetail = sprinklerRepository.getById(retWarehouseSprinklerId);
-                if (Objects.isNull(sprinklerDetail) || sprinklerDetail.getDeletedFlag()) {
-                    return ResponseDTO.userErrorParam("返仓喷头不存在："+approvedEntity.getAllocateSprinklerSerial());
-                }
-            }
-
+        Boolean isApproved = approveVO.getIsApproved();
+        // 校验领用与返仓记录是否存在
+        AllocationRetWarehouseRecordEntity recordDetail = allocationRetWarehouseRecordRepository.getById(recordId);
+        if (Objects.isNull(recordDetail) || recordDetail.getDeletedFlag()) {
+            return ResponseDTO.userErrorParam("领用与返仓记录不存在");
         }
-        return ResponseDTO.ok();
+        if(isApproved){
+            recordDetail.setStatus(AllocationRetWarehouseTypeEnum.APPROVED.getValue());
+        }else {
+            recordDetail.setStatus(AllocationRetWarehouseTypeEnum.NOTAPPROVED.getValue());
+        }
+        allocationRetWarehouseRecordRepository.updateById(recordDetail);
+        return ResponseDTO.okMsg(isApproved?"审核通过":"审核不通过");
     }
 
-    private ResponseDTO<String> allocateSprinkler(Long allocateSprinklerId, AllocationRetWarehouseEntity approvedEntity){
-        SprinklerEntity sprinklerDetail = sprinklerRepository.getById(allocateSprinklerId);
-        if (Objects.isNull(sprinklerDetail) || sprinklerDetail.getDeletedFlag()) {
-            return ResponseDTO.userErrorParam("领用喷头不存在："+approvedEntity.getAllocateSprinklerSerial());
-        }
-        // 数据编辑
-        AllocationRetWarehouseRecordEntity updateEntity = SmartBeanUtil.copy(sprinklerDetail, AllocationRetWarehouseRecordEntity.class);
-//        SmartBeanUtil.copyProperties(updateVO, updateEntity);
-//        allocationRetWarehouseRecordRepository.updateById(updateEntity);
-        return ResponseDTO.ok();
-    }
 
 
 }

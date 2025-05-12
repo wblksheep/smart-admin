@@ -24,6 +24,12 @@ public class AllocationRetWarehouseRecordEntity {
     private Long recordId;
 
     /**
+     * 审核状态
+     */
+    @DataTracerFieldLabel("审核状态")
+    private Byte status;
+
+    /**
      * 禁用状态
      */
     @DataTracerFieldLabel("禁用状态")

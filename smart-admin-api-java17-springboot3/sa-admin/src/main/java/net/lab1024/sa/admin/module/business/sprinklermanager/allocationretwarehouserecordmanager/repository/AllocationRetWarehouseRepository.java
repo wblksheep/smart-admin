@@ -9,7 +9,10 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwareho
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseVO;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface AllocationRetWarehouseRepository extends IService<AllocationRetWarehouseEntity> {
     List<AllocationRetWarehouseVO> getListByQueryPage(Page<?> page, @Param("queryForm") AllocationRetWarehouseQueryForm queryForm);
@@ -17,4 +20,6 @@ public interface AllocationRetWarehouseRepository extends IService<AllocationRet
     List<AllocationRetWarehouseVO> getDetail(@Param("recordId") Long recordId, @Param("deletedFlag") Boolean deletedFlag);
 
     List<AllocationRetWarehouseEntity> getListByRecordId(@Param("recordId") Long recordId);
+
+    List<AllocationRetWarehouseEntity> getListByAllocationRetWarehouseId(@Param("allocationRetWarehouseIds") Set<Long> allocationRetWarehouseIds);
 }
