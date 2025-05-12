@@ -44,6 +44,11 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+/**
+ * 喷头管理-喷头服务
+ *
+ * @Author 海印：芦苇
+ */
 @Service
 @Slf4j
 public class SprinklerService {

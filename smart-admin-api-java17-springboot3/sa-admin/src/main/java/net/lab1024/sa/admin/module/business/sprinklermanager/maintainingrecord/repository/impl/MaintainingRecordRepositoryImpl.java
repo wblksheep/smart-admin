@@ -20,6 +20,11 @@ public class MaintainingRecordRepositoryImpl extends ServiceImpl<MaintainingReco
     }
 
     @Override
+    public List<MaintainingRecordVO> getListByQueryPage(MaintainingRecordQueryForm queryForm) {
+        return List.of();
+    }
+
+    @Override
     public MaintainingRecordVO getDetail(Long recordId, Boolean deletedFlag) {
         return this.getBaseMapper().getDetail(recordId, deletedFlag);
     }
