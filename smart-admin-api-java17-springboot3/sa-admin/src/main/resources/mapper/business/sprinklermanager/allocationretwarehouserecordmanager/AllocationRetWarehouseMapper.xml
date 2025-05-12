@@ -3,10 +3,12 @@
 <mapper namespace="net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.dao.AllocationRetWarehouseDao">
     <select id="queryPage"
             resultType="net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseVO">
-        SELECT t_allocation_ret_warehouse.*
+        SELECT t_allocation_ret_warehouse.*,
+        t_allocation_ret_warehouse_record.record_id, status
         FROM t_allocation_ret_warehouse
+        LEFT JOIN t_allocation_ret_warehouse_record on t_allocation_ret_warehouse.record_id = t_allocation_ret_warehouse_record.record_id
         <where>
-            deleted_flag = #{queryForm.deletedFlag}
+            t_allocation_ret_warehouse.deleted_flag = #{queryForm.deletedFlag}
             <if test="queryForm.allocateSprinklerSerial != null and queryForm.allocateSprinklerSerial != ''">
                 AND INSTR(allocate_sprinkler_serial,#{queryForm.allocateSprinklerSerial})
             </if>
@@ -62,12 +64,15 @@
             <if test="queryForm.note != null and queryForm.note != ''">
                 AND INSTR(note,#{queryForm.note})
             </if>
+            <if test="queryForm.status != null">
+                AND status = #{queryForm.status}
+            </if>
             <if test="queryForm.disabledFlag != null">
-                AND disabled_flag = #{queryForm.disabledFlag}
+                AND t_allocation_ret_warehouse.disabled_flag = #{queryForm.disabledFlag}
             </if>
         </where>
         <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
-            ORDER BY create_time DESC
+            ORDER BY t_allocation_ret_warehouse.create_time DESC
         </if>
     </select>
 

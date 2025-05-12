@@ -2,6 +2,7 @@ package net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwareh
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import net.lab1024.sa.base.module.support.datatracer.annoation.DataTracerFieldLabel;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -66,6 +67,9 @@ public class AllocationRetWarehouseVO {
 
     @Schema(description = "备注")
     private String note;
+
+    @Schema(description = "审核状态")
+    private Byte status;
 
     @Schema(description = "禁用状态")
     private Boolean disabledFlag;

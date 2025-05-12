@@ -52,6 +52,9 @@ public class AllocationRetWarehouseQueryForm extends PageParam {
     @Schema(description = "备注")
     private String note;
 
+    @Schema(description = "审核状态")
+    private Byte status;
+
     @Schema(description = "禁用状态")
     private Boolean disabledFlag;
 
