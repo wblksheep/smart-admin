@@ -139,9 +139,9 @@ public class StatisticService {
         WriteSheet writeSheet1 = FastExcel.writerSheet("每月统计").head(header).build();
         excelWriter.write(data, writeSheet1);
 
-        // 1. 暴力表头生成
+
         List<List<String>> header2 = Arrays.stream(MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERSVO)
-                .map(Arrays::asList)
+                .map(Collections::singletonList) // 单列转List
                 .collect(Collectors.toList());
 
 
@@ -201,19 +201,9 @@ public class StatisticService {
 
 
 
-        WriteSheet writeSheet2 = FastExcel.writerSheet("每月统计2").head(header2).build();
+        WriteSheet writeSheet2 = FastExcel.writerSheet("每月机台服务返仓喷头统计").head(header2).build();
         excelWriter.write(data1, writeSheet2);
 
-//        // 3. 暴力合并策略（合并前两列）
-//        FastExcel.write("月度报表.xlsx")
-//                .head(header)
-////                .registerWriteHandler(new LoopMergeStrategy(2, 0))  // 合并分类列
-////                .registerWriteHandler(new LoopMergeStrategy(2, 1))  // 合并统计日期列
-//                .sheet("每月统计")
-//                .doWrite(data)
-//        ;
-
-//        return resultList;
         excelWriter.close();
         return List.of();
     }
