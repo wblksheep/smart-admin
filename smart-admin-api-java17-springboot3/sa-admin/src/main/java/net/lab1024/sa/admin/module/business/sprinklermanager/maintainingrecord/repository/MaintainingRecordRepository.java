@@ -15,4 +15,7 @@ public interface MaintainingRecordRepository extends IService<MaintainingRecordE
     List<MaintainingRecordVO> getListByQueryPage(@Param("queryForm") MaintainingRecordQueryForm queryForm);
 
     MaintainingRecordVO getDetail(@Param("recordId") Long recordId, @Param("deletedFlag") Boolean deletedFlag);
+
+    List<MaintainingRecordEntity> getListByCondition();
+
 }

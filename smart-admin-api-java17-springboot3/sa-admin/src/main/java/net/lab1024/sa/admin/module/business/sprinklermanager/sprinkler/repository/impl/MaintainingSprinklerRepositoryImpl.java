@@ -1,7 +1,9 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.entity.MaintainingRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerType;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeEnum;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.dao.MachineSprinklerDao;
@@ -34,6 +36,14 @@ public class MaintainingSprinklerRepositoryImpl extends BaseServiceImpl<Maintain
     @Override
     public List<MaintainingSprinklerExcelVO> getListByQueryPage(SprinklerQueryForm queryForm, MaintainingSprinklerQueryForm joinForm) {
         return this.getBaseMapper().queryExcel(queryForm, joinForm);
+    }
+
+    @Override
+    public List<MaintainingSprinklerEntity> getListByCondition() {
+        LambdaQueryWrapper<MaintainingSprinklerEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.lt(MaintainingSprinklerEntity::getRetMaintainenceDate, "2025-04-01");
+        lqw.eq(MaintainingSprinklerEntity::getRetMaintainenceReason, "活性堵嘴歪针");
+        return this.list(lqw);
     }
 
     @Override

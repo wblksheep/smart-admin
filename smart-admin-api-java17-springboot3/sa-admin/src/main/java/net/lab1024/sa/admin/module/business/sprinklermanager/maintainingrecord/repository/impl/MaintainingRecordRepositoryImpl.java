@@ -1,5 +1,6 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.repository.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.dao.MaintainingRecordDao;
@@ -27,5 +28,14 @@ public class MaintainingRecordRepositoryImpl extends ServiceImpl<MaintainingReco
     @Override
     public MaintainingRecordVO getDetail(Long recordId, Boolean deletedFlag) {
         return this.getBaseMapper().getDetail(recordId, deletedFlag);
+    }
+
+    @Override
+    public List<MaintainingRecordEntity> getListByCondition() {
+        LambdaQueryWrapper<MaintainingRecordEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.lt(MaintainingRecordEntity::getRetMaintainenceDate, "2025-03-01");
+        lqw.ge(MaintainingRecordEntity::getRetMaintainenceDate, "2025-02-01");
+        lqw.eq(MaintainingRecordEntity::getRetMaintainenceReason, "活性堵嘴歪针");
+        return this.list(lqw);
     }
 }
