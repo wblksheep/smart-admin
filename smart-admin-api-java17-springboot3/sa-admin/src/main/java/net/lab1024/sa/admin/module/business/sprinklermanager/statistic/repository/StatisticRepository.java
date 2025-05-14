@@ -7,6 +7,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.d
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.MaintainingSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.dao.StatisticDao;
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.domain.entity.StatisticEntity;
+import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.domain.vo.MonthlyDamagedSprinklerUsingDaysVO;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -46,4 +47,8 @@ public interface StatisticRepository extends IService<StatisticEntity> {
     List<MaintainingRecordEntity> batchQueryMachineData6(LocalDate startDate, LocalDate endDate, String machine);
 
     List<MaintainingSprinklerEntity> batchQuerySprinklerData3(LocalDate startDate, LocalDate endDate, String machine);
+
+    List<MaintainingRecordEntity> batchQueryMachineData7(LocalDate startDate, LocalDate endDate, String limit);
+
+    List<MonthlyDamagedSprinklerUsingDaysVO> listByRetDamagedAndDate(LocalDate startDate, LocalDate endDate);
 }

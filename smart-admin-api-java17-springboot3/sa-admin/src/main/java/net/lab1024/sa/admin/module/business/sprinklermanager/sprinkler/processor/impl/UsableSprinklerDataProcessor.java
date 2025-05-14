@@ -43,7 +43,7 @@ public class UsableSprinklerDataProcessor implements DataProcessor<UsableSprinkl
     public ResponseDTO<String> process(List<UsableSprinklerCreateForm> createVOs) {
         // 1. 空数据校验（基础校验优化）
         if (CollectionUtils.isEmpty(createVOs)) {
-            return ResponseDTO.userErrorParam("导入数据为空");
+            return ResponseDTO.userErrorParam("数据为空");
         }
 
         // 2. 数据预处理分区（使用Stream分区优化处理效率）

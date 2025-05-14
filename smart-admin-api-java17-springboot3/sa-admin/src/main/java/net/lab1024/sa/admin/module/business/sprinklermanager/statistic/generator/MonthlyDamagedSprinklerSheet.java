@@ -10,6 +10,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.repositor
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -31,12 +32,14 @@ public class MonthlyDamagedSprinklerSheet extends SheetGenerator{
 
     private Collection<?> calculateMonthlyData(LocalDate startDate, LocalDate endDate) {
         Month month = startDate.getMonth();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月");
+        String formattedDate = startDate.format(formatter); // 输出格式如"2023-10"
         List<List<Object>> data = new ArrayList<>();
         // 1.1 批量预加载破损仓记录数据（避免循环内多次查询）返仓记录相关
         List<MaintainingRecordEntity> reasonRecords = statisticRepository.batchQueryMachineData4(startDate, endDate);
         for(MaintainingRecordEntity maintainingRecordEntity : reasonRecords) {
             List<Object> row = new ArrayList<>();
-            row.add(String.format("2025-%02d", 3));
+            row.add(formattedDate);
             row.add(maintainingRecordEntity.getSprinklerSerial());
             row.add(maintainingRecordEntity.getCustomer());
             row.add(maintainingRecordEntity.getRetMaintainenceReason());

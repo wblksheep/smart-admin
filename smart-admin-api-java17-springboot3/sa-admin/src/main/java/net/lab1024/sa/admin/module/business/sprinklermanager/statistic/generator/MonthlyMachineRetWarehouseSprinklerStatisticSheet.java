@@ -10,6 +10,8 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.en
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.repository.StatisticRepository;
 
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -36,9 +38,10 @@ public class MonthlyMachineRetWarehouseSprinklerStatisticSheet extends SheetGene
 
     private Collection<?> calculateMonthlyData(LocalDate startDate, LocalDate endDate) {
         List<List<Object>> data = new ArrayList<>();
-
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月");
+        String formattedDate = startDate.format(formatter); // 输出格式如"2023-10"
         List<Object> rowSummary = new ArrayList<>();
-        rowSummary.add(String.format("2025-%02d", MONTHLYMACHINERETWAREHOUSESPRINKLERTYPESVO.length - 1));
+        rowSummary.add(formattedDate);
         rowSummary.add(MONTHLYMACHINERETWAREHOUSESPRINKLERTYPESVO[MONTHLYMACHINERETWAREHOUSESPRINKLERTYPESVO.length - 1]);
         Long[] summaryTotal = new Long[MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS.length];
         Arrays.fill(summaryTotal, 0L);
@@ -50,7 +53,7 @@ public class MonthlyMachineRetWarehouseSprinklerStatisticSheet extends SheetGene
             List<Object> row = new ArrayList<>();
 
             // 年份月份列："2023-01"格式
-            row.add(String.format("2025-%02d", i));
+            row.add(formattedDate);
 
             // 分类列：交替显示两种分类
             row.add(MONTHLYMACHINERETWAREHOUSESPRINKLERTYPESVO[i]);

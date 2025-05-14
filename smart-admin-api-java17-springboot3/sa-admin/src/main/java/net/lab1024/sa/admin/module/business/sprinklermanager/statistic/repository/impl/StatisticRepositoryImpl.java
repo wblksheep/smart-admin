@@ -10,6 +10,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.en
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.MaintainingSprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.dao.StatisticDao;
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.domain.entity.StatisticEntity;
+import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.domain.vo.MonthlyDamagedSprinklerUsingDaysVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.repository.StatisticRepository;
 import org.springframework.stereotype.Service;
 
@@ -90,6 +91,25 @@ public class StatisticRepositoryImpl extends ServiceImpl<StatisticDao, Statistic
         return maintainingSprinklerRepository.list(
                 buildSprinklerQuery3(startDate, endDate, machine)
         );
+    }
+
+    @Override
+    public List<MaintainingRecordEntity> batchQueryMachineData7(LocalDate startDate, LocalDate endDate, String limit) {
+        return maintainingRecordRepository.list(
+                buildMachinequery7(startDate, endDate, limit)
+        );
+    }
+
+    @Override
+    public List<MonthlyDamagedSprinklerUsingDaysVO> listByRetDamagedAndDate(LocalDate startDate, LocalDate endDate) {
+        return this.getBaseMapper().queryByRetDamagedAndDate(startDate, endDate);
+    }
+
+    private LambdaQueryWrapper<MaintainingRecordEntity> buildMachinequery7(LocalDate start, LocalDate end, String limit) {
+        return new LambdaQueryWrapper<MaintainingRecordEntity>()
+                .ge(MaintainingRecordEntity::getRetWarehouseDate, start)
+                .lt(MaintainingRecordEntity::getRetWarehouseDate, end)
+                .eq(MaintainingRecordEntity::getAllocateLimitation, limit);
     }
 
     private LambdaQueryWrapper<MaintainingSprinklerEntity> buildSprinklerQuery3(LocalDate start, LocalDate end, String machine) {

@@ -29,4 +29,8 @@ public class ExcelGeneratorFactory {
     public MonthlyRetUsableSprinklerSheet createMonthlyRetUsableSprinklerSheet() {
         return new MonthlyRetUsableSprinklerSheet(statisticRepository);
     }
+
+    public MonthlyDamagedSprinklerUsingDaysSheet createMonthlyDamagedSprinklerUsingDaysSheet() {
+        return new MonthlyDamagedSprinklerUsingDaysSheet(statisticRepository);
+    }
 }

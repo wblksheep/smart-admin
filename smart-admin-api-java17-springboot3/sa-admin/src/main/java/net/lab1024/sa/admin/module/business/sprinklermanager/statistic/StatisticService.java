@@ -4,14 +4,19 @@ import cn.idev.excel.ExcelWriter;
 import cn.idev.excel.FastExcel;
 import cn.idev.excel.exception.ExcelGenerateException;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.repository.MaintainingRecordRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.MaintainingSprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.factory.ExcelGeneratorFactory;
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.generator.SheetGenerator;
+import net.lab1024.sa.base.common.domain.ResponseDTO;
+import net.lab1024.sa.base.common.util.SmartExcelUtil;
+import net.lab1024.sa.base.common.util.SmartResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -43,17 +48,19 @@ public class StatisticService {
     @Autowired
     private ExcelGeneratorFactory factory;
 
-    public List<?> getMonthlySheetStatisticExcelExportData() {
-        try(ExcelWriter excelWriter = FastExcel.write("月度报表.xlsx").build()){
-            LocalDate startDate = LocalDate.of(2025, 2, 1);
-            LocalDate endDate = LocalDate.of(2025, 3, 1);
+    public ResponseDTO<String> getMonthlySheetStatisticExcelExportData(LocalDate startDate, LocalDate endDate, HttpServletResponse response, String watermarkString) throws IOException {
+        String fileName = "月度报表.xlsx";
+        // 设置下载消息头
+        SmartResponseUtil.setDownloadFileHeader(response, fileName, null);
+        try(ExcelWriter excelWriter = FastExcel.write(response.getOutputStream()).inMemory(true).build()){
             // 使用责任链模式添加Sheet生成器
             List<SheetGenerator> generators = Arrays.asList(
                     factory.createMonthlyStatisticSheet(),
                     factory.createMonthlyMachineRetWarehouseSprinklerStatisticSheet(),
                     factory.createMonthlyDamagedSprinklerSheet(),
                     factory.createMonthlyMachineSprinklerMaintainingDetailSheet(),
-                    factory.createMonthlyRetUsableSprinklerSheet()
+                    factory.createMonthlyRetUsableSprinklerSheet(),
+                    factory.createMonthlyDamagedSprinklerUsingDaysSheet()
             );
             generators.forEach(generator -> {
                 try {
@@ -63,7 +70,7 @@ public class StatisticService {
                 }
             });
         }
-        return List.of();
+        return ResponseDTO.ok();
     }
 
 

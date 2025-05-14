@@ -38,4 +38,13 @@ public class SprinklerRepositoryImpl extends ServiceImpl<SprinklerDao, Sprinkler
         return this.getBaseMapper().selectExcelExportData(queryForm);
     }
 
+    @Override
+    public SprinklerEntity queryBySprinklerSerial(String sprinklerSerial, Long sprinklerId, Boolean deletedFlag) {
+        LambdaQueryWrapper<SprinklerEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(SprinklerEntity::getSprinklerSerial, sprinklerSerial);
+        lqw.eq(SprinklerEntity::getDeletedFlag, deletedFlag);
+        lqw.ne(SprinklerEntity::getSprinklerId, sprinklerId);
+        return this.getBaseMapper().selectOne(lqw);
+    }
+
 }

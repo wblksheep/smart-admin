@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -51,7 +53,7 @@ public class MonthlyStatisticSheet extends SheetGenerator {
 
     @Override
     public void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate) throws ExcelGenerateException {
-        WriteSheet sheet = FastExcel.writerSheet("每月统计").head(buildComplexHeader()).build();
+        WriteSheet sheet = FastExcel.writerSheet("每月统计").head(buildComplexHeader(startDate, endDate)).build();
         excelWriter.write(calculateMonthlyData(startDate, endDate), sheet);
     }
 
@@ -113,9 +115,12 @@ public class MonthlyStatisticSheet extends SheetGenerator {
         return reasonMap.getOrDefault(reason, Collections.emptyMap()).getOrDefault(warehouseType, 0L).intValue();
     }
 
-    private ArrayList buildComplexHeader() {
+    private ArrayList buildComplexHeader(LocalDate startDate, LocalDate endDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        LocalDate lastDay = startDate.with(TemporalAdjusters.lastDayOfMonth());
+        String formattedDate = lastDay.format(formatter); // 输出格式如"yyyy.MM.dd"
         return new ArrayList<>() {{
-            add(Arrays.asList("统计日期: 2025.3.31", "分类"));
+            add(Arrays.asList("统计日期: "+formattedDate, "分类"));
             IntStream.range(0, 4).forEach(i -> add(Arrays.asList(new String[]{"月初", "当月收入", "当月多次收入", "当月破损仓取出清洗"}[i], new String[]{"月初", "当月收入", "当月多次收入", "当月破损仓取出清洗"}[i])));
             Arrays.asList("入可用仓", "入破损仓", "RMA", "注射测试液", "留在维修部").forEach(s -> add(Arrays.asList("当月维修部完成", s)));
             add(Arrays.asList("月末", ""));

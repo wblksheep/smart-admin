@@ -8,9 +8,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.constant.AdminSwaggerTagConst;
+import net.lab1024.sa.admin.module.business.oa.enterprise.domain.form.EnterpriseUpdateForm;
 import net.lab1024.sa.admin.module.business.oa.enterprise.domain.vo.EnterpriseVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.CombinedQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerUpdateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.BaseSprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO;
@@ -72,6 +74,20 @@ public class SprinklerController {
         return sprinklerService.batchSprinklerCreate(file, requestUser);
     }
 
+    @Operation(summary = "编辑全部喷头 @author 芦苇")
+    @PostMapping("/sprinklermanager//sprinkler/update")
+    @SaCheckPermission("sprinklermanager:sprinkler:update")
+    public ResponseDTO<String> updateSprinkler(@RequestBody @Valid SprinklerUpdateForm updateVO) {
+        return sprinklerService.updateSprinkler(updateVO);
+    }
+
+    @Operation(summary = "编辑各仓喷头 @author 芦苇")
+    @PostMapping("/sprinklermanager/repositorysprinkler/update")
+    @SaCheckPermission("sprinklermanager:repositorysprinkler:update")
+    public ResponseDTO<String> updateSprinkler(@RequestBody @Valid SprinklerUpdateForm updateVO, Byte type) {
+        return sprinklerService.updateRepositorySprinkler(updateVO, type);
+    }
+
     @Operation(summary = "批量新建各仓喷头 @author 芦苇")
     @PostMapping("/sprinklermanager/repositorysprinkler/create")
     @SaCheckPermission("sprinklermanager:repositorysprinkler:add")
@@ -82,6 +98,8 @@ public class SprinklerController {
         RequestUser requestUser = SmartRequestUtil.getRequestUser();
         return sprinklerService.batchRepositorySprinklerCreate(file, requestUser, type);
     }
+
+
 
 
 

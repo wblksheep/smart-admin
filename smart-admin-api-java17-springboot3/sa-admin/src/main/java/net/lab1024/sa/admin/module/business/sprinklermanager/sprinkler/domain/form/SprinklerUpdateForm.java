@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
- * 喷头信息编辑编辑
+ * 全部喷头信息编辑
  *
  * @Author 海印: 芦苇
  */

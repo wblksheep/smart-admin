@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.lab1024.sa.admin.module.business.sprinklermanager.statistic.dao.StatisticDao">
+
+    <select id="queryByRetDamagedAndDate"
+            resultType="net.lab1024.sa.admin.module.business.sprinklermanager.statistic.domain.vo.MonthlyDamagedSprinklerUsingDaysVO">
+        SELECT t_maintaining_record.sprinkler_serial,
+        ret_warehouse_date,
+        t_sprinkler.allocate_date,
+        -- 计算日期差（单位：天）
+        DATEDIFF(ret_warehouse_date, t_sprinkler.allocate_date) AS using_days
+        FROM t_maintaining_record
+        LEFT JOIN t_sprinkler
+        ON t_sprinkler.sprinkler_id = t_maintaining_record.sprinkler_id
+        <where>
+            ret_warehouse_type = "破损仓"
+            <if test="startDate != null">
+                AND DATE_FORMAT(ret_warehouse_date, '%Y-%m-%d') >= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND DATE_FORMAT(ret_warehouse_date, '%Y-%m-%d') &lt; #{endDate}
+            </if>
+        </where>
+
+
+    </select>
+</mapper>

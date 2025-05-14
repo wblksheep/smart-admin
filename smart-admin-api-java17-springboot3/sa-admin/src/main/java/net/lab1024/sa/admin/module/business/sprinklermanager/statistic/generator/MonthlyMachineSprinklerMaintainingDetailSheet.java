@@ -7,6 +7,7 @@ import cn.idev.excel.write.metadata.WriteSheet;
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.repository.StatisticRepository;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,15 +32,16 @@ public class MonthlyMachineSprinklerMaintainingDetailSheet extends SheetGenerato
 
     private Collection<?> calculateMonthlyData(LocalDate startDate, LocalDate endDate) {
         List<List<Object>> data = new ArrayList<>();
-
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月");
+        String formattedDate = startDate.format(formatter); // 输出格式如"2023-10"
         List<Object> rowSummary = new ArrayList<>();
-        rowSummary.add(String.format("2025-%02d", 2));
+        rowSummary.add(formattedDate);
         rowSummary.add(MONTHLYMAINTAININGRESULTTYPESVO[MONTHLYMAINTAININGRESULTTYPESVO.length - 1]);
         Long[] summaryTotal = new Long[MONTHLYMACHINESPRINKLERMAINTAININGDETAILHEADERS.length];
         Arrays.fill(summaryTotal, 0L);
         for(int i=0;i<MONTHLYMAINTAININGRESULTTYPESVO.length-2;i++){
             List<Object> row = new ArrayList<>();
-            row.add(String.format("2025-%02d", 2));
+            row.add(formattedDate);
             row.add(MONTHLYMAINTAININGRESULTTYPESVO[i]);
             Long total = 0L;
             for(int j=0;j<MONTHLYMACHINESPRINKLERMAINTAININGDETAILHEADERS.length-1;j++){
@@ -56,7 +58,7 @@ public class MonthlyMachineSprinklerMaintainingDetailSheet extends SheetGenerato
             data.add(row);
         }
         List<Object> row = new ArrayList<>();
-        row.add(String.format("2025-%02d", 2));
+        row.add(formattedDate);
         row.add(MONTHLYMAINTAININGRESULTTYPESVO[MONTHLYMAINTAININGRESULTTYPESVO.length-2]);
         Long total = 0L;
         for(int j=0;j<MONTHLYMACHINESPRINKLERMAINTAININGDETAILHEADERS.length-1;j++){
