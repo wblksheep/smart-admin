@@ -15,6 +15,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwareho
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordQueryForm;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseRecordVO;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.repository.AllocationRetWarehouseRecordRepository;
+import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseRecordVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.repository.AllocationRetWarehouseRecordRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.repository.AllocationRetWarehouseRepository;
@@ -55,7 +56,7 @@ public class AllocationRetWarehouseRecordService {
      * 新建领用与返仓记录
      */
     @Transactional(rollbackFor = Exception.class)
-    public ResponseDTO<String> createAllocationRetWarehouseRecord(AllocationRetWarehouseRecordCreateForm createVO) {
+    public ResponseDTO<String> createAllocationRetWarehouseRecord(@Valid AllocationRetWarehouseRecordCreateForm createVO) {
         List<AllocationRetWarehouseCreateForm> createVOs = createVO.getAllocationRetWarehouseCreateForm();
         //提前返回空值情况
         if (createVOs.isEmpty()) {
@@ -153,8 +154,12 @@ public class AllocationRetWarehouseRecordService {
     /**
      * 查询领用与返仓记录详情
      */
-    public List<AllocationRetWarehouseVO> getDetail(Long recordId) {
-        return allocationRetWarehouseRepository.getDetail(recordId, Boolean.FALSE);
+    public AllocationRetWarehouseRecordVO getDetail(Long recordId) {
+
+        AllocationRetWarehouseRecordVO allocationRetWarehouseRecordVO =allocationRetWarehouseRecordRepository.getDetail(recordId, Boolean.FALSE);
+        List<AllocationRetWarehouseVO> vos = allocationRetWarehouseRepository.getDetail(recordId, Boolean.FALSE);
+        allocationRetWarehouseRecordVO.setAllocationRetWarehouseVO(vos);
+        return allocationRetWarehouseRecordVO;
     }
 
     /**

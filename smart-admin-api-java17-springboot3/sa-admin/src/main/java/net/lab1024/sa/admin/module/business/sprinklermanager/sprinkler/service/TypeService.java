@@ -1,15 +1,13 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.service;
 
 import jakarta.annotation.Resource;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.MachineSprinklerEntity;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.UsableSprinklerEntity;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.*;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.MachineSprinklerUpdateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.UsableSprinklerUpdateForm;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.BaseIService;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.MachineSprinklerRepository;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.UsableSprinklerRepository;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.*;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.abstractimpl.BaseServiceImpl;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.impl.UsableSprinklerRepositoryImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -25,6 +23,12 @@ public class TypeService {
     private UsableSprinklerRepository usableSprinklerRepository;
     @Resource
     private MachineSprinklerRepository machineSprinklerRepository;
+    @Resource
+    private MaintainingSprinklerRepository maintainingSprinklerRepository;
+    @Resource
+    private DamagedSprinklerRepository damagedSprinklerRepository;
+    @Resource
+    private RmaSprinklerRepository rmaSprinklerRepository;
 
 
     public BaseIService<?> getCachedRepository(Byte type) {
@@ -54,6 +58,12 @@ public class TypeService {
                 return usableSprinklerRepository;
             case "MachineSprinklerEntity":
                 return machineSprinklerRepository;
+            case "MaintainingSprinklerEntity":
+                return maintainingSprinklerRepository;
+            case "DamagedSprinklerEntity":
+                return damagedSprinklerRepository;
+            case "RmaSprinklerEntity":
+                return rmaSprinklerRepository;
             default:
                 throw new IllegalArgumentException("未知的类：" + clazz.getSimpleName());
         }
@@ -65,6 +75,12 @@ public class TypeService {
                 return UsableSprinklerEntity.class;
             case 1:
                 return MachineSprinklerEntity.class;
+            case 2:
+                return MaintainingSprinklerEntity.class;
+            case 3:
+                return DamagedSprinklerEntity.class;
+            case 4:
+                return RmaSprinklerEntity.class;
             default:
                 throw new IllegalArgumentException("未知的类型：" + type);
         }

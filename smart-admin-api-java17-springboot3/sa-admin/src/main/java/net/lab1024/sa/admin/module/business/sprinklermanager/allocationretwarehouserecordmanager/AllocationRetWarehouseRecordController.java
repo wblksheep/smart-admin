@@ -13,6 +13,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwareho
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordCreateForm;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordQueryForm;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseRecordVO;
+import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseRecordVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseVO;
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
@@ -65,7 +66,7 @@ public class AllocationRetWarehouseRecordController {
     @Operation(summary = "查询领用与返仓记录详情 @author 芦苇")
     @GetMapping("/sprinklermanager/allocationretwarehouserecord/get/{recordId}")
     @SaCheckPermission("sprinklermanager:allocationretwarehouserecord:detail")
-    public ResponseDTO<List<AllocationRetWarehouseVO>> getDetail(@PathVariable Long recordId) {
+    public ResponseDTO<AllocationRetWarehouseRecordVO> getDetail(@PathVariable Long recordId) {
         return ResponseDTO.ok(allocationRetWarehouseRecordService.getDetail(recordId));
     }
 

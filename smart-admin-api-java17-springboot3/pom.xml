@@ -397,7 +397,7 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <classifier>dev</classifier> <!-- 添加分类标识 -->
+                            <classifier>${profiles.active}</classifier> <!-- 添加分类标识 -->
                         </configuration>
                     </execution>
                 </executions>
