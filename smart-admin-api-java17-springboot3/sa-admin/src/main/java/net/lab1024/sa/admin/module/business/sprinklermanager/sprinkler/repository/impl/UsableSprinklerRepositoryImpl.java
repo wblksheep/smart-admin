@@ -46,6 +46,20 @@ public class UsableSprinklerRepositoryImpl extends BaseServiceImpl<UsableSprinkl
     }
 
     @Override
+    public UsableSprinklerEntity getBySprinklerSerial(String sprinklerSerial, Long sprinklerId, Boolean deletedFlag) {
+        LambdaQueryWrapper<UsableSprinklerEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(UsableSprinklerEntity::getSprinklerSerial, sprinklerSerial);
+        lqw.eq(UsableSprinklerEntity::getSprinklerId, sprinklerId);
+        lqw.ne(UsableSprinklerEntity::getDeletedFlag, deletedFlag);
+        return this.getBaseMapper().selectOne(lqw);
+    }
+
+    @Override
+    public void myUpdateById(Object updateEntity) {
+        this.updateById((UsableSprinklerEntity) updateEntity);
+    }
+
+    @Override
     public RepositorySprinklerTypeEnum getSprinklerType() {
         return RepositorySprinklerTypeEnum.USABLE_REPOSITORY;
     }

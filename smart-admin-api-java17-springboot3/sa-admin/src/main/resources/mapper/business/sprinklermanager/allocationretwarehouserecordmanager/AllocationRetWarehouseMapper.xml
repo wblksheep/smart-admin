@@ -67,7 +67,7 @@
             <if test="queryForm.status != null">
                 AND status = #{queryForm.status}
             </if>
-            <if test="queryForm.disabledFlag != null">
+            <if test="queryForm.disabledflag != null">
                 AND t_allocation_ret_warehouse.disabled_flag = #{queryForm.disabledFlag}
             </if>
         </where>

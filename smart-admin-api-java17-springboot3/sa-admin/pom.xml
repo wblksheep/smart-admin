@@ -21,6 +21,7 @@
             <groupId>net.1024lab</groupId>
             <artifactId>sa-base</artifactId>
             <version>3.0.0</version>
+            <classifier>dev</classifier>
         </dependency>
 
         <dependency>

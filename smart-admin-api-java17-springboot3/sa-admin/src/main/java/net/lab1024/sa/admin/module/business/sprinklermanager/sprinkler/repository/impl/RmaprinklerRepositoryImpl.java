@@ -1,10 +1,12 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerType;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeEnum;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.dao.RmaSprinklerDao;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.RmaSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.RmaSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.RmaSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
@@ -42,6 +44,20 @@ public class RmaprinklerRepositoryImpl extends BaseServiceImpl<RmaSprinklerDao, 
         SmartBeanUtil.copyProperties(sprinklerEntity, vo);   // 源1
         SmartBeanUtil.copyProperties(rmaEntity, vo);     // 源2
         return vo;
+    }
+
+    @Override
+    public RmaSprinklerEntity getBySprinklerSerial(String sprinklerSerial, Long sprinklerId, Boolean deletedFlag) {
+        LambdaQueryWrapper<RmaSprinklerEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(RmaSprinklerEntity::getSprinklerSerial, sprinklerSerial);
+        lqw.eq(RmaSprinklerEntity::getSprinklerId, sprinklerId);
+        lqw.ne(RmaSprinklerEntity::getDeletedFlag, deletedFlag);
+        return this.getBaseMapper().selectOne(lqw);
+    }
+
+    @Override
+    public void myUpdateById(Object updateEntity) {
+        this.updateById((RmaSprinklerEntity) updateEntity);
     }
 
     @Override

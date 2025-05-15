@@ -22,9 +22,11 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.R
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.RepositorySprinklerStrategyFactory;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.SprinklerRepositoryFactory;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.processor.DataProcessor;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.BaseIService;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.UsableSprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.abstractimpl.BaseServiceImpl;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.service.TypeService;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.RepositorySprinklerQueryStrategy;
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
@@ -33,12 +35,16 @@ import net.lab1024.sa.base.common.util.ExcelUtil;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
 import net.lab1024.sa.base.common.util.SmartPageUtil;
 import net.lab1024.sa.base.module.support.datatracer.service.DataTracerService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -114,7 +120,6 @@ public class SprinklerService {
 
     /**
      * 查询各仓喷头详情
-     *
      */
     public BaseSprinklerVO getDetail(Long sprinklerId) {
         // 1. 获取喷头实体
@@ -146,7 +151,6 @@ public class SprinklerService {
 
     /**
      * 导入各仓喷头模块
-     *
      */
     public ResponseDTO<String> batchRepositorySprinklerCreate(@Valid MultipartFile file, RequestUser requestUser, @Valid Integer type) {
         Class<? extends BaseCreateForm> createVOClazz = createFormFactory.getSprinklerClass(type);
@@ -163,7 +167,6 @@ public class SprinklerService {
 
     /**
      * 导入全部喷头模块
-     *
      */
     public ResponseDTO<String> batchSprinklerCreate(@Valid MultipartFile file, RequestUser requestUser) {
         //使用收集器一次性完成字段设置，避免冗余操作
@@ -219,7 +222,6 @@ public class SprinklerService {
         return ResponseDTO.userErrorParam("无有效数据可插入，错误数据：" + String.join(",", errorData));
 
     }
-
 
 
     // 辅助方法
@@ -283,7 +285,6 @@ public class SprinklerService {
 
     /**
      * 编辑全部喷头
-     *
      */
     public ResponseDTO<String> updateSprinkler(@Valid SprinklerUpdateForm updateVO) {
         Long sprinklerId = updateVO.getSprinklerId();
@@ -293,8 +294,8 @@ public class SprinklerService {
             return ResponseDTO.userErrorParam("喷头不存在");
         }
         // 验证喷头序列号是否重复
-        SprinklerEntity validateEnterprise = sprinklerRepository.queryBySprinklerSerial(updateVO.getSprinklerSerial(), sprinklerId, Boolean.FALSE);
-        if (Objects.nonNull(validateEnterprise)) {
+        SprinklerEntity validateSprinkler = sprinklerRepository.queryBySprinklerSerial(updateVO.getSprinklerSerial(), sprinklerId, Boolean.FALSE);
+        if (Objects.nonNull(validateSprinkler)) {
             return ResponseDTO.userErrorParam("喷头序列号重复");
         }
         SprinklerEntity updateEntity = SmartBeanUtil.copy(sprinklerDetail, SprinklerEntity.class);
@@ -303,11 +304,15 @@ public class SprinklerService {
         return ResponseDTO.ok();
     }
 
+
+    @Resource
+    private TypeService typeService;
+
     /**
      * 编辑各仓喷头
-     *
      */
-    public ResponseDTO<String> updateRepositorySprinkler(@Valid SprinklerUpdateForm updateVO, Byte type) {
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseDTO<String> updateRepositorySprinkler(@Valid BaseUpdateForm updateVO, Byte type) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchFieldException {
         Long sprinklerId = updateVO.getSprinklerId();
         // 校验喷头是否存在
         SprinklerEntity sprinklerDetail = sprinklerRepository.getById(sprinklerId);
@@ -315,13 +320,40 @@ public class SprinklerService {
             return ResponseDTO.userErrorParam("喷头不存在");
         }
         // 验证喷头序列号是否重复
-        SprinklerEntity validateEnterprise = sprinklerRepository.queryBySprinklerSerial(updateVO.getSprinklerSerial(), sprinklerId, Boolean.FALSE);
-        if (Objects.nonNull(validateEnterprise)) {
+        SprinklerEntity validSprinkler = sprinklerRepository.queryBySprinklerSerial(updateVO.getSprinklerSerial(), sprinklerId, Boolean.FALSE);
+        if (Objects.nonNull(validSprinkler)) {
             return ResponseDTO.userErrorParam("喷头序列号重复");
         }
-        SprinklerEntity updateEntity = SmartBeanUtil.copy(sprinklerDetail, SprinklerEntity.class);
+        Class<?> clazz = typeService.getCachedEntity(type);
+        BaseIService<?> repository = typeService.getCachedRepository(type);
+
+        // 校验各仓喷头是否存在
+        Object repoSprinklerDetail = repository.getById(sprinklerId);
+        if (Objects.isNull(repoSprinklerDetail)) {
+            return ResponseDTO.userErrorParam("喷头不存在");
+        }
+        // 动态实例化并拷贝
+        Object entity = clazz.getDeclaredConstructor().newInstance();
+        BeanUtils.copyProperties(repoSprinklerDetail, entity);
+        // 获取字段值（不依赖getter方法）
+        Field deletedFlagField = clazz.getDeclaredField("deletedFlag");
+        deletedFlagField.setAccessible(true);
+        Boolean deleted = (Boolean) deletedFlagField.get(repoSprinklerDetail);
+        if (Boolean.TRUE.equals(deleted)) {
+            return ResponseDTO.userErrorParam("喷头已被删除");
+        }
+
+        // 验证各仓喷头序列号是否重复
+        Object detailObj = repository.getBySprinklerSerial(updateVO.getSprinklerSerial(), sprinklerId, Boolean.FALSE);
+
+        if (Objects.nonNull(detailObj)) {
+            return ResponseDTO.userErrorParam("所在仓喷头序列号重复");
+        }
+
+        // 更新对应仓喷头
+        Object updateEntity = SmartBeanUtil.copy(repoSprinklerDetail, clazz);
         SmartBeanUtil.copyProperties(updateVO, updateEntity);
-        sprinklerRepository.updateById(updateEntity);
+        repository.myUpdateById(updateEntity);
         return ResponseDTO.ok();
     }
 }

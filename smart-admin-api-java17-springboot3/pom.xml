@@ -10,9 +10,9 @@
     <name>sa-parent</name>
     <description>SmartAdmin project</description>
 
-	<modules>
+    <modules>
         <module>sa-base</module>
-		<module>sa-admin</module>
+        <module>sa-admin</module>
     </modules>
 
     <properties>
@@ -386,6 +386,23 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>dev</classifier> <!-- 添加分类标识 -->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

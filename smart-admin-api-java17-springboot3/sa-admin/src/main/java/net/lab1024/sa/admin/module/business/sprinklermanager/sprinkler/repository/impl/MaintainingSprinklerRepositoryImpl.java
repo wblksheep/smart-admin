@@ -9,7 +9,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.dao.MachineSprinklerDao;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.dao.MaintainingSprinklerDao;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.DamagedSprinklerEntity;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.MachineSprinklerEntity;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.MaintainingSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.MaintainingSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.MaintainingSprinklerQueryForm;
@@ -55,6 +55,20 @@ public class MaintainingSprinklerRepositoryImpl extends BaseServiceImpl<Maintain
         SmartBeanUtil.copyProperties(sprinklerEntity, vo);   // 源1
         SmartBeanUtil.copyProperties(maintainingEntity, vo);     // 源2
         return vo;
+    }
+
+    @Override
+    public MaintainingSprinklerEntity getBySprinklerSerial(String sprinklerSerial, Long sprinklerId, Boolean deletedFlag) {
+        LambdaQueryWrapper<MaintainingSprinklerEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(MaintainingSprinklerEntity::getSprinklerSerial, sprinklerSerial);
+        lqw.eq(MaintainingSprinklerEntity::getSprinklerId, sprinklerId);
+        lqw.ne(MaintainingSprinklerEntity::getDeletedFlag, deletedFlag);
+        return this.getBaseMapper().selectOne(lqw);
+    }
+
+    @Override
+    public void myUpdateById(Object updateEntity) {
+        this.getBaseMapper().updateById((MaintainingSprinklerEntity) updateEntity);
     }
 
     @Override

@@ -6,13 +6,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.constant.AdminSwaggerTagConst;
 import net.lab1024.sa.admin.module.business.oa.enterprise.domain.form.EnterpriseUpdateForm;
 import net.lab1024.sa.admin.module.business.oa.enterprise.domain.vo.EnterpriseVO;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.CombinedQueryForm;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerUpdateForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.*;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.BaseSprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO;
@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -75,7 +76,7 @@ public class SprinklerController {
     }
 
     @Operation(summary = "编辑全部喷头 @author 芦苇")
-    @PostMapping("/sprinklermanager//sprinkler/update")
+    @PostMapping("/sprinklermanager/sprinkler/update")
     @SaCheckPermission("sprinklermanager:sprinkler:update")
     public ResponseDTO<String> updateSprinkler(@RequestBody @Valid SprinklerUpdateForm updateVO) {
         return sprinklerService.updateSprinkler(updateVO);
@@ -84,7 +85,10 @@ public class SprinklerController {
     @Operation(summary = "编辑各仓喷头 @author 芦苇")
     @PostMapping("/sprinklermanager/repositorysprinkler/update")
     @SaCheckPermission("sprinklermanager:repositorysprinkler:update")
-    public ResponseDTO<String> updateSprinkler(@RequestBody @Valid SprinklerUpdateForm updateVO, Byte type) {
+    public ResponseDTO<String> updateSprinkler(@RequestBody @Valid BaseUpdateForm updateVO,@RequestParam @Valid @Min(0) @Max(4) Byte type) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, NoSuchFieldException {
+        RequestUser requestUser = SmartRequestUtil.getRequestUser();
+        updateVO.setCreateUserId(requestUser.getUserId());
+        updateVO.setCreateUserName(requestUser.getUserName());
         return sprinklerService.updateRepositorySprinkler(updateVO, type);
     }
 
