@@ -1,11 +1,8 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.Data;
 import net.lab1024.sa.base.common.domain.PageParam;
-import org.hibernate.validator.constraints.Length;
 
 @Data
 public class AllocationRetWarehouseQueryForm extends PageParam {

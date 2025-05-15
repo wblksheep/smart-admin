@@ -1,10 +1,6 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.Data;
-import org.hibernate.validator.constraints.Length;
 
 @Data
 public class AllocationRetWarehouseCreateForm extends AllocationRetWarehouseBaseForm{

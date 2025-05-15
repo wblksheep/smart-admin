@@ -19,5 +19,8 @@ public interface AllocationRetWarehouseDao extends BaseMapper<AllocationRetWareh
      */
     List<AllocationRetWarehouseVO> queryPage(Page<?> page, @Param("queryForm") AllocationRetWarehouseQueryForm queryForm);
 
+    /**
+     * 领用与返仓详情
+     */
     List<AllocationRetWarehouseVO> getDetail(@Param("recordId") Long recordId,@Param("deletedFlag") Boolean deletedFlag);
 }

@@ -27,5 +27,4 @@ public interface AllocationRecordDao extends BaseMapper<AllocationRecordEntity> 
 
     AllocationRecordVO getDetail(@Param("recordId") Long recordId,@Param("deletedFlag") Boolean deletedFlag);
 
-//    List<UsableSprinklerExcelVO> queryExcel(@Param("queryForm") SprinklerQueryForm queryForm, @Param("joinForm") UsableSprinklerQueryForm joinForm);
 }

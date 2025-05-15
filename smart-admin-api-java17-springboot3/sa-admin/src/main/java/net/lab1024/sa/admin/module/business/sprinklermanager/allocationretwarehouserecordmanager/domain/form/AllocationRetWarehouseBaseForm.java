@@ -27,8 +27,8 @@ public class AllocationRetWarehouseBaseForm {
     private String allocateColor;
 
     @Schema(description = "领用位置",
-        minimum = "0",      // Swagger 文档显示最小值
-        maximum = "40",     // Swagger 文档显示最大值
+        minimum = "0",
+        maximum = "40",
         example = "10"
     )
     @Min(0)
@@ -55,8 +55,8 @@ public class AllocationRetWarehouseBaseForm {
     private String retWarehouseColor;
 
     @Schema(description = "返仓位置",
-            minimum = "0",      // Swagger 文档显示最小值
-            maximum = "40",     // Swagger 文档显示最大值
+            minimum = "0",
+            maximum = "40",
             example = "10"
     )
     @Min(0)
