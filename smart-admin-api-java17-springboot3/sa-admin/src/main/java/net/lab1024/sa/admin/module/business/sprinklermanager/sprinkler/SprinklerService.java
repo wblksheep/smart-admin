@@ -60,10 +60,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SprinklerService {
 
-
-    @Resource
-    private DataTracerService dataTracerService;
-
     @Resource
     private SprinklerRepository sprinklerRepository;
 
@@ -72,8 +68,6 @@ public class SprinklerService {
 
     @Resource
     private SprinklerRepositoryFactory sprinklerRepositoryFactory;
-    @Autowired
-    private UsableSprinklerRepository usableSprinklerRepository;
 
 
     /**

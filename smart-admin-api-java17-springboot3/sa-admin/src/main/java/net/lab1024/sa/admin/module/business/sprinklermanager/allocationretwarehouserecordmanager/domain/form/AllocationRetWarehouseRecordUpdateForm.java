@@ -1,6 +1,7 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -14,6 +15,7 @@ public class AllocationRetWarehouseRecordUpdateForm extends AllocationRetWarehou
     private Long recordId;
 
     @Schema(description = "领用与返仓表单")
+    @Valid
     private List<AllocationRetWarehouseUpdateForm> allocationRetWarehouseUpdateForm;
 
 }

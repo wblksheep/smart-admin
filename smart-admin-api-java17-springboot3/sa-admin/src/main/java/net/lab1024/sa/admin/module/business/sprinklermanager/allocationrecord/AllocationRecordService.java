@@ -1,17 +1,15 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.allocationrecord;
 
-import cn.idev.excel.util.StringUtils;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationrecord.domain.entity.AllocationRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationrecord.domain.form.AllocationRecordCreateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationrecord.domain.form.AllocationRecordQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.allocationrecord.domain.form.AllocationRecordUpdateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationrecord.domain.vo.AllocationRecordVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationrecord.repository.AllocationRecordRepository;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.SprinklerService;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
 import net.lab1024.sa.base.common.domain.PageResult;
@@ -20,6 +18,7 @@ import net.lab1024.sa.base.common.domain.ResponseDTO;
 import net.lab1024.sa.base.common.util.ExcelUtil;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
 import net.lab1024.sa.base.common.util.SmartPageUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +36,8 @@ public class AllocationRecordService {
 
     @Resource
     private AllocationRecordRepository allocationRecordRepository;
+    @Autowired
+    private SprinklerService sprinklerService;
 
     /**
      * 新建领用记录
@@ -73,5 +74,46 @@ public class AllocationRecordService {
      */
     public AllocationRecordVO getDetail(Long recordId) {
         return allocationRecordRepository.getDetail(recordId, Boolean.FALSE);
+    }
+
+    /**
+     * 编辑领用记录
+     *
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseDTO<String> updateAllocationRecord(AllocationRecordUpdateForm updateVO) {
+        Long recordId = updateVO.getRecordId();
+        // 校验领用记录是否存在
+        AllocationRecordEntity allocationRecordDetail = allocationRecordRepository.getById(recordId);
+        if (Objects.isNull(allocationRecordDetail) || allocationRecordDetail.getDeletedFlag()) {
+            return ResponseDTO.userErrorParam("领用记录不存在");
+        }
+        Long sprinklerId = updateVO.getSprinklerId();
+        // 验证喷头是否存在
+        List<SprinklerEntity> sprinklerDetails = sprinklerRepository.getListBySprinklerSerials(Arrays.asList(updateVO.getSprinklerSerial()));
+        if(sprinklerDetails.isEmpty()){
+            return ResponseDTO.userErrorParam("喷头不存在");
+        }
+        SprinklerEntity sprinklerDetail = sprinklerDetails.get(0);
+        updateVO.setSprinklerId(sprinklerDetail.getSprinklerId());
+        // 数据编辑
+        AllocationRecordEntity updateEntity = SmartBeanUtil.copy(allocationRecordDetail, AllocationRecordEntity.class);
+        SmartBeanUtil.copyProperties(updateVO, updateEntity);
+        allocationRecordRepository.updateById(updateEntity);
+        return ResponseDTO.ok();
+    }
+    /**
+     * 删除领用记录
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseDTO<String> deleteAllocationRecord(Long recordId) {
+        // 校验领用记录是否存在
+        AllocationRecordEntity allocationRecordDetail = allocationRecordRepository.getById(recordId);
+        if (Objects.isNull(allocationRecordDetail) || allocationRecordDetail.getDeletedFlag()) {
+            return ResponseDTO.userErrorParam("领用记录不存在");
+        }
+        allocationRecordDetail.setDeletedFlag(Boolean.TRUE);
+        allocationRecordRepository.updateById(allocationRecordDetail);
+        return ResponseDTO.ok();
     }
 }

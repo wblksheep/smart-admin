@@ -8,10 +8,10 @@
         <where>
             deleted_flag = #{queryForm.deletedFlag}
             <if test="queryForm.retMaintainenceDateStartTime != null">
-                AND DATE_FORMAT(shipping_date, '%Y-%m-%d') &gt;= #{queryForm.retMaintainenceDateStartTime}
+                AND DATE_FORMAT(ret_maintainence_date, '%Y-%m-%d') &gt;= #{queryForm.retMaintainenceDateStartTime}
             </if>
             <if test="queryForm.retMaintainenceDateEndTime != null">
-                AND DATE_FORMAT(shipping_date, '%Y-%m-%d') &lt;= #{queryForm.retMaintainenceDateEndTime}
+                AND DATE_FORMAT(ret_maintainence_date, '%Y-%m-%d') &lt;= #{queryForm.retMaintainenceDateEndTime}
             </if>
             <if test="queryForm.sprinklerSerial != null and queryForm.sprinklerSerial != ''">
                 AND INSTR(sprinkler_serial,#{queryForm.sprinklerSerial})
@@ -30,10 +30,10 @@
             </if>
 
             <if test="queryForm.retWarehouseDateStartTime != null">
-                AND DATE_FORMAT(shipping_date, '%Y-%m-%d') &gt;= #{queryForm.retWarehouseDateStartTime}
+                AND DATE_FORMAT(ret_warehouse_date, '%Y-%m-%d') &gt;= #{queryForm.retWarehouseDateStartTime}
             </if>
             <if test="queryForm.retWarehouseDateEndTime != null">
-                AND DATE_FORMAT(shipping_date, '%Y-%m-%d') &lt;= #{queryForm.retWarehouseDateEndTime}
+                AND DATE_FORMAT(ret_warehouse_date, '%Y-%m-%d') &lt;= #{queryForm.retWarehouseDateEndTime}
             </if>
 
             <if test="queryForm.retWarehouseType != null and queryForm.retWarehouseType != ''">

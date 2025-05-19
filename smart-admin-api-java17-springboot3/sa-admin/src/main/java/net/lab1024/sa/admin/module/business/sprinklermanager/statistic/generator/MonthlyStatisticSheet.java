@@ -57,6 +57,10 @@ public class MonthlyStatisticSheet extends SheetGenerator {
         excelWriter.write(calculateMonthlyData(startDate, endDate), sheet);
     }
 
+    public List<MonthlyStatisticExcelVO> calculateMonthlyData(LocalDate startDate, LocalDate endDate, Boolean excelFlag) {
+        return (List<MonthlyStatisticExcelVO>) calculateMonthlyData(startDate, endDate);
+    }
+
     private Collection<?> calculateMonthlyData(LocalDate startDate, LocalDate endDate) {
         Integer month = startDate.getMonthValue();
 
@@ -83,7 +87,7 @@ public class MonthlyStatisticSheet extends SheetGenerator {
 
             MonthlyStatisticExcelVO excelVO = new MonthlyStatisticExcelVO();
             excelVO.setRetMaintainenceReason(reason);
-            excelVO.setMonthBegin(MONTHBEGIN[month-1][i]);
+            excelVO.setMonthBegin(MONTHBEGIN[month - 1][i]);
             excelVO.setMonthIn(records2.size() + sprinklers.size());
             // 4. 通过预计算Map直接获取统计值（O(1)复杂度）
             // 改造调用方式
@@ -98,7 +102,7 @@ public class MonthlyStatisticSheet extends SheetGenerator {
 
         MonthlyStatisticExcelVO excelVO = new MonthlyStatisticExcelVO();
         excelVO.setRetMaintainenceReason(reason);
-        excelVO.setMonthBegin(MONTHBEGIN[month-1][MONTHBEGIN.length - 1]);
+        excelVO.setMonthBegin(MONTHBEGIN[month - 1][MONTHBEGIN.length - 1]);
         excelVO.setMonthIn(data.stream().mapToInt(v -> v.getMonthIn()).sum());
         // 4. 通过预计算Map直接获取统计值（O(1)复杂度）
         // 改造调用方式
@@ -120,7 +124,7 @@ public class MonthlyStatisticSheet extends SheetGenerator {
         LocalDate lastDay = startDate.with(TemporalAdjusters.lastDayOfMonth());
         String formattedDate = lastDay.format(formatter); // 输出格式如"yyyy.MM.dd"
         return new ArrayList<>() {{
-            add(Arrays.asList("统计日期: "+formattedDate, "分类"));
+            add(Arrays.asList("统计日期: " + formattedDate, "分类"));
             IntStream.range(0, 4).forEach(i -> add(Arrays.asList(new String[]{"月初", "当月收入", "当月多次收入", "当月破损仓取出清洗"}[i], new String[]{"月初", "当月收入", "当月多次收入", "当月破损仓取出清洗"}[i])));
             Arrays.asList("入可用仓", "入破损仓", "RMA", "注射测试液", "留在维修部").forEach(s -> add(Arrays.asList("当月维修部完成", s)));
             add(Arrays.asList("月末", ""));

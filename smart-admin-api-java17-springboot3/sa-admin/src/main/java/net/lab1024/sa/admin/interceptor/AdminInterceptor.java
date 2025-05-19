@@ -100,6 +100,8 @@ public class AdminInterceptor implements HandlerInterceptor {
              * sa-token 异常状态码
              * 具体请看： https://sa-token.cc/doc.html#/fun/exception-code
              */
+            e.printStackTrace();
+            System.out.println(e.getMessage());
             int code = e.getCode();
             if (code == 11041 || code == 11051) {
                 SmartResponseUtil.write(response, ResponseDTO.error(UserErrorCode.NO_PERMISSION));
