@@ -11,6 +11,7 @@ import net.lab1024.sa.base.common.exception.BusinessException;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -60,6 +61,66 @@ public class SmartPageUtil {
         }
         page.setOrders(orderItemList);
         return page;
+    }
+
+    /**
+     * 转换为查询参数
+     */
+    public static Page<?> convert2PageQueryBySprinklerSerial(PageParam pageParam) {
+        Page<?> page = new Page<>(pageParam.getPageNum(), pageParam.getPageSize());
+
+        if (pageParam.getSearchCount() != null) {
+            page.setSearchCount(pageParam.getSearchCount());
+        }
+
+        List<PageParam.SortItem> sortItemList = pageParam.getSortItemList();
+        if (CollectionUtils.isEmpty(sortItemList)) {
+            return page;
+        }
+
+        List<OrderItem> orderItemList = new ArrayList<>();
+        for (PageParam.SortItem sortItem : sortItemList) {
+            if (SmartStringUtil.isEmpty(sortItem.getColumn())) continue;
+
+            // 特定字段特殊处理
+            if ("sprinkler_serial".equals(sortItem.getColumn())) {
+                addSprinklerSerialSort(orderItemList, sortItem.getIsAsc());
+                continue;
+            }
+
+            // 常规字段安全检查
+            if (SqlInjectionUtils.check(sortItem.getColumn())) {
+                log.error("SQL注入风险: {}", sortItem.getColumn());
+                throw new BusinessException("非法排序参数");
+            }
+
+            OrderItem orderItem = new OrderItem();
+            orderItem.setColumn(sortItem.getColumn());
+            orderItem.setAsc(sortItem.getIsAsc());
+            orderItemList.add(orderItem);
+        }
+        page.setOrders(orderItemList);
+        return page;
+    }
+
+    // 添加 sprinklerSerial 特殊排序规则
+    private static void addSprinklerSerialSort(List<OrderItem> orderList, Boolean isAsc) {
+        // 规则1：优先排序符合 XXXXXX-AA 格式的记录
+        OrderItem formatCheck = new OrderItem();
+        formatCheck.setColumn("CASE WHEN sprinkler_serial REGEXP '^\\\\w{6}-\\\\d{2}$' THEN 0 ELSE 1 END");
+        formatCheck.setAsc(true); // 强制符合格式的在前
+
+        // 规则2：按 XXXXXX 部分升序
+        OrderItem prefixSort = new OrderItem();
+        prefixSort.setColumn("SUBSTRING(sprinkler_serial, 1, 6)");
+        prefixSort.setAsc(isAsc); // 继承原始排序方向
+
+        // 规则3：按 AA 部分数字升序
+        OrderItem suffixSort = new OrderItem();
+        suffixSort.setColumn("CAST(SUBSTRING(sprinkler_serial, 7, 2) AS UNSIGNED)");
+        suffixSort.setAsc(isAsc); // 继承原始排序方向
+
+        Collections.addAll(orderList, formatCheck, prefixSort, suffixSort);
     }
 
     /**

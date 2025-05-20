@@ -15,9 +15,6 @@ import java.time.LocalDate;
 @Data
 public class RmaSprinklerExcelVO extends BaseSprinklerExcelVO{
 
-    @ExcelProperty("喷头序列号")
-    private String sprinklerSerial;
-
     @ExcelProperty("返修原因")
     private String retMaintainenceReason;
 

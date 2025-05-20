@@ -5,6 +5,10 @@ import cn.idev.excel.FastExcel;
 import cn.idev.excel.exception.ExcelGenerateException;
 import cn.idev.excel.write.metadata.WriteSheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import jakarta.annotation.Resource;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.entity.MaintainingRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.repository.MaintainingRecordRepository;
@@ -12,9 +16,17 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.en
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.MaintainingSprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.domain.vo.MonthlyStatisticExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.repository.StatisticRepository;
+import net.lab1024.sa.base.common.domain.ResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
@@ -32,11 +44,9 @@ public class MonthlyStatisticSheet extends SheetGenerator {
 
     private static final String[] MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS = {"大昌德1#", "大昌德2#", "宇华1#", "宇华2#", "宇华3#", "华都1#", "华都2#", "大昌祥1#", "大昌祥2#", "大昌祥扫描机", "鸿大北海1#大机", "鸿大北海2#大机", "鸿大北海3#大机", "吉盛祥1#", "吉盛祥2#", "绍肖1#", "绍肖2#", "绍肖3#", "绍肖4#", "沙印1#", "沙印2#", "宏强1#", "宏强2#", "宏强3#", "稽山1#", "稽山2#", "盛兴1#", "盛兴2#", "超超1#", "超超2#", "宜滨1#", "宜滨2#", "恒晨1#", "恒晨3C1#", "洁彩纺一号车间1#大机", "洁彩纺二号车间1#大机", "金楚1#大机", "鸿大北海1#小机", "鸿大北海2#小机", "鸿大北海3#小机", "鸿大北海5#小机", "轮转机", "其他", "共计"};
 
-    // 暴力生成分类数据池
-    private static final Integer[][] MONTHBEGIN = {
+    private Integer[][] MONTHBEGIN = {
             {13, 9, 20, 2, 9, 2, 10, 0, 8, 1, 0, 8, 20, 102},
-            {5, 3, 8, 7, 9, 0, 6, 0, 3, 0, 0, 4, 20, 65},
-            {8, 5, 22, 1, 8, 1, 7, 0, 6, 0, 0, 4, 20, 82}
+            {5, 3, 8, 7, 9, 0, 6, 0, 3, 0, 0, 4, 20, 65}
     };
 
     // 定义仓库类型常量（可抽离到常量类）
@@ -52,16 +62,16 @@ public class MonthlyStatisticSheet extends SheetGenerator {
 
 
     @Override
-    public void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate) throws ExcelGenerateException {
+    public void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate) throws ExcelGenerateException, IOException {
         WriteSheet sheet = FastExcel.writerSheet("每月统计").head(buildComplexHeader(startDate, endDate)).build();
         excelWriter.write(calculateMonthlyData(startDate, endDate), sheet);
     }
 
-    public List<MonthlyStatisticExcelVO> calculateMonthlyData(LocalDate startDate, LocalDate endDate, Boolean excelFlag) {
+    public List<MonthlyStatisticExcelVO> calculateMonthlyData(LocalDate startDate, LocalDate endDate, Boolean excelFlag) throws IOException {
         return (List<MonthlyStatisticExcelVO>) calculateMonthlyData(startDate, endDate);
     }
 
-    private Collection<?> calculateMonthlyData(LocalDate startDate, LocalDate endDate) {
+    private Collection<?> calculateMonthlyData(LocalDate startDate, LocalDate endDate) throws IOException, ArrayIndexOutOfBoundsException {
         Integer month = startDate.getMonthValue();
 
         // 1.1 批量预加载维修记录数据（避免循环内多次查询）返仓记录相关
@@ -79,6 +89,8 @@ public class MonthlyStatisticSheet extends SheetGenerator {
             retWarehouseTypeMap.put(k, reasonRecordsMap1.get(k).stream().collect(Collectors.groupingByConcurrent(MaintainingRecordEntity::getRetWarehouseType, Collectors.counting())));
         }
         List<MonthlyStatisticExcelVO> data = new ArrayList<>();
+        HotReloader.init();
+        MONTHBEGIN = HotReloader.MONTHBEGIN;
         for (int i = 0; i < RETMAINTAINENCEREASONTYPES.length - 1; i++) {
             String reason = RETMAINTAINENCEREASONTYPES[i];
             List<MaintainingRecordEntity> records = reasonRecordsMap1.getOrDefault(reason, Collections.emptyList());
@@ -87,7 +99,11 @@ public class MonthlyStatisticSheet extends SheetGenerator {
 
             MonthlyStatisticExcelVO excelVO = new MonthlyStatisticExcelVO();
             excelVO.setRetMaintainenceReason(reason);
-            excelVO.setMonthBegin(MONTHBEGIN[month - 1][i]);
+            try {
+                excelVO.setMonthBegin(MONTHBEGIN[month - 1][i]);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                throw new ArrayIndexOutOfBoundsException(e.getMessage());
+            }
             excelVO.setMonthIn(records2.size() + sprinklers.size());
             // 4. 通过预计算Map直接获取统计值（O(1)复杂度）
             // 改造调用方式
@@ -102,7 +118,7 @@ public class MonthlyStatisticSheet extends SheetGenerator {
 
         MonthlyStatisticExcelVO excelVO = new MonthlyStatisticExcelVO();
         excelVO.setRetMaintainenceReason(reason);
-        excelVO.setMonthBegin(MONTHBEGIN[month - 1][MONTHBEGIN.length - 1]);
+        excelVO.setMonthBegin(MONTHBEGIN[month - 1][MONTHBEGIN[month - 1].length - 1]);
         excelVO.setMonthIn(data.stream().mapToInt(v -> v.getMonthIn()).sum());
         // 4. 通过预计算Map直接获取统计值（O(1)复杂度）
         // 改造调用方式
@@ -117,6 +133,17 @@ public class MonthlyStatisticSheet extends SheetGenerator {
     // 优化取值逻辑
     private int getWarehouseCount(Map<String, Map<String, Long>> reasonMap, String reason, String warehouseType) {
         return reasonMap.getOrDefault(reason, Collections.emptyMap()).getOrDefault(warehouseType, 0L).intValue();
+    }
+
+    public Integer[][] loadFromJson(InputStream is) throws IOException {
+        try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+            Gson gson = new Gson();
+            Type arrayType = new TypeToken<Integer[][]>() {
+            }.getType();
+            return gson.fromJson(reader, arrayType);
+        } catch (JsonSyntaxException | JsonIOException e) {
+            throw new IOException("JSON解析失败: " + e.getMessage(), e);
+        }
     }
 
     private ArrayList buildComplexHeader(LocalDate startDate, LocalDate endDate) {

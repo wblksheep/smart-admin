@@ -15,7 +15,6 @@ import java.time.LocalDate;
 @Data
 public class DamagedSprinklerExcelVO extends BaseSprinklerExcelVO{
 
-
     @ExcelProperty("喷头序列号")
     private String sprinklerSerial;
 
@@ -33,5 +32,6 @@ public class DamagedSprinklerExcelVO extends BaseSprinklerExcelVO{
 
     @ExcelProperty("具体破损原因")
     private String realDamagedReason;
+
 
 }

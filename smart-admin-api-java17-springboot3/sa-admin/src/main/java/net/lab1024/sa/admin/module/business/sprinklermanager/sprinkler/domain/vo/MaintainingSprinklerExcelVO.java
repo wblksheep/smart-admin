@@ -13,8 +13,7 @@ import java.time.LocalDate;
  */
 @Data
 public class MaintainingSprinklerExcelVO extends BaseSprinklerExcelVO{
-     @ExcelProperty("喷头序列号")
-    private String sprinklerSerial;
+
 
      @ExcelProperty("返修日期")
     private LocalDate retMaintainenceDate;

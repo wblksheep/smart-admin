@@ -27,6 +27,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repositor
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.UsableSprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.abstractimpl.BaseServiceImpl;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.service.TypeService;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.sorter.SprinklerSorter;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.RepositorySprinklerQueryStrategy;
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
@@ -77,7 +78,6 @@ public class SprinklerService {
         queryForm.setDeletedFlag(Boolean.FALSE);
         Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
         List<SprinklerVO> sprinklerList = sprinklerRepository.getListByQueryPage(page, queryForm);
-
         PageResult<SprinklerVO> pageResult = SmartPageUtil.convert2PageResult(page, sprinklerList);
         return ResponseDTO.ok(pageResult);
     }
@@ -228,7 +228,7 @@ public class SprinklerService {
         String msg = String.format(
                 "成功插入%d条，错误数据（空值/重复）:%s",
                 successCount,
-                errorData.isEmpty() ? "无" : String.join(",", errorData)
+                errorData.isEmpty() ? "无" : "存在空值或重复数据"
         );
         return ResponseDTO.okMsg(msg);
     }
@@ -257,6 +257,13 @@ public class SprinklerService {
         vo.setCreateUserName(user.getUserName());
     }
 
+    // 辅助方法：初始化创建对象
+    private <T extends BaseUpdateForm> void initUpdateVO(T vo, RequestUser user) {
+        vo.setDisabledFlag(Boolean.FALSE);
+        vo.setCreateUserId(user.getUserId());
+        vo.setCreateUserName(user.getUserName());
+    }
+
 
     public List<?> getRepositorySprinklerExcelExportData(@Valid CombinedQueryForm queryForm) {
         Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
@@ -280,6 +287,7 @@ public class SprinklerService {
     /**
      * 编辑全部喷头
      */
+    @Transactional(rollbackFor = Exception.class)
     public ResponseDTO<String> updateSprinkler(@Valid SprinklerUpdateForm updateVO) {
         Long sprinklerId = updateVO.getSprinklerId();
         // 校验喷头是否存在
@@ -324,7 +332,7 @@ public class SprinklerService {
         // 校验各仓喷头是否存在
         Object repoSprinklerDetail = repository.getById(sprinklerId);
         if (Objects.isNull(repoSprinklerDetail)) {
-            return ResponseDTO.userErrorParam("喷头不存在");
+            return ResponseDTO.userErrorParam("该仓喷头不存在");
         }
         // 动态实例化并拷贝
         Object entity = clazz.getDeclaredConstructor().newInstance();
@@ -334,7 +342,7 @@ public class SprinklerService {
         deletedFlagField.setAccessible(true);
         Boolean deleted = (Boolean) deletedFlagField.get(repoSprinklerDetail);
         if (Boolean.TRUE.equals(deleted)) {
-            return ResponseDTO.userErrorParam("喷头已被删除");
+            return ResponseDTO.userErrorParam("该喷头已被删除");
         }
 
         // 验证各仓喷头序列号是否重复
@@ -348,6 +356,42 @@ public class SprinklerService {
         Object updateEntity = SmartBeanUtil.copy(repoSprinklerDetail, clazz);
         SmartBeanUtil.copyProperties(updateVO, updateEntity);
         repository.myUpdateById(updateEntity);
+        return ResponseDTO.ok();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseDTO<String> updateBatchSprinkler(@Valid MultipartFile file, RequestUser requestUser) {
+        //使用收集器一次性完成字段设置，避免冗余操作
+        List<SprinklerUpdateForm> updateVOs = ExcelUtil.importExcelByClass(file, SprinklerUpdateForm.class)
+                .stream()
+                .peek(vo -> initCreateVO(vo, requestUser)) // 提取字段设置为独立方法
+                .toList();
+        updateVOs.forEach(this::updateSprinkler);
+        return ResponseDTO.ok();
+    }
+
+    public <T extends BaseUpdateForm> ResponseDTO<String> updateBatchSprinkler(@Valid MultipartFile file, Byte type, RequestUser requestUser) {
+        Class<T> baseUpdateFormClass = (Class<T>) typeService.getCachedUpdateForm(type);
+        //使用收集器一次性完成字段设置，避免冗余操作
+        List<T> updateVOs = ExcelUtil.importExcelByClass(file, baseUpdateFormClass)
+                .stream()
+                .peek(vo -> initUpdateVO(vo, requestUser)) // 提取字段设置为独立方法
+                .toList();
+        updateVOs.forEach(vo -> {
+            try {
+                updateRepositorySprinkler(vo, type);
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e);
+            } catch (InstantiationException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            }
+        });
         return ResponseDTO.ok();
     }
 }

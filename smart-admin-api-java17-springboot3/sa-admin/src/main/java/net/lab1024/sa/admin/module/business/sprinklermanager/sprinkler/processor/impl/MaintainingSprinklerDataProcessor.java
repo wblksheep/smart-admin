@@ -46,72 +46,77 @@ public class MaintainingSprinklerDataProcessor implements DataProcessor<Maintain
             return ResponseDTO.userErrorParam("导入数据为空");
         }
 
-        // 2. 数据预处理分区（使用Stream分区优化处理效率）
-        Map<Boolean, List<MaintainingSprinklerCreateForm>> preprocessed = createVOs.stream()
-                .collect(Collectors.partitioningBy(
-                        form -> StringUtils.isNotBlank(form.getSprinklerSerial())
-                                && form.getStatus() == RepositorySprinklerTypeEnum.MAINTAINING_REPOSITORY.getValue().byteValue())
-                );
-        List<MaintainingSprinklerCreateForm> validForms = preprocessed.get(true);
-        List<MaintainingSprinklerCreateForm> invalidForms = preprocessed.get(false);
+        try{
+            // 2. 数据预处理分区（使用Stream分区优化处理效率）
+            Map<Boolean, List<MaintainingSprinklerCreateForm>> preprocessed = createVOs.stream()
+                    .collect(Collectors.partitioningBy(
+                            form -> StringUtils.isNotBlank(form.getSprinklerSerial())
+                                    && form.getStatus() == RepositorySprinklerTypeEnum.MAINTAINING_REPOSITORY.getValue().byteValue())
+                    );
+            List<MaintainingSprinklerCreateForm> validForms = preprocessed.get(true);
+            List<MaintainingSprinklerCreateForm> invalidForms = preprocessed.get(false);
 
-        // 3. 收集无效序列号（并行流优化处理大数据量场景）
-        Set<String> invalidSerials = collectInvalidSerials(invalidForms);
+            // 3. 收集无效序列号（并行流优化处理大数据量场景）
+            Set<String> invalidSerials = collectInvalidSerials(invalidForms);
 
-        // 4. 批量查询主表数据（优化点：合并查询减少数据库IO）
-        Set<String> serials = validForms.stream()
-                .map(MaintainingSprinklerCreateForm::getSprinklerSerial)
-                .collect(Collectors.toSet());
-        Map<String, SprinklerEntity> mainTableMap = getMainTableMap(serials);
+            // 4. 批量查询主表数据（优化点：合并查询减少数据库IO）
+            Set<String> serials = validForms.stream()
+                    .map(MaintainingSprinklerCreateForm::getSprinklerSerial)
+                    .collect(Collectors.toSet());
+            Map<String, SprinklerEntity> mainTableMap = getMainTableMap(serials);
 
-        // 5. 主表校验及维修仓重复校验（双重校验优化）
-        // 5.1 批量查询已存在的序列号（优化点：合并查询条件）
-        Set<String> existingSerials = getExistingSprinklerSerials(validForms);
+            // 5. 主表校验及维修仓重复校验（双重校验优化）
+            // 5.1 批量查询已存在的序列号（优化点：合并查询条件）
+            Set<String> existingSerials = getExistingSprinklerSerials(validForms);
 
-        // 5.2 过滤有效数据（使用Map快速查找优化性能）
-        List<MaintainingSprinklerCreateForm> filteredForms = validForms.stream()
-                .filter(form -> {
-                    SprinklerEntity mainRecord = mainTableMap.get(form.getSprinklerSerial());
-                    return mainRecord != null && !existingSerials.contains(form.getSprinklerSerial());
-                })
-                .toList();
+            // 5.2 过滤有效数据（使用Map快速查找优化性能）
+            List<MaintainingSprinklerCreateForm> filteredForms = validForms.stream()
+                    .filter(form -> {
+                        SprinklerEntity mainRecord = mainTableMap.get(form.getSprinklerSerial());
+                        return mainRecord != null && !existingSerials.contains(form.getSprinklerSerial());
+                    })
+                    .toList();
 
-        // 6. 实体转换（使用Bean拷贝工具优化代码简洁性）
-        List<MaintainingSprinklerEntity> entities = filteredForms.stream()
-                .map(form -> convertToWarehouseEntity(form, mainTableMap))
-                .filter(entity -> entity.getSprinklerId() != null)
-                .toList();
+            // 6. 实体转换（使用Bean拷贝工具优化代码简洁性）
+            List<MaintainingSprinklerEntity> entities = filteredForms.stream()
+                    .map(form -> convertToWarehouseEntity(form, mainTableMap))
+                    .filter(entity -> entity.getSprinklerId() != null)
+                    .toList();
 
-        // 7. 准备主表更新数据（状态更新优化）
-        List<SprinklerEntity> mainTableUpdates = new ArrayList<>();
-        filteredForms.forEach(form -> {
-            SprinklerEntity mainRecord = mainTableMap.get(form.getSprinklerSerial());
-            if (mainRecord.getStatus() != RepositorySprinklerTypeEnum.MAINTAINING_REPOSITORY.getValue().byteValue()) {
-                mainRecord.setStatus(RepositorySprinklerTypeEnum.MAINTAINING_REPOSITORY.getValue().byteValue());
-                mainTableUpdates.add(mainRecord);
+            // 7. 准备主表更新数据（状态更新优化）
+            List<SprinklerEntity> mainTableUpdates = new ArrayList<>();
+            filteredForms.forEach(form -> {
+                SprinklerEntity mainRecord = mainTableMap.get(form.getSprinklerSerial());
+                if (mainRecord.getStatus() != RepositorySprinklerTypeEnum.MAINTAINING_REPOSITORY.getValue().byteValue()) {
+                    mainRecord.setStatus(RepositorySprinklerTypeEnum.MAINTAINING_REPOSITORY.getValue().byteValue());
+                    mainTableUpdates.add(mainRecord);
+                }
+            });
+
+            // 7.1 收集需要更新的主表ID（ID提取优化）
+            List<Long> mainIdsToUpdate = mainTableUpdates.stream()
+                    .map(SprinklerEntity::getSprinklerId)
+                    .toList();
+
+            // 8. 批量操作（数据库操作优化）
+            // 8.1 批量更新主表状态（使用UpdateWrapper优化更新效率）
+            if (!mainTableUpdates.isEmpty()) {
+                UpdateWrapper<SprinklerEntity> updateWrapper = new UpdateWrapper<>();
+                updateWrapper.in("sprinkler_id", mainIdsToUpdate)
+                        .set("status", RepositorySprinklerTypeEnum.MAINTAINING_REPOSITORY.getValue().byteValue());
+                sprinklerRepository.update(updateWrapper);
             }
-        });
+            // 8.2 批量插入维修仓数据（使用MyBatis-Plus批量操作优化）
+            if (!entities.isEmpty()) {
+                maintainingSprinklerRepository.saveBatch(entities);
+            }
 
-        // 7.1 收集需要更新的主表ID（ID提取优化）
-        List<Long> mainIdsToUpdate = mainTableUpdates.stream()
-                .map(SprinklerEntity::getSprinklerId)
-                .toList();
-
-        // 8. 批量操作（数据库操作优化）
-        // 8.1 批量更新主表状态（使用UpdateWrapper优化更新效率）
-        if (!mainTableUpdates.isEmpty()) {
-            UpdateWrapper<SprinklerEntity> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.in("sprinkler_id", mainIdsToUpdate)
-                    .set("status", RepositorySprinklerTypeEnum.MAINTAINING_REPOSITORY.getValue().byteValue());
-            sprinklerRepository.update(updateWrapper);
-        }
-        // 8.2 批量插入维修仓数据（使用MyBatis-Plus批量操作优化）
-        if (!entities.isEmpty()) {
-            maintainingSprinklerRepository.saveBatch(entities);
+            // 9. 返回处理结果（结果信息优化）
+            return ResponseDTO.ok("处理成功，无效数据：" + invalidSerials);
+        }catch (NullPointerException e){
+            return ResponseDTO.userErrorParam("所在仓status不能为空");
         }
 
-        // 9. 返回处理结果（结果信息优化）
-        return ResponseDTO.ok("处理成功，无效数据：" + invalidSerials);
     }
 
     /**

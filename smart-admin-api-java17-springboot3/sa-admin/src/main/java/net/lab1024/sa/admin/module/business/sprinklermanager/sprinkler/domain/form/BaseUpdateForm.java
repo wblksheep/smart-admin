@@ -20,6 +20,7 @@ import org.hibernate.validator.constraints.Length;
 })
 @Data
 public abstract class BaseUpdateForm {
+    @ExcelProperty("喷头ID")
     @Schema(description = "喷头ID")
     @NotNull(message = "喷头ID不能为空")
     private Long sprinklerId;

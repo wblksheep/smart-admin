@@ -49,6 +49,8 @@ public class StatisticService {
                     generator.generateSheet(excelWriter, startDate, endDate);
                 } catch (ExcelGenerateException e) {
                     log.error("Sheet生成失败", e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
             });
         }
@@ -59,14 +61,18 @@ public class StatisticService {
     /**
      * 查询每月统计模块
      */
-    public ResponseDTO<List<MonthlyStatisticSheetVO>> getMonthlyStatisticSheet(LocalDate startDate, LocalDate endDate) {
+    public ResponseDTO<List<MonthlyStatisticSheetVO>> getMonthlyStatisticSheet(LocalDate startDate, LocalDate endDate) throws IOException {
         MonthlyStatisticSheet statisticSheet = factory.createMonthlyStatisticSheet();
-        List<MonthlyStatisticExcelVO> datas = statisticSheet.calculateMonthlyData(startDate, endDate, Boolean.FALSE);
-        return ResponseDTO.ok(datas.stream().map(data -> {
-            MonthlyStatisticSheetVO vo = new MonthlyStatisticSheetVO();
-            SmartBeanUtil.copyProperties(data, vo);
-            return vo;
-        }).collect(Collectors.toList()));
+        try {
+            List<MonthlyStatisticExcelVO> datas = statisticSheet.calculateMonthlyData(startDate, endDate, Boolean.FALSE);
+            return ResponseDTO.ok(datas.stream().map(data -> {
+                MonthlyStatisticSheetVO vo = new MonthlyStatisticSheetVO();
+                SmartBeanUtil.copyProperties(data, vo);
+                return vo;
+            }).collect(Collectors.toList()));
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return ResponseDTO.userErrorParam("没有提供月初统计数据");
+        }
     }
 
 

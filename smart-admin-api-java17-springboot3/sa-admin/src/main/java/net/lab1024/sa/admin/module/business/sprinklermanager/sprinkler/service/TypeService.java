@@ -2,8 +2,7 @@ package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.service;
 
 import jakarta.annotation.Resource;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.*;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.MachineSprinklerUpdateForm;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.UsableSprinklerUpdateForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.*;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.*;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.abstractimpl.BaseServiceImpl;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.impl.UsableSprinklerRepositoryImpl;
@@ -18,6 +17,7 @@ public class TypeService {
 
     private static final Map<Byte, Class<?>> ENTITY_CLASS_CACHE = new ConcurrentHashMap<>();
     private static final Map<Class<?>, BaseIService<?>> REPOSITORY_CACHE = new ConcurrentHashMap<>();
+    private static final Map<Byte, Class<?>> UPDATE_FORM_CLASS_CACHE = new ConcurrentHashMap<>();
 
     @Resource
     private UsableSprinklerRepository usableSprinklerRepository;
@@ -52,6 +52,14 @@ public class TypeService {
         );
     }
 
+    public Class<?> getCachedUpdateForm(Byte type) {
+        // 先获取或缓存实体类
+        return UPDATE_FORM_CLASS_CACHE.computeIfAbsent(
+                type,
+                t -> this.getUpdateFormClass(t)
+        );
+    }
+
     private BaseIService<?> getRepository(Class<?> clazz) {
         switch (clazz.getSimpleName()) {
             case "UsableSprinklerEntity":
@@ -81,6 +89,23 @@ public class TypeService {
                 return DamagedSprinklerEntity.class;
             case 4:
                 return RmaSprinklerEntity.class;
+            default:
+                throw new IllegalArgumentException("未知的类型：" + type);
+        }
+    }
+
+    private Class<?> getUpdateFormClass(Byte type) {
+        switch (type) {
+            case 0:
+                return UsableSprinklerUpdateForm.class;
+            case 1:
+                return MachineSprinklerUpdateForm.class;
+            case 2:
+                return MaintainingSprinklerUpdateForm.class;
+            case 3:
+                return DamagedSprinklerUpdateForm.class;
+            case 4:
+                return RmaSprinklerUpdateForm.class;
             default:
                 throw new IllegalArgumentException("未知的类型：" + type);
         }

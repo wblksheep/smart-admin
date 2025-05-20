@@ -51,7 +51,7 @@ public class StatisticController {
     @Operation(summary = "查询每月统计信息 @author 芦苇")
     @PostMapping("/sprinklermanager/statistic/monthlyStatisticSheetQuery")
     @SaCheckPermission("sprinklermanager:statistic:query")
-    public ResponseDTO<List<MonthlyStatisticSheetVO>> monthlyStatisticSheetQuery(@RequestBody @Valid MonthlyStatisticSheetQueryForm queryForm){
+    public ResponseDTO<List<MonthlyStatisticSheetVO>> monthlyStatisticSheetQuery(@RequestBody @Valid MonthlyStatisticSheetQueryForm queryForm) throws IOException {
         return statisticService.getMonthlyStatisticSheet(queryForm.getStartDate(), queryForm.getEndDate());
     }
 }

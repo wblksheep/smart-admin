@@ -19,9 +19,6 @@ public class UsableSprinklerExcelVO extends BaseSprinklerExcelVO{
     @ExcelProperty("喷头型号")
     private String sprinklerModel;
 
-    @ExcelProperty("喷头序列号")
-    private String sprinklerSerial;
-
     @ExcelProperty("发货日期")
     private LocalDate shippingDate;
 
