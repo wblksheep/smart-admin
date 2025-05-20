@@ -12,12 +12,14 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.allocationrecord.re
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.SprinklerService;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
+import net.lab1024.sa.admin.module.system.employee.domain.entity.EmployeeEntity;
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
 import net.lab1024.sa.base.common.util.ExcelUtil;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
 import net.lab1024.sa.base.common.util.SmartPageUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +43,6 @@ public class AllocationRecordService {
 
     /**
      * 新建领用记录
-     *
      */
     @Transactional(rollbackFor = Exception.class)
     public ResponseDTO<String> createAllocationRecord(AllocationRecordCreateForm createVO) {
@@ -70,7 +71,6 @@ public class AllocationRecordService {
 
     /**
      * 查询领用记录详情
-     *
      */
     public AllocationRecordVO getDetail(Long recordId) {
         return allocationRecordRepository.getDetail(recordId, Boolean.FALSE);
@@ -78,7 +78,6 @@ public class AllocationRecordService {
 
     /**
      * 编辑领用记录
-     *
      */
     @Transactional(rollbackFor = Exception.class)
     public ResponseDTO<String> updateAllocationRecord(AllocationRecordUpdateForm updateVO) {
@@ -91,7 +90,7 @@ public class AllocationRecordService {
         Long sprinklerId = updateVO.getSprinklerId();
         // 验证喷头是否存在
         List<SprinklerEntity> sprinklerDetails = sprinklerRepository.getListBySprinklerSerials(Arrays.asList(updateVO.getSprinklerSerial()));
-        if(sprinklerDetails.isEmpty()){
+        if (sprinklerDetails.isEmpty()) {
             return ResponseDTO.userErrorParam("喷头不存在");
         }
         SprinklerEntity sprinklerDetail = sprinklerDetails.get(0);
@@ -102,6 +101,7 @@ public class AllocationRecordService {
         allocationRecordRepository.updateById(updateEntity);
         return ResponseDTO.ok();
     }
+
     /**
      * 删除领用记录
      */
@@ -114,6 +114,28 @@ public class AllocationRecordService {
         }
         allocationRecordDetail.setDeletedFlag(Boolean.TRUE);
         allocationRecordRepository.updateById(allocationRecordDetail);
+        return ResponseDTO.ok();
+    }
+
+    /**
+     * 批量删除领用记录
+     */
+    public ResponseDTO<String> batchUpdateDeleteFlag(List<Long> recordIdList) {
+        if (CollectionUtils.isEmpty(recordIdList)) {
+            return ResponseDTO.ok();
+        }
+        List<AllocationRecordEntity> allocationRecordEntityList = allocationRecordRepository.listByIds(recordIdList);
+        if (CollectionUtils.isEmpty(allocationRecordEntityList)) {
+            return ResponseDTO.ok();
+        }
+        // 更新删除
+        List<AllocationRecordEntity> deleteList = recordIdList.stream().map(e -> {
+            AllocationRecordEntity updateAllocationRecord = new AllocationRecordEntity();
+            updateAllocationRecord.setRecordId(e);
+            updateAllocationRecord.setDeletedFlag(true);
+            return updateAllocationRecord;
+        }).collect(Collectors.toList());
+        allocationRecordRepository.updateBatchById(deleteList);
         return ResponseDTO.ok();
     }
 }

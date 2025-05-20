@@ -213,12 +213,12 @@ public class SprinklerService {
             sprinklerRepository.saveBatch(validData);
             return buildResponse(validData.size(), errorData);
         }
-        return ResponseDTO.userErrorParam("无有效数据可插入，错误数据：" + String.join(",", errorData));
+        return ResponseDTO.userErrorParam("无有效数据可插入，错误数据：全部为空值或重复序列号");
 
     }
 
 
-    // 辅助方法
+    // 辅助方法w
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Set<Object> seen = ConcurrentHashMap.newKeySet();
         return t -> seen.add(keyExtractor.apply(t));

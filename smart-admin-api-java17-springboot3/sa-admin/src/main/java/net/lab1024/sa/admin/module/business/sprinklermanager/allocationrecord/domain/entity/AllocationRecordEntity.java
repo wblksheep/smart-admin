@@ -41,6 +41,18 @@ public class AllocationRecordEntity {
     private String allocateUser;
 
     /**
+     * 领用日期
+     */
+    @DataTracerFieldLabel("领用日期")
+    private LocalDate allocateDate;
+
+    /**
+     * 备注
+     */
+    @DataTracerFieldLabel("备注")
+    private String note;
+
+    /**
      * 禁用状态
      */
     @DataTracerFieldLabel("禁用状态")

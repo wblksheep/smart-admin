@@ -63,6 +63,13 @@ public class MaintainingRecordController {
         return maintainingRecordService.createMaintainingRecord(createVO);
     }
 
+    @Operation(summary = "删除维修记录 @author 芦苇")
+    @GetMapping("/sprinklermanager/maintainingrecord/delete/{recordId}")
+    @SaCheckPermission("sprinklermanager:maintainingrecord:delete")
+    public ResponseDTO<String> delete(@PathVariable Long recordId) {
+        return maintainingRecordService.update(recordId);
+    }
+
     @Operation(summary = "查询维修记录详情 @author 芦苇")
     @GetMapping("/sprinklermanager/maintainingrecord/get/{recordId}")
     @SaCheckPermission("sprinklermanager:maintainingrecord:detail")

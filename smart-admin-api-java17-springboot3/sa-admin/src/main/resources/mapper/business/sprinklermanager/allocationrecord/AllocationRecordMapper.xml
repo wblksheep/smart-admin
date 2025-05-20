@@ -14,6 +14,16 @@
             <if test="queryForm.allocateUser != null and queryForm.allocateUser != ''">
                 AND INSTR(allocate_user,#{queryForm.allocateUser})
             </if>
+            <if test="queryForm.allocateDateStartTime != null">
+                AND DATE_FORMAT(allocate_date, '%Y-%m-%d') &gt;= #{queryForm.allocateDateStartTime}
+            </if>
+            <if test="queryForm.allocateDateEndTime != null">
+                AND DATE_FORMAT(allocate_date, '%Y-%m-%d') &lt;= #{queryForm.allocateDateEndTime}
+            </if>
+
+            <if test="queryForm.note != null and queryForm.note != ''">
+                AND INSTR(note,#{queryForm.note})
+            </if>
             <if test="queryForm.disabledFlag != null">
                 AND disabled_flag = #{queryForm.disabledFlag}
             </if>

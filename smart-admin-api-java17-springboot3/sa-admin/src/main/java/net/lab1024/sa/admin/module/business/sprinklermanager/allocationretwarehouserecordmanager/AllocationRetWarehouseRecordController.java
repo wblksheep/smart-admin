@@ -59,7 +59,7 @@ public class AllocationRetWarehouseRecordController {
     @Operation(summary = "分页查询领用与返仓记录模块 @author 芦苇")
     @PostMapping("/sprinklermanager/allocationretwarehouserecord/page/query")
     @SaCheckPermission("sprinklermanager:allocationretwarehouserecord:query")
-    public ResponseDTO<PageResult<AllocationRetWarehouseVO>> queryByPage(@RequestBody @Valid AllocationRetWarehouseQueryForm queryForm) {
+    public ResponseDTO<PageResult<AllocationRetWarehouseRecordVO>> queryByPage(@RequestBody @Valid AllocationRetWarehouseQueryForm queryForm) {
         return allocationRetWarehouseRecordService.queryByPage(queryForm);
     }
 

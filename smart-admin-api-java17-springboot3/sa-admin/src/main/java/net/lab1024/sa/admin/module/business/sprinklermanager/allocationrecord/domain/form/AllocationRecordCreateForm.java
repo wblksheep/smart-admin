@@ -7,6 +7,8 @@ import lombok.Data;
 import net.lab1024.sa.base.common.domain.PageParam;
 import org.hibernate.validator.constraints.Length;
 
+import java.time.LocalDate;
+
 @Data
 public class AllocationRecordCreateForm {
 
@@ -18,6 +20,13 @@ public class AllocationRecordCreateForm {
     @Schema(description = "领用人")
     @Length(max = 255, message = "领用人最多255字符")
     private String allocateUser;
+
+    @Schema(description = "领用日期")
+    private LocalDate allocateDate;
+
+    @Schema(description = "备注")
+    @Length(max = 255, message = "备注最多255字符")
+    private String note;
 
     @Schema(description = "禁用状态")
     private Boolean disabledFlag;

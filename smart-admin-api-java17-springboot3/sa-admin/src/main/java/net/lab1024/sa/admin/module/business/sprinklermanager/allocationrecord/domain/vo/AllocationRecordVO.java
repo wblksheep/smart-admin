@@ -26,6 +26,12 @@ public class AllocationRecordVO {
     @Schema(description = "领用人")
     private String allocateUser;
 
+    @Schema(description = "领用日期")
+    private LocalDate allocateDate;
+
+    @Schema(description = "备注")
+    private String note;
+
     @Schema(description = "禁用状态")
     private Boolean disabledFlag;
 

@@ -18,6 +18,8 @@ import net.lab1024.sa.base.common.util.SmartRequestUtil;
 import net.lab1024.sa.base.module.support.operatelog.annotation.OperateLog;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 领用记录
  *
@@ -60,8 +62,16 @@ public class AllocationRecordController {
 
     @Operation(summary = "删除领用记录 @author 芦苇")
     @GetMapping("/sprinklermanager/allocationrecord/delete/{recordId}")
+    @SaCheckPermission("sprinklermanager:allocationrecord:delete")
     public ResponseDTO<String> deleteAllocationRecord(@PathVariable Long recordId) {
         return allocationRecordService.deleteAllocationRecord(recordId);
+    }
+
+    @Operation(summary = "批量删除领用记录 @author 芦苇")
+    @PostMapping("/sprinklermanager/allocationrecord/update/batch/delete")
+    @SaCheckPermission("sprinklermanager:allocationrecord:batchdelete")
+    public ResponseDTO<String> batchUpdateDeleteFlag(@RequestBody List<Long> recordIdList) {
+        return allocationRecordService.batchUpdateDeleteFlag(recordIdList);
     }
 
 }

@@ -15,6 +15,15 @@ public class AllocationRecordQueryForm extends PageParam {
     @Schema(description = "领用人")
     private String allocateUser;
 
+    @Schema(description = "领用日期开始时间")
+    private LocalDate allocateDateStartTime;
+
+    @Schema(description = "领用日期结束时间")
+    private LocalDate allocateDateEndTime;
+
+    @Schema(description = "备注")
+    private String note;
+
     @Schema(description = "禁用状态")
     private Boolean disabledFlag;
 

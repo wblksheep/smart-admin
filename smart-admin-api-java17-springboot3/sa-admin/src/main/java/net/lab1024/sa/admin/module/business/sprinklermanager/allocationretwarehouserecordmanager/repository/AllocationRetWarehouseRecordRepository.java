@@ -5,13 +5,17 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.entity.AllocationRetWarehouseRecordEntity;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordQueryForm;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseRecordVO;
+import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseRecordVO;
+import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
 public interface AllocationRetWarehouseRecordRepository extends IService<AllocationRetWarehouseRecordEntity> {
     AllocationRetWarehouseRecordVO getDetail(Long recordId, Boolean deletedFlag);
+
+    List<AllocationRetWarehouseRecordVO> getListByQueryPage(Page<?> page, @Param("queryForm") AllocationRetWarehouseQueryForm queryForm);
 //    List<AllocationRetWarehouseRecordVO> getListByQueryPage(Page<?> page, @Param("queryForm") AllocationRetWarehouseRecordQueryForm queryForm);
 //
 //    AllocationRetWarehouseRecordVO getDetail(@Param("recordId") Long recordId, @Param("deletedFlag") Boolean deletedFlag);

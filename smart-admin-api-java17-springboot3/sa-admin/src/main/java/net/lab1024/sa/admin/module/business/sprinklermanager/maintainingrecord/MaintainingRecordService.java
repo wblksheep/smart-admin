@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.module.business.oa.enterprise.domain.entity.EnterpriseEntity;
 import net.lab1024.sa.admin.module.business.oa.enterprise.domain.form.EnterpriseCreateForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.allocationrecord.domain.entity.AllocationRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.entity.MaintainingRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordCreateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordQueryForm;
@@ -91,7 +92,8 @@ public class MaintainingRecordService {
 
     /**
      * 实体转换方法（使用SmartBeanUtil优化属性拷贝）
-     * @param form 表单对象
+     *
+     * @param form         表单对象
      * @param mainTableMap 主表数据映射
      * @return 可用仓实体
      */
@@ -122,6 +124,7 @@ public class MaintainingRecordService {
 
     /**
      * 收集无效序列号（空值过滤优化）
+     *
      * @param invalidForms 无效表单列表
      * @return 无效序列号集合
      */
@@ -155,9 +158,9 @@ public class MaintainingRecordService {
         vo.setCreateUserId(user.getUserId());
         vo.setCreateUserName(user.getUserName());
     }
+
     /**
      * 新建维修记录
-     *
      */
     @Transactional(rollbackFor = Exception.class)
     public ResponseDTO<String> createMaintainingRecord(MaintainingRecordCreateForm createVO) {
@@ -186,9 +189,22 @@ public class MaintainingRecordService {
 
     /**
      * 查询维修记录详情
-     *
      */
     public MaintainingRecordVO getDetail(Long recordId) {
         return maintainingRecordRepository.getDetail(recordId, Boolean.FALSE);
+    }
+
+    /**
+     * 删除维修记录
+     */
+    public ResponseDTO<String> update(Long recordId) {
+        // 校验领用记录是否存在
+        MaintainingRecordEntity maintainingRecordDetail = maintainingRecordRepository.getById(recordId);
+        if (Objects.isNull(maintainingRecordDetail) || maintainingRecordDetail.getDeletedFlag()) {
+            return ResponseDTO.userErrorParam("维修记录不存在");
+        }
+        maintainingRecordDetail.setDeletedFlag(Boolean.TRUE);
+        maintainingRecordRepository.updateById(maintainingRecordDetail);
+        return ResponseDTO.ok();
     }
 }

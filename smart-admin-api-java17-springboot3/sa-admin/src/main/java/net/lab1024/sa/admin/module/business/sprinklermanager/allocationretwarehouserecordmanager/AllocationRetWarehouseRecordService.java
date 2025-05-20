@@ -132,12 +132,12 @@ public class AllocationRetWarehouseRecordService {
     /**
      * 分页查询领用与返仓模块
      */
-    public ResponseDTO<PageResult<AllocationRetWarehouseVO>> queryByPage(AllocationRetWarehouseQueryForm queryForm) {
+    public ResponseDTO<PageResult<AllocationRetWarehouseRecordVO>> queryByPage(AllocationRetWarehouseQueryForm queryForm) {
         queryForm.setDeletedFlag(Boolean.FALSE);
         Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
-        List<AllocationRetWarehouseVO> allocationRetWarehouseList = allocationRetWarehouseRepository.getListByQueryPage(page, queryForm);
+        List<AllocationRetWarehouseRecordVO> allocationRetWarehouseRecordList = allocationRetWarehouseRecordRepository.getListByQueryPage(page, queryForm);
 
-        PageResult<AllocationRetWarehouseVO> pageResult = SmartPageUtil.convert2PageResult(page, allocationRetWarehouseList);
+        PageResult<AllocationRetWarehouseRecordVO> pageResult = SmartPageUtil.convert2PageResult(page, allocationRetWarehouseRecordList);
         return ResponseDTO.ok(pageResult);
     }
 
