@@ -72,9 +72,9 @@ public class MaintainingRecordController {
     }
 
     @Operation(summary = "编辑维修记录 @author 芦苇")
-    @GetMapping("/sprinklermanager/maintainingrecord/update")
-    @SaCheckPermission("sprinklermanager:maintainingrecord:delete")
-    public ResponseDTO<String> delete(@RequestBody @Valid MaintainingRecordUpdateForm updateVO) {
+    @PostMapping("/sprinklermanager/maintainingrecord/update")
+    @SaCheckPermission("sprinklermanager:maintainingrecord:update")
+    public ResponseDTO<String> update(@RequestBody @Valid MaintainingRecordUpdateForm updateVO) {
         return maintainingRecordService.updateMaintainingRecord(updateVO);
     }
 

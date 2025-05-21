@@ -43,7 +43,9 @@ public class SprinklerRepositoryImpl extends ServiceImpl<SprinklerDao, Sprinkler
         LambdaQueryWrapper<SprinklerEntity> lqw = new LambdaQueryWrapper<>();
         lqw.eq(SprinklerEntity::getSprinklerSerial, sprinklerSerial);
         lqw.eq(SprinklerEntity::getDeletedFlag, deletedFlag);
-        lqw.ne(SprinklerEntity::getSprinklerId, sprinklerId);
+        if (sprinklerId != null) {
+            lqw.ne(SprinklerEntity::getSprinklerId, sprinklerId);
+        }
         return this.getBaseMapper().selectOne(lqw);
     }
 

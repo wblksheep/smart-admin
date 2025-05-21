@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import net.lab1024.sa.admin.module.business.oa.enterprise.dao.EnterpriseDao;
 import net.lab1024.sa.admin.module.business.oa.enterprise.domain.entity.EnterpriseEntity;
 import net.lab1024.sa.admin.module.business.oa.enterprise.domain.vo.EnterpriseVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeChineseEnum;
@@ -37,6 +38,7 @@ import net.lab1024.sa.base.common.util.ExcelUtil;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
 import net.lab1024.sa.base.common.util.SmartPageUtil;
 import net.lab1024.sa.base.common.util.SmartRequestUtil;
+import net.lab1024.sa.base.module.support.datatracer.constant.DataTracerTypeEnum;
 import net.lab1024.sa.base.module.support.datatracer.service.DataTracerService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +77,10 @@ public class SprinklerService {
 
     @Resource
     private RepositorySprinklerTransferStrategyFactory repositorySprinklerTransferStrategyFactory;
+    @Autowired
+    private UsableSprinklerRepository usableSprinklerRepository;
+    @Autowired
+    private EnterpriseDao enterpriseDao;
 
 
     /**
@@ -442,8 +448,25 @@ public class SprinklerService {
     }
 
     /**
-     * 新建银行信息
+     * 新建全部喷头
      */
-    public ResponseDTO<String> createSprinkler(@Valid SprinklerCreateForm createVO) {
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseDTO<String> createSprinkler(SprinklerCreateForm createVO) {
+        // 验证喷头序列号是否重复
+        SprinklerEntity validSprinkler = sprinklerRepository.queryBySprinklerSerial(createVO.getSprinklerSerial(), null, Boolean.FALSE);
+        if (Objects.nonNull(validSprinkler)) {
+            return ResponseDTO.userErrorParam("喷头序列号重复");
+        }
+        // 数据插入
+        SprinklerEntity insertSprinkler = SmartBeanUtil.copy(createVO, SprinklerEntity.class);
+        sprinklerRepository.save(insertSprinkler);
+
+        UsableSprinklerEntity usableSprinkler = new UsableSprinklerEntity();
+        usableSprinkler.setSprinklerId(insertSprinkler.getSprinklerId());
+        usableSprinkler.setSprinklerSerial(insertSprinkler.getSprinklerSerial());
+        usableSprinkler.setCreateUserId(insertSprinkler.getCreateUserId());
+        usableSprinkler.setCreateUserName(insertSprinkler.getCreateUserName());
+        usableSprinklerRepository.save(usableSprinkler);
+        return ResponseDTO.ok();
     }
 }
