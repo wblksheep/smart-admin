@@ -10,7 +10,6 @@
             <if test="queryForm.sprinklerSerial != null and queryForm.sprinklerSerial != ''">
                 AND INSTR(sprinkler_serial,#{queryForm.sprinklerSerial})
             </if>
-
             <if test="queryForm.allocateUser != null and queryForm.allocateUser != ''">
                 AND INSTR(allocate_user,#{queryForm.allocateUser})
             </if>

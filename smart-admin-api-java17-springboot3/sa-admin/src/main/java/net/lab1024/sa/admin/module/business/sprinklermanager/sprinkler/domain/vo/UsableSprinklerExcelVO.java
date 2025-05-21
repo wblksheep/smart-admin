@@ -35,7 +35,7 @@ public class UsableSprinklerExcelVO extends BaseSprinklerExcelVO{
     private String history;
 
     @ExcelProperty("新旧喷头")
-    private Boolean isNew;
+    private String isNew;
 
     @ExcelProperty("返仓日期")
     private LocalDate retWarehouseDate;
@@ -48,5 +48,13 @@ public class UsableSprinklerExcelVO extends BaseSprinklerExcelVO{
 
     @ExcelProperty("喷头详情")
     private String sprinklerDetail;
+
+    public String getIsNew() {
+        return this.isNew;
+    }
+
+    public void setIsNew(Boolean isNew) {
+        this.isNew = isNew ? "新喷头" : "旧喷头";
+    }
 
 }

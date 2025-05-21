@@ -73,7 +73,7 @@ public class SprinklerController {
             @RequestPart("file") @Valid MultipartFile file
     ) {
         RequestUser requestUser = SmartRequestUtil.getRequestUser();
-        return sprinklerService.batchSprinklerCreate(file, requestUser);
+        return sprinklerService.batchSprinklerImport(file, requestUser);
     }
 
     @Operation(summary = "新建全部喷头 @author 芦苇")
@@ -126,7 +126,7 @@ public class SprinklerController {
         return sprinklerService.updateRepositorySprinkler(updateVO, type);
     }
 
-    @Operation(summary = "批量新建各仓喷头 @author 芦苇")
+    @Operation(summary = "批量导入各仓喷头 @author 芦苇")
     @PostMapping("/sprinklermanager/repositorysprinkler/create")
     @SaCheckPermission("sprinklermanager:repositorysprinkler:add")
     public ResponseDTO<String> createRepositorySprinkler(
@@ -134,7 +134,7 @@ public class SprinklerController {
             Integer type
     ) {
         RequestUser requestUser = SmartRequestUtil.getRequestUser();
-        return sprinklerService.batchRepositorySprinklerCreate(file, requestUser, type);
+        return sprinklerService.batchRepositorySprinklerImport(file, requestUser, type);
     }
 
 

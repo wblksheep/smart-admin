@@ -15,9 +15,6 @@ import java.time.LocalDate;
 @Data
 public class DamagedSprinklerExcelVO extends BaseSprinklerExcelVO{
 
-    @ExcelProperty("喷头序列号")
-    private String sprinklerSerial;
-
     @ExcelProperty("返仓日期")
     private LocalDate retWarehouseDate;
 

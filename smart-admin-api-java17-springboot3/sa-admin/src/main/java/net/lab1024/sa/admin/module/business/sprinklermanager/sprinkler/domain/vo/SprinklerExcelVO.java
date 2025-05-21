@@ -53,12 +53,47 @@ public class SprinklerExcelVO {
     @ExcelProperty("历史")
     private String history;
 
-    @ExcelProperty("所在仓status")
-    private Byte status;
+    @ExcelProperty("所在仓")
+    private String status;
 
     @ExcelProperty("新旧喷头")
-    private Boolean isNew;
+    private String isNew;
 
     @ExcelProperty("喷头详情")
     private String sprinklerDetail;
+
+    public String getIsNew() {
+        return this.isNew;
+    }
+
+    public void setIsNew(Boolean isNew) {
+        this.isNew = isNew ? "新喷头" : "旧喷头";
+    }
+
+    public String getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(Byte status) {
+        switch (status) {
+            case (byte) 0:
+                this.status = "可用仓";
+                break;
+            case (byte) 1:
+                this.status = "机台";
+                break;
+            case (byte) 2:
+                this.status = "维修仓";
+                break;
+            case (byte) 3:
+                this.status = "破损仓";
+                break;
+            case (byte) 4:
+                this.status = "rma";
+                break;
+            default:
+                throw new RuntimeException("非法的仓库状态");
+        }
+    }
+
 }

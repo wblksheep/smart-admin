@@ -158,7 +158,7 @@ public class SprinklerService {
     /**
      * 导入各仓喷头模块
      */
-    public ResponseDTO<String> batchRepositorySprinklerCreate(@Valid MultipartFile file, RequestUser requestUser, @Valid Integer type) {
+    public ResponseDTO<String> batchRepositorySprinklerImport(@Valid MultipartFile file, RequestUser requestUser, @Valid Integer type) {
         Class<? extends BaseCreateForm> createVOClazz = createFormFactory.getSprinklerClass(type);
         List<? extends BaseCreateForm> list = ExcelUtil
                 .importExcelByClass(file, createVOClazz)
@@ -174,30 +174,30 @@ public class SprinklerService {
     /**
      * 导入全部喷头模块
      */
-    public ResponseDTO<String> batchSprinklerCreate(@Valid MultipartFile file, RequestUser requestUser) {
+    public ResponseDTO<String> batchSprinklerImport(@Valid MultipartFile file, RequestUser requestUser) {
         //使用收集器一次性完成字段设置，避免冗余操作
-        List<SprinklerCreateForm> createVOs = ExcelUtil.importExcelByClass(file, SprinklerCreateForm.class)
+        List<SprinklerImportForm> importVOs = ExcelUtil.importExcelByClass(file, SprinklerImportForm.class)
                 .stream()
-                .peek(vo -> initCreateVO(vo, requestUser)) // 提取字段设置为独立方法
+                .peek(vo -> initImportVO(vo, requestUser)) // 提取字段设置为独立方法
                 .toList();
 
         //提前返回空值情况
-        if (createVOs.isEmpty()) {
+        if (importVOs.isEmpty()) {
             return ResponseDTO.ok("导入数据为空");
         }
 
         // 校验1：收集无效数据（空值或空字符串）
-        Set<String> invalidSerials = createVOs.stream()
+        Set<String> invalidSerials = importVOs.stream()
                 .filter(vo -> StringUtils.isBlank(vo.getSprinklerSerial()))
-                .map(SprinklerCreateForm::getSprinklerSerial) // 实际会得到null或空字符串
+                .map(SprinklerImportForm::getSprinklerSerial) // 实际会得到null或空字符串
                 .collect(Collectors.toSet());
 
         //使用提取方法优化可读性
         // 校验2：收集已存在数据
-        Set<String> existingSerials = getExistingSprinklerSerials(createVOs);
+        Set<String> existingSerials = getExistingSprinklerSerials(importVOs);
 
         //合并校验结果
-        Map<Boolean, List<SprinklerCreateForm>> partitionedData = createVOs.stream()
+        Map<Boolean, List<SprinklerImportForm>> partitionedData = importVOs.stream()
                 .collect(Collectors.partitioningBy(
                         vo -> StringUtils.isNotBlank(vo.getSprinklerSerial())
                                 && !existingSerials.contains(vo.getSprinklerSerial())
@@ -211,7 +211,7 @@ public class SprinklerService {
         Set<String> errorData = new HashSet<>();
         errorData.addAll(invalidSerials);
         errorData.addAll(partitionedData.get(false).stream()
-                .map(SprinklerCreateForm::getSprinklerSerial)
+                .map(SprinklerImportForm::getSprinklerSerial)
                 .filter(StringUtils::isNotBlank)
                 .collect(Collectors.toSet()));
 
@@ -229,6 +229,11 @@ public class SprinklerService {
 
     }
 
+    private <T extends BaseImportForm> void initImportVO(T vo, RequestUser requestUser) {
+        vo.setDisabledFlag(Boolean.FALSE);
+        vo.setCreateUserId(requestUser.getUserId());
+        vo.setCreateUserName(requestUser.getUserName());
+    }
 
     // 辅助方法w
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
@@ -246,14 +251,14 @@ public class SprinklerService {
     }
 
     // 辅助方法：对象转换
-    private SprinklerEntity convertToEntity(SprinklerCreateForm form) {
+    private SprinklerEntity convertToEntity(SprinklerImportForm form) {
         return SmartBeanUtil.copy(form, SprinklerEntity.class);
     }
 
     // 辅助方法：获取已存在序列号
-    private Set<String> getExistingSprinklerSerials(List<SprinklerCreateForm> createVOs) {
+    private Set<String> getExistingSprinklerSerials(List<SprinklerImportForm> createVOs) {
         List<String> serials = createVOs.stream()
-                .map(SprinklerCreateForm::getSprinklerSerial)
+                .map(SprinklerImportForm::getSprinklerSerial)
                 .toList();
 
         return sprinklerRepository.getListBySprinklerSerials(serials)
