@@ -30,13 +30,6 @@ public class MachineSprinklerEntity {
     private String sprinklerSerial;
 
     /**
-     * 历史
-     */
-    @DataTracerFieldLabel("历史")
-    private String history;
-
-
-    /**
      * 禁用状态
      */
     @DataTracerFieldLabel("禁用状态")

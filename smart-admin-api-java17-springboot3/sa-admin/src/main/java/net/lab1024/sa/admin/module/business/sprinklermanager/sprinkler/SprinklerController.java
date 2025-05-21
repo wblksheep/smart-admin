@@ -82,6 +82,13 @@ public class SprinklerController {
         return sprinklerService.updateSprinkler(updateVO);
     }
 
+    @Operation(summary = "喷头转仓 @author 芦苇")
+    @PostMapping("/sprinklermanager/sprinkler/transfer")
+    @SaCheckPermission("sprinklermanager:sprinkler:transfer")
+    public ResponseDTO<String> transferRepo(Long sprinklerId, @RequestParam @Valid @Min(0) @Max(4) Byte type){
+        return sprinklerService.transferRepo(sprinklerId, type);
+    }
+
     @Operation(summary = "批量编辑全部喷头 @author 芦苇")
     @PostMapping("/sprinklermanager/sprinkler/updateBatch")
     @SaCheckPermission("sprinklermanager:sprinkler:updateBatch")

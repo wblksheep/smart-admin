@@ -54,13 +54,6 @@ public class MaintainingSprinklerEntity {
     private String customer;
 
     /**
-     * 历史
-     */
-    @DataTracerFieldLabel("历史")
-    private String history;
-
-
-    /**
      * 禁用状态
      */
     @DataTracerFieldLabel("禁用状态")

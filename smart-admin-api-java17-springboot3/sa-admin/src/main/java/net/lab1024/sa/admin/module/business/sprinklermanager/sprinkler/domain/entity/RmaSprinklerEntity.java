@@ -52,11 +52,6 @@ public class RmaSprinklerEntity {
     @DataTracerFieldLabel("返修客户")
     private String customer;
 
-    /**
-     * 历史
-     */
-    @DataTracerFieldLabel("历史")
-    private String history;
 
     /**
      * RMA地点

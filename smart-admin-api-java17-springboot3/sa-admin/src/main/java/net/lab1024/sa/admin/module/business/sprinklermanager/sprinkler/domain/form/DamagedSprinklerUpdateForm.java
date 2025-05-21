@@ -16,10 +16,6 @@ public class DamagedSprinklerUpdateForm extends BaseUpdateForm {
     @Schema(description = "返仓日期")
     private LocalDate retWarehouseDate;
 
-    @ExcelProperty("历史")
-    @Schema(description = "历史")
-    private String history;
-
     @ExcelProperty("备注1")
     @Schema(description = "备注1")
     private String note1;

@@ -35,12 +35,6 @@ public class DamagedSprinklerEntity {
     private LocalDate retWarehouseDate;
 
     /**
-     * 历史
-     */
-    @DataTracerFieldLabel("历史")
-    private String history;
-
-    /**
      * 备注1
      */
     @DataTracerFieldLabel("备注1")

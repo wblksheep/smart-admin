@@ -10,10 +10,6 @@ import java.time.LocalDate;
 @Data
 public class UsableSprinklerUpdateForm extends BaseUpdateForm{
 
-    @ExcelProperty("历史")
-    @Schema(description = "历史")
-    private String history;
-
     @ExcelProperty("返仓日期")
     @Schema(description = "返仓日期")
     private LocalDate retWarehouseDate;

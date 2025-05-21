@@ -27,10 +27,6 @@ public class RmaSprinklerUpdateForm extends BaseUpdateForm{
     @Schema(description = "返修客户")
     private String customer;
 
-    @ExcelProperty("历史")
-    @Schema(description = "历史")
-    private String history;
-
     @ExcelProperty("RMA地点")
     @Schema(description = "RMA地点")
     private String rmaPosition;

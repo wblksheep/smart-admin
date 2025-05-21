@@ -3,12 +3,12 @@
 <mapper namespace="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.dao.UsableSprinklerDao">
     <select id="queryPage"
             resultType="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.UsableSprinklerVO">
-        SELECT t_sprinkler.*,
-        t_usable_sprinkler.*
+        SELECT t_usable_sprinkler.*,
+               t_sprinkler.*
         FROM t_usable_sprinkler
         LEFT JOIN t_sprinkler ON t_sprinkler.sprinkler_id = t_usable_sprinkler.sprinkler_id
         <where>
-            t_sprinkler.deleted_flag = #{queryForm.deletedFlag}
+            t_usable_sprinkler.deleted_flag = #{queryForm.deletedFlag}
             <if test="queryForm.purchaseDateContractNumber != null and queryForm.purchaseDateContractNumber != ''">
                 AND INSTR(t_sprinkler.purchase_date_contract_number,#{queryForm.purchaseDateContractNumber})
             </if>
@@ -87,7 +87,7 @@
         FROM t_usable_sprinkler
         LEFT JOIN t_sprinkler ON t_sprinkler.sprinkler_id = t_usable_sprinkler.sprinkler_id
         <where>
-            t_sprinkler.deleted_flag = #{queryForm.deletedFlag}
+            t_usable_sprinkler.deleted_flag = #{queryForm.deletedFlag}
             <if test="queryForm.purchaseDateContractNumber != null and queryForm.purchaseDateContractNumber != ''">
                 AND INSTR(t_sprinkler.purchase_date_contract_number,#{queryForm.purchaseDateContractNumber})
             </if>

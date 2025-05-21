@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,6 +51,18 @@ public class GlobalExceptionHandler {
             log.error("全局JSON格式错误异常,URL:{}", getCurrentRequestUrl(), e);
         }
         return ResponseDTO.error(UserErrorCode.PARAM_ERROR, "参数JSON格式错误");
+    }
+
+    /**
+     * json 格式错误 缺少请求体
+     */
+    @ResponseBody
+    @ExceptionHandler({HandlerMethodValidationException.class})
+    public ResponseDTO<?> invalidParamExceptionHandler(Exception e) {
+        if (!systemEnvironment.isProd()) {
+            log.error("输入参数校验异常,输入了非法参数,URL:{}", getCurrentRequestUrl(), e);
+        }
+        return ResponseDTO.error(UserErrorCode.VALID_ERROR, "输入参数校验异常，输入了非法参数");
     }
 
     /**

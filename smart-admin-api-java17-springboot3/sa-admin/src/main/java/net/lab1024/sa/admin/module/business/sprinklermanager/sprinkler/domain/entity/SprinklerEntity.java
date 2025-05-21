@@ -38,7 +38,6 @@ public class SprinklerEntity {
     @DataTracerFieldLabel("喷头型号")
     private String sprinklerModel;
 
-
     /**
      * 喷头序列号
      */

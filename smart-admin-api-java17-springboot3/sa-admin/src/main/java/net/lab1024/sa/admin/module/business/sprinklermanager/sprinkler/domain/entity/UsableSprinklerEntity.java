@@ -29,12 +29,6 @@ public class UsableSprinklerEntity {
     private String sprinklerSerial;
 
     /**
-     * 历史
-     */
-    @DataTracerFieldLabel("历史")
-    private String history;
-
-    /**
      * 返仓日期
      */
     @DataTracerFieldLabel("返仓日期")

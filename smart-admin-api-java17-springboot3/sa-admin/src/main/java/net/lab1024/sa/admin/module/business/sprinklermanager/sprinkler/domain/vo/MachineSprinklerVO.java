@@ -35,9 +35,6 @@ public class MachineSprinklerVO extends BaseSprinklerVO{
     @Schema(description = "位置")
     private String allocatePosition;
 
-    @Schema(description = "历史")
-    private String history;
-
     @Schema(description = "所在仓status")
     private Byte status;
 

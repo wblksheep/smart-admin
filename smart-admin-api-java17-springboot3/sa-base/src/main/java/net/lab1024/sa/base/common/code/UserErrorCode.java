@@ -10,11 +10,12 @@ import lombok.Getter;
  * @Date 2021/09/21 22:12:27
  * @Wechat zhuoda1024
  * @Email lab1024@163.com
- * @Copyright  <a href="https://1024lab.net">1024创新实验室</a>
+ * @Copyright <a href="https://1024lab.net">1024创新实验室</a>
  */
 @Getter
 @AllArgsConstructor
 public enum UserErrorCode implements ErrorCode {
+
 
     PARAM_ERROR(30001, "参数错误"),
 
@@ -37,7 +38,11 @@ public enum UserErrorCode implements ErrorCode {
     LOGIN_FAIL_LOCK(30010, "登录连续失败已经被锁定，无法登录"),
     LOGIN_FAIL_WILL_LOCK(30011, "登录连续失败将会锁定提醒"),
 
-    LOGIN_ACTIVE_TIMEOUT(30012, "长时间未操作系统，需要重新登录");
+    LOGIN_ACTIVE_TIMEOUT(30012, "长时间未操作系统，需要重新登录"),
+    //@Author:芦苇
+    VALID_ERROR(30013, "校验错误"),
+    ;
+
 
     private final int code;
 

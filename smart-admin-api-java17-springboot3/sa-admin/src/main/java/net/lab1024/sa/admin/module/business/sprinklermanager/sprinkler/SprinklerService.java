@@ -10,31 +10,33 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.module.business.oa.enterprise.domain.entity.EnterpriseEntity;
 import net.lab1024.sa.admin.module.business.oa.enterprise.domain.vo.EnterpriseVO;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeChineseEnum;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeEnum;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.MachineSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.UsableSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.*;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.BaseSprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.DataProcessorFactory;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.RepositorySprinklerCreateFormFactory;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.RepositorySprinklerStrategyFactory;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.SprinklerRepositoryFactory;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.*;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.processor.DataProcessor;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.BaseIService;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.MachineSprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.UsableSprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.abstractimpl.BaseServiceImpl;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.service.TypeService;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.sorter.SprinklerSorter;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.RepositorySprinklerQueryStrategy;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.RepositorySprinklerTransferStrategy;
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
 import net.lab1024.sa.base.common.util.ExcelUtil;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
 import net.lab1024.sa.base.common.util.SmartPageUtil;
+import net.lab1024.sa.base.common.util.SmartRequestUtil;
 import net.lab1024.sa.base.module.support.datatracer.service.DataTracerService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -69,6 +72,9 @@ public class SprinklerService {
 
     @Resource
     private SprinklerRepositoryFactory sprinklerRepositoryFactory;
+
+    @Resource
+    private RepositorySprinklerTransferStrategyFactory repositorySprinklerTransferStrategyFactory;
 
 
     /**
@@ -302,6 +308,22 @@ public class SprinklerService {
         }
         SprinklerEntity updateEntity = SmartBeanUtil.copy(sprinklerDetail, SprinklerEntity.class);
         SmartBeanUtil.copyProperties(updateVO, updateEntity);
+        Byte oldStatus = sprinklerDetail.getStatus().byteValue();
+        Byte newStatus = updateEntity.getStatus().byteValue();
+        if (oldStatus == newStatus) {
+            // 更新对应仓喷头
+            SprinklerEntity updateEntity2 = SmartBeanUtil.copy(sprinklerDetail, SprinklerEntity.class);
+            SmartBeanUtil.copyProperties(updateVO, updateEntity2);
+            sprinklerRepository.updateById(updateEntity2);
+            return ResponseDTO.ok();
+        }
+        RepositorySprinklerTransferStrategy curStrategy = repositorySprinklerTransferStrategyFactory.getStrategy(oldStatus);
+        curStrategy.updateDeletedFlag(sprinklerDetail);
+
+        RepositorySprinklerTransferStrategy nextStrategy = repositorySprinklerTransferStrategyFactory.getStrategy(newStatus);
+        nextStrategy.updateRepository(sprinklerDetail);
+        RequestUser requestUser = SmartRequestUtil.getRequestUser();
+        updateEntity.setHistory(sprinklerDetail.getHistory() + ";" + LocalDate.now() + requestUser.getUserName() + "将喷头从" + RepositorySprinklerTypeChineseEnum.fromStatus(oldStatus).get().getDesc() + "转入" + RepositorySprinklerTypeChineseEnum.fromStatus(newStatus).get().getDesc());
         sprinklerRepository.updateById(updateEntity);
         return ResponseDTO.ok();
     }
@@ -370,6 +392,9 @@ public class SprinklerService {
         return ResponseDTO.ok();
     }
 
+    /**
+     * 批量编辑全部喷头
+     */
     public <T extends BaseUpdateForm> ResponseDTO<String> updateBatchSprinkler(@Valid MultipartFile file, Byte type, RequestUser requestUser) {
         Class<T> baseUpdateFormClass = (Class<T>) typeService.getCachedUpdateForm(type);
         //使用收集器一次性完成字段设置，避免冗余操作
@@ -392,6 +417,27 @@ public class SprinklerService {
                 throw new RuntimeException(e);
             }
         });
+        return ResponseDTO.ok();
+    }
+
+
+    /**
+     * 喷头转仓
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseDTO<String> transferRepo(Long sprinklerId, Byte type) {
+        SprinklerEntity sprinklerDetail = sprinklerRepository.getById(sprinklerId);
+        if (Objects.isNull(sprinklerDetail) || sprinklerDetail.getDeletedFlag()) {
+            return ResponseDTO.userErrorParam("喷头不存在");
+        }
+        if (sprinklerDetail.getStatus().byteValue() == type) {
+            return ResponseDTO.userErrorParam("喷头已经在该仓了");
+        }
+        RepositorySprinklerTransferStrategy curStrategy = repositorySprinklerTransferStrategyFactory.getStrategy(sprinklerDetail.getStatus());
+        curStrategy.updateDeletedFlag(sprinklerDetail);
+
+        RepositorySprinklerTransferStrategy nextStrategy = repositorySprinklerTransferStrategyFactory.getStrategy(type);
+        nextStrategy.updateRepository(sprinklerDetail);
         return ResponseDTO.ok();
     }
 }

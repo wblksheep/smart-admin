@@ -35,9 +35,6 @@ public class MaintainingSprinklerVO extends BaseSprinklerVO{
     @Schema(description = "返修客户")
     private String customer;
 
-    @Schema(description = "历史")
-    private String history;
-
     @Schema(description = "所在仓status")
     private Byte status;
 

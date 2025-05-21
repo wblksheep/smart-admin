@@ -29,9 +29,6 @@ public class UsableSprinklerVO extends BaseSprinklerVO {
     @Schema(description = "入仓日期")
     private LocalDate warehouseDate;
 
-    @Schema(description = "历史")
-    private String history;
-
     @Schema(description = "所在仓status")
     private Byte status;
 
