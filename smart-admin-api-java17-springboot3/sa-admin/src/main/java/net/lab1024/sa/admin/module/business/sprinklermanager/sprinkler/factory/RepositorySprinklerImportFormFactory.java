@@ -2,14 +2,15 @@ package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory;
 
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerClazzEnum;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.BaseCreateForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.BaseImportForm;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RepositorySprinklerCreateFormFactory {
+public class RepositorySprinklerImportFormFactory {
     private RepositorySprinklerClazzEnum type;
 
     // 通过枚举类型直接获取Class
-    public Class<? extends BaseCreateForm> getSprinklerClass(int typeCode) {
+    public Class<? extends BaseImportForm> getSprinklerClass(int typeCode) {
         type = RepositorySprinklerClazzEnum.fromCode(typeCode);
         return type.getSprinklerClass();
     }

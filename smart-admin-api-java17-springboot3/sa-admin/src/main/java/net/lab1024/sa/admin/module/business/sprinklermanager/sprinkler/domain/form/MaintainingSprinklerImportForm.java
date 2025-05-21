@@ -11,7 +11,7 @@ public class MaintainingSprinklerImportForm extends BaseImportForm {
 
     @ExcelProperty("返修日期")
     @Schema(description = "返修日期")
-    private LocalDate retMaintainenceDate;
+    private String retMaintainenceDate;
 
     @ExcelProperty("返修原因")
     @Schema(description = "返修原因")

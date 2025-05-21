@@ -5,10 +5,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import jakarta.annotation.Resource;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeChineseEnum;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeEnum;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.UsableSprinklerEntity;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.UsableSprinklerCreateForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.UsableSprinklerImportForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.processor.DataProcessor;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.UsableSprinklerRepository;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
  * 处理导入的可用喷头数据，进行数据校验、分仓存储及主表状态更新
  */
 @Component("usable") // 通过组件名称标识处理器类型
-public class UsableSprinklerDataProcessor implements DataProcessor<UsableSprinklerCreateForm> {
+public class UsableSprinklerDataProcessor implements DataProcessor<UsableSprinklerImportForm> {
 
     // 使用MyBatis-Plus仓库接口
     @Resource
@@ -37,31 +38,31 @@ public class UsableSprinklerDataProcessor implements DataProcessor<UsableSprinkl
     /**
      * 核心处理方法
      *
-     * @param createVOs 前端传入的创建表单列表
+     * @param importVOs 前端传入的创建表单列表
      * @return 处理结果响应
      */
     @Override
-    public ResponseDTO<String> process(List<UsableSprinklerCreateForm> createVOs) {
+    public ResponseDTO<String> process(List<UsableSprinklerImportForm> importVOs) {
         // 1. 空数据校验（基础校验优化）
-        if (CollectionUtils.isEmpty(createVOs)) {
+        if (CollectionUtils.isEmpty(importVOs)) {
             return ResponseDTO.userErrorParam("数据为空");
         }
 
         try {
             // 2. 数据预处理分区（使用Stream分区优化处理效率）
-            Map<Boolean, List<UsableSprinklerCreateForm>> preprocessed = createVOs.stream()
+            Map<Boolean, List<UsableSprinklerImportForm>> preprocessed = importVOs.stream()
                     .collect(Collectors.partitioningBy(
                             form -> StringUtils.isNotBlank(form.getSprinklerSerial())
-                                    && form.getStatus() == RepositorySprinklerTypeEnum.USABLE_REPOSITORY.getValue().byteValue())
+                                    && form.getStatus().equals(RepositorySprinklerTypeChineseEnum.USABLE_REPOSITORY.getDesc()))
                     );
-            List<UsableSprinklerCreateForm> validForms = preprocessed.get(true);
-            List<UsableSprinklerCreateForm> invalidForms = preprocessed.get(false);
+            List<UsableSprinklerImportForm> validForms = preprocessed.get(true);
+            List<UsableSprinklerImportForm> invalidForms = preprocessed.get(false);
             // 3. 收集无效序列号（并行流优化处理大数据量场景）
             Set<String> invalidSerials = collectInvalidSerials(invalidForms);
 
             // 4. 批量查询主表数据（优化点：合并查询减少数据库IO）
             Set<String> serials = validForms.stream()
-                    .map(UsableSprinklerCreateForm::getSprinklerSerial)
+                    .map(UsableSprinklerImportForm::getSprinklerSerial)
                     .collect(Collectors.toSet());
             Map<String, SprinklerEntity> mainTableMap = getMainTableMap(serials);
 
@@ -70,7 +71,7 @@ public class UsableSprinklerDataProcessor implements DataProcessor<UsableSprinkl
             Set<String> existingSerials = getExistingSprinklerSerials(validForms);
 
             // 5.2 过滤有效数据（使用Map快速查找优化性能）
-            List<UsableSprinklerCreateForm> filteredForms = validForms.stream()
+            List<UsableSprinklerImportForm> filteredForms = validForms.stream()
                     .filter(form -> {
                         SprinklerEntity mainRecord = mainTableMap.get(form.getSprinklerSerial());
                         return mainRecord != null && !existingSerials.contains(form.getSprinklerSerial());
@@ -125,7 +126,7 @@ public class UsableSprinklerDataProcessor implements DataProcessor<UsableSprinkl
      * @return 可用仓实体
      */
     private UsableSprinklerEntity convertToWarehouseEntity(
-            UsableSprinklerCreateForm form,
+            UsableSprinklerImportForm form,
             Map<String, SprinklerEntity> mainTableMap
     ) {
         // 使用Bean拷贝工具优化属性复制
@@ -160,9 +161,9 @@ public class UsableSprinklerDataProcessor implements DataProcessor<UsableSprinkl
      * @param invalidForms 无效表单列表
      * @return 无效序列号集合
      */
-    private Set<String> collectInvalidSerials(List<UsableSprinklerCreateForm> invalidForms) {
+    private Set<String> collectInvalidSerials(List<UsableSprinklerImportForm> invalidForms) {
         return invalidForms.stream()
-                .map(UsableSprinklerCreateForm::getSprinklerSerial)
+                .map(UsableSprinklerImportForm::getSprinklerSerial)
                 .filter(StringUtils::isNotBlank)
                 .collect(Collectors.toSet());
     }
@@ -173,9 +174,9 @@ public class UsableSprinklerDataProcessor implements DataProcessor<UsableSprinkl
      * @param validForms 有效表单列表
      * @return 已存在序列号集合
      */
-    private Set<String> getExistingSprinklerSerials(List<UsableSprinklerCreateForm> validForms) {
+    private Set<String> getExistingSprinklerSerials(List<UsableSprinklerImportForm> validForms) {
         Set<String> serialsToCheck = validForms.stream()
-                .map(UsableSprinklerCreateForm::getSprinklerSerial)
+                .map(UsableSprinklerImportForm::getSprinklerSerial)
                 .collect(Collectors.toSet());
         if (serialsToCheck.isEmpty()) {
             return Collections.emptySet();

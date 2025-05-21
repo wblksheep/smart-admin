@@ -1,19 +1,13 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler;
 
-import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.module.business.oa.enterprise.dao.EnterpriseDao;
-import net.lab1024.sa.admin.module.business.oa.enterprise.domain.entity.EnterpriseEntity;
-import net.lab1024.sa.admin.module.business.oa.enterprise.domain.vo.EnterpriseVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeChineseEnum;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeEnum;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.MachineSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.UsableSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.*;
@@ -23,12 +17,10 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.*;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.processor.DataProcessor;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.BaseIService;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.MachineSprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.UsableSprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.abstractimpl.BaseServiceImpl;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.service.TypeService;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.sorter.SprinklerSorter;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.RepositorySprinklerQueryStrategy;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.RepositorySprinklerTransferStrategy;
 import net.lab1024.sa.base.common.domain.PageResult;
@@ -38,14 +30,10 @@ import net.lab1024.sa.base.common.util.ExcelUtil;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
 import net.lab1024.sa.base.common.util.SmartPageUtil;
 import net.lab1024.sa.base.common.util.SmartRequestUtil;
-import net.lab1024.sa.base.module.support.datatracer.constant.DataTracerTypeEnum;
-import net.lab1024.sa.base.module.support.datatracer.service.DataTracerService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.reflect.Field;
@@ -150,7 +138,7 @@ public class SprinklerService {
 
 
     @Resource
-    private RepositorySprinklerCreateFormFactory createFormFactory;
+    private RepositorySprinklerImportFormFactory importFormFactory;
 
     @Resource
     private DataProcessorFactory processorFactory;
@@ -159,11 +147,11 @@ public class SprinklerService {
      * 导入各仓喷头模块
      */
     public ResponseDTO<String> batchRepositorySprinklerImport(@Valid MultipartFile file, RequestUser requestUser, @Valid Integer type) {
-        Class<? extends BaseCreateForm> createVOClazz = createFormFactory.getSprinklerClass(type);
-        List<? extends BaseCreateForm> list = ExcelUtil
-                .importExcelByClass(file, createVOClazz)
+        Class<? extends BaseImportForm> importVOClazz = importFormFactory.getSprinklerClass(type);
+        List<? extends BaseImportForm> list = ExcelUtil
+                .importExcelByClass(file, importVOClazz)
                 .stream()
-                .peek(vo -> initCreateVO(vo, requestUser))
+                .peek(vo -> initImportVO(vo, requestUser))
                 .toList();
         DataProcessor dataProcessor = processorFactory
                 .getProcessor(RepositorySprinklerTypeEnum.values()[type].getDesc());

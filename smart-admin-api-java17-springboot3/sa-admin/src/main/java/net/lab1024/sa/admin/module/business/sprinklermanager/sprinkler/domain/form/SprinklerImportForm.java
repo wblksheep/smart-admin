@@ -26,11 +26,11 @@ public class SprinklerImportForm extends BaseImportForm {
 
     @ExcelProperty("入仓日期")
     @Schema(description = "入仓日期")
-    private LocalDate warehouseDate;
+    private String warehouseDate;
 
     @ExcelProperty("领用日期")
     @Schema(description = "领用日期")
-    private LocalDate allocateDate;
+    private String allocateDate;
 
     @ExcelProperty("领用人")
     @Schema(description = "领用人")
@@ -46,11 +46,11 @@ public class SprinklerImportForm extends BaseImportForm {
 
     @ExcelProperty("电压")
     @Schema(description = "电压")
-    private Float voltage;
+    private String voltage;
 
     @ExcelProperty("jetsout")
     @Schema(description = "jetsout")
-    private Byte jetsout;
+    private String jetsout;
 
     @ExcelProperty("历史")
     @Schema(description = "history")
@@ -58,7 +58,7 @@ public class SprinklerImportForm extends BaseImportForm {
 
     @ExcelProperty("新旧喷头")
     @Schema(description = "新旧喷头")
-    private Boolean isNew;
+    private String isNew;
 
     @ExcelProperty("喷头详情")
     @Schema(description = "喷头详情")
