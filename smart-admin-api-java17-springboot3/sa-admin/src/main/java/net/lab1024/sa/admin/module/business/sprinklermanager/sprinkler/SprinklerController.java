@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.constant.AdminSwaggerTagConst;
+import net.lab1024.sa.admin.module.business.oa.bank.domain.BankCreateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.*;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.BaseSprinklerVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerExcelVO;
@@ -65,14 +66,24 @@ public class SprinklerController {
     }
 
 
-    @Operation(summary = "批量新建所有喷头 @author 芦苇")
+    @Operation(summary = "批量导入所有喷头 @author 芦苇")
     @PostMapping("/sprinklermanager/sprinkler/create")
     @SaCheckPermission("sprinklermanager:sprinkler:add")
-    public ResponseDTO<String> createSprinkler(
+    public ResponseDTO<String> importSprinkler(
             @RequestPart("file") @Valid MultipartFile file
     ) {
         RequestUser requestUser = SmartRequestUtil.getRequestUser();
         return sprinklerService.batchSprinklerCreate(file, requestUser);
+    }
+
+    @Operation(summary = "新建全部喷头 @author 芦苇")
+    @PostMapping("/sprinklermanager/sprinkler/createSprinkler")
+    @SaCheckPermission("sprinklermanager:sprinkler:addsprinkler")
+    public ResponseDTO<String> createSprinkler(@RequestBody @Valid SprinklerCreateForm createVO) {
+        RequestUser requestUser = SmartRequestUtil.getRequestUser();
+        createVO.setCreateUserId(requestUser.getUserId());
+        createVO.setCreateUserName(requestUser.getUserName());
+        return sprinklerService.createSprinkler(createVO);
     }
 
     @Operation(summary = "编辑全部喷头 @author 芦苇")

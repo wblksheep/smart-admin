@@ -440,4 +440,10 @@ public class SprinklerService {
         nextStrategy.updateRepository(sprinklerDetail);
         return ResponseDTO.ok();
     }
+
+    /**
+     * 新建银行信息
+     */
+    public ResponseDTO<String> createSprinkler(@Valid SprinklerCreateForm createVO) {
+    }
 }

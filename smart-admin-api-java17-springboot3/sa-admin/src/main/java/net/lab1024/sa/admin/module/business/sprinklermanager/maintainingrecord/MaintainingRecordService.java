@@ -7,12 +7,14 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import net.lab1024.sa.admin.module.business.oa.bank.domain.BankEntity;
 import net.lab1024.sa.admin.module.business.oa.enterprise.domain.entity.EnterpriseEntity;
 import net.lab1024.sa.admin.module.business.oa.enterprise.domain.form.EnterpriseCreateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationrecord.domain.entity.AllocationRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.entity.MaintainingRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordCreateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordUpdateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo.MaintainingRecordVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.repository.MaintainingRecordRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
@@ -205,6 +207,31 @@ public class MaintainingRecordService {
         }
         maintainingRecordDetail.setDeletedFlag(Boolean.TRUE);
         maintainingRecordRepository.updateById(maintainingRecordDetail);
+        return ResponseDTO.ok();
+    }
+
+    /**
+     * 编辑维修记录信息
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseDTO<String> updateMaintainingRecord(MaintainingRecordUpdateForm updateVO) {
+        Long recordId = updateVO.getRecordId();
+        // 校验记录是否存在
+        MaintainingRecordEntity maintainingRecordDetail = maintainingRecordRepository.getById(recordId);
+        if (Objects.isNull(maintainingRecordDetail) || maintainingRecordDetail.getDeletedFlag()) {
+            return ResponseDTO.userErrorParam("维修记录不存在");
+        }
+        // 校验喷头是否存在
+        List<SprinklerEntity> sprinklerDetails = sprinklerRepository.getListBySprinklerSerials(Arrays.asList(updateVO.getSprinklerSerial()));
+        if (sprinklerDetails.isEmpty()) {
+            return ResponseDTO.userErrorParam("喷头信息不存在");
+        }
+        SprinklerEntity sprinklerDetail = sprinklerDetails.get(0);
+        if (Objects.isNull(sprinklerDetail) || sprinklerDetail.getDeletedFlag()) {
+            return ResponseDTO.userErrorParam("喷头信息不存在");
+        }
+        MaintainingRecordEntity updateMaintainingRecord = SmartBeanUtil.copy(updateVO, MaintainingRecordEntity.class);
+        maintainingRecordRepository.updateById(updateMaintainingRecord);
         return ResponseDTO.ok();
     }
 }

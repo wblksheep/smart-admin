@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.constant.AdminSwaggerTagConst;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordCreateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordUpdateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo.MaintainingRecordVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.BaseSprinklerVO;
@@ -68,6 +69,13 @@ public class MaintainingRecordController {
     @SaCheckPermission("sprinklermanager:maintainingrecord:delete")
     public ResponseDTO<String> delete(@PathVariable Long recordId) {
         return maintainingRecordService.update(recordId);
+    }
+
+    @Operation(summary = "编辑维修记录 @author 芦苇")
+    @GetMapping("/sprinklermanager/maintainingrecord/update")
+    @SaCheckPermission("sprinklermanager:maintainingrecord:delete")
+    public ResponseDTO<String> delete(@RequestBody @Valid MaintainingRecordUpdateForm updateVO) {
+        return maintainingRecordService.updateMaintainingRecord(updateVO);
     }
 
     @Operation(summary = "查询维修记录详情 @author 芦苇")
