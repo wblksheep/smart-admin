@@ -1,19 +1,13 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler;
 
-import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.module.business.oa.enterprise.dao.EnterpriseDao;
-import net.lab1024.sa.admin.module.business.oa.enterprise.domain.entity.EnterpriseEntity;
-import net.lab1024.sa.admin.module.business.oa.enterprise.domain.vo.EnterpriseVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeChineseEnum;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeEnum;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.MachineSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.UsableSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.*;
@@ -23,12 +17,10 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.factory.*;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.processor.DataProcessor;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.BaseIService;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.MachineSprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.UsableSprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.abstractimpl.BaseServiceImpl;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.service.TypeService;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.sorter.SprinklerSorter;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.RepositorySprinklerQueryStrategy;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.RepositorySprinklerTransferStrategy;
 import net.lab1024.sa.base.common.domain.PageResult;
@@ -38,14 +30,10 @@ import net.lab1024.sa.base.common.util.ExcelUtil;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
 import net.lab1024.sa.base.common.util.SmartPageUtil;
 import net.lab1024.sa.base.common.util.SmartRequestUtil;
-import net.lab1024.sa.base.module.support.datatracer.constant.DataTracerTypeEnum;
-import net.lab1024.sa.base.module.support.datatracer.service.DataTracerService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.reflect.Field;
@@ -88,9 +76,8 @@ public class SprinklerService {
      */
     public ResponseDTO<PageResult<SprinklerVO>> queryByPage(SprinklerQueryForm queryForm) {
         queryForm.setDeletedFlag(Boolean.FALSE);
-        Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
-        List<SprinklerVO> sprinklerList = sprinklerRepository.getListByQueryForm(queryForm);
-        SprinklerSorter.sortBySprinklerSerial(sprinklerList);
+        Page<?> page = SmartPageUtil.convert2PageQueryBySprinklerSerial(queryForm);
+        List<SprinklerVO> sprinklerList = sprinklerRepository.getListByQueryPage(page, queryForm);
         PageResult<SprinklerVO> pageResult = SmartPageUtil.convert2PageResult(page, sprinklerList);
         return ResponseDTO.ok(pageResult);
     }
@@ -229,60 +216,6 @@ public class SprinklerService {
         return ResponseDTO.userErrorParam("无有效数据可插入，错误数据：全部为空值或重复序列号");
 
     }
-
-    private <T extends BaseImportForm> void initImportVO(T vo, RequestUser requestUser) {
-        vo.setDisabledFlag(Boolean.FALSE);
-        vo.setCreateUserId(requestUser.getUserId());
-        vo.setCreateUserName(requestUser.getUserName());
-    }
-
-    // 辅助方法w
-    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
-        Set<Object> seen = ConcurrentHashMap.newKeySet();
-        return t -> seen.add(keyExtractor.apply(t));
-    }
-
-    private ResponseDTO<String> buildResponse(int successCount, Set<String> errorData) {
-        String msg = String.format(
-                "成功插入%d条，错误数据（空值/重复）:%s",
-                successCount,
-                errorData.isEmpty() ? "无" : "存在空值或重复数据"
-        );
-        return ResponseDTO.okMsg(msg);
-    }
-
-    // 辅助方法：对象转换
-    private SprinklerEntity convertToEntity(SprinklerImportForm form) {
-        return SmartBeanUtil.copy(form, SprinklerEntity.class);
-    }
-
-    // 辅助方法：获取已存在序列号
-    private Set<String> getExistingSprinklerSerials(List<SprinklerImportForm> createVOs) {
-        List<String> serials = createVOs.stream()
-                .map(SprinklerImportForm::getSprinklerSerial)
-                .toList();
-
-        return sprinklerRepository.getListBySprinklerSerials(serials)
-                .stream()
-                .map(SprinklerEntity::getSprinklerSerial)
-                .collect(Collectors.toCollection(LinkedHashSet::new)); // 保持查询顺序
-    }
-
-    // 辅助方法：初始化创建对象
-    private <T extends BaseCreateForm> void initCreateVO(T vo, RequestUser user) {
-        vo.setDisabledFlag(Boolean.FALSE);
-        vo.setCreateUserId(user.getUserId());
-        vo.setCreateUserName(user.getUserName());
-    }
-
-    // 辅助方法：初始化创建对象
-    private <T extends BaseUpdateForm> void initUpdateVO(T vo, RequestUser user) {
-        vo.setDisabledFlag(Boolean.FALSE);
-        vo.setCreateUserId(user.getUserId());
-        vo.setCreateUserName(user.getUserName());
-    }
-
-
     public List<?> getRepositorySprinklerExcelExportData(@Valid CombinedQueryForm queryForm) {
         Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
         BaseQueryForm joinForm = queryForm.getJoinQueryForm();
@@ -339,8 +272,8 @@ public class SprinklerService {
 
         RepositorySprinklerTransferStrategy nextStrategy = repositorySprinklerTransferStrategyFactory.getStrategy(newStatus);
         nextStrategy.updateRepository(sprinklerDetail);
-        RequestUser requestUser = SmartRequestUtil.getRequestUser();
-        updateEntity.setHistory(updateEntity.getHistory() + LocalDate.now() + requestUser.getUserName() + "将喷头从" + RepositorySprinklerTypeChineseEnum.fromStatus(oldStatus).get().getDesc() + "转入" + RepositorySprinklerTypeChineseEnum.fromStatus(newStatus).get().getDesc() + ";");
+//        RequestUser requestUser = SmartRequestUtil.getRequestUser();
+//        updateEntity.setHistory(updateEntity.getHistory() + LocalDate.now() + requestUser.getUserName() + "将喷头从" + RepositorySprinklerTypeChineseEnum.fromStatus(oldStatus).get().getDesc() + "转入" + RepositorySprinklerTypeChineseEnum.fromStatus(newStatus).get().getDesc() + ";");
         sprinklerRepository.updateById(updateEntity);
         return ResponseDTO.ok();
     }
@@ -494,4 +427,59 @@ public class SprinklerService {
         usableSprinklerRepository.save(usableSprinkler);
         return ResponseDTO.ok();
     }
+
+    private <T extends BaseImportForm> void initImportVO(T vo, RequestUser requestUser) {
+        vo.setDisabledFlag(Boolean.FALSE);
+        vo.setCreateUserId(requestUser.getUserId());
+        vo.setCreateUserName(requestUser.getUserName());
+    }
+
+    // 辅助方法w
+    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
+    }
+
+    private ResponseDTO<String> buildResponse(int successCount, Set<String> errorData) {
+        String msg = String.format(
+                "成功插入%d条，错误数据（空值/重复）:%s",
+                successCount,
+                errorData.isEmpty() ? "无" : "存在空值或重复数据"
+        );
+        return ResponseDTO.okMsg(msg);
+    }
+
+    // 辅助方法：对象转换
+    private SprinklerEntity convertToEntity(SprinklerImportForm form) {
+        return SmartBeanUtil.copy(form, SprinklerEntity.class);
+    }
+
+    // 辅助方法：获取已存在序列号
+    private Set<String> getExistingSprinklerSerials(List<SprinklerImportForm> createVOs) {
+        List<String> serials = createVOs.stream()
+                .map(SprinklerImportForm::getSprinklerSerial)
+                .toList();
+
+        return sprinklerRepository.getListBySprinklerSerials(serials)
+                .stream()
+                .map(SprinklerEntity::getSprinklerSerial)
+                .collect(Collectors.toCollection(LinkedHashSet::new)); // 保持查询顺序
+    }
+
+    // 辅助方法：初始化创建对象
+    private <T extends BaseCreateForm> void initCreateVO(T vo, RequestUser user) {
+        vo.setDisabledFlag(Boolean.FALSE);
+        vo.setCreateUserId(user.getUserId());
+        vo.setCreateUserName(user.getUserName());
+    }
+
+    // 辅助方法：初始化创建对象
+    private <T extends BaseUpdateForm> void initUpdateVO(T vo, RequestUser user) {
+        vo.setDisabledFlag(Boolean.FALSE);
+        vo.setCreateUserId(user.getUserId());
+        vo.setCreateUserName(user.getUserName());
+    }
+
+
+
 }

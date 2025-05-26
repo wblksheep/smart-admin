@@ -72,34 +72,6 @@ public class SmartPageUtil {
         if (pageParam.getSearchCount() != null) {
             page.setSearchCount(pageParam.getSearchCount());
         }
-
-        List<PageParam.SortItem> sortItemList = pageParam.getSortItemList();
-        if (CollectionUtils.isEmpty(sortItemList)) {
-            return page;
-        }
-
-        List<OrderItem> orderItemList = new ArrayList<>();
-        for (PageParam.SortItem sortItem : sortItemList) {
-            if (SmartStringUtil.isEmpty(sortItem.getColumn())) continue;
-
-            // 特定字段特殊处理
-            if ("sprinkler_serial".equals(sortItem.getColumn())) {
-                addSprinklerSerialSort(orderItemList, sortItem.getIsAsc());
-                continue;
-            }
-
-            // 常规字段安全检查
-            if (SqlInjectionUtils.check(sortItem.getColumn())) {
-                log.error("SQL注入风险: {}", sortItem.getColumn());
-                throw new BusinessException("非法排序参数");
-            }
-
-            OrderItem orderItem = new OrderItem();
-            orderItem.setColumn(sortItem.getColumn());
-            orderItem.setAsc(sortItem.getIsAsc());
-            orderItemList.add(orderItem);
-        }
-        page.setOrders(orderItemList);
         return page;
     }
 
