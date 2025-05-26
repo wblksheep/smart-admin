@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * json 格式错误 缺少请求体
+     * 输入参数校验异常
      */
     @ResponseBody
     @ExceptionHandler({HandlerMethodValidationException.class})

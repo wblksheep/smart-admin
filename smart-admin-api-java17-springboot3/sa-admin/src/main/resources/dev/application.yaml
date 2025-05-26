@@ -8,13 +8,13 @@
 # 项目配置: 名称、日志目录
 project:
   name: sa-admin
-  log-directory: ${localPath:/home}/logs/smart_admin_v3/${project.name}/${spring.profiles.active}
-
+#  log-directory: ${localPath:/home}/logs/smart_admin_v3/${project.name}/${spring.profiles.active}
+  log-directory: ./logs/smart_admin_v3/${project.name}/${spring.profiles.active}
 # 项目端口和url根路径
 server:
   port: 1024
   servlet:
-    context-path: /
+    context-path: /api
 
 # 环境
 spring:

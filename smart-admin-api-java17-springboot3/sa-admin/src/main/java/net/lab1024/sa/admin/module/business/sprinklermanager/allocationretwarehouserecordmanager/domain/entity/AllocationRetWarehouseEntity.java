@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import net.lab1024.sa.base.module.support.datatracer.annoation.DataTracerFieldLabel;
+import org.apache.ibatis.annotations.UpdateProvider;
 
 import java.time.LocalDateTime;
 

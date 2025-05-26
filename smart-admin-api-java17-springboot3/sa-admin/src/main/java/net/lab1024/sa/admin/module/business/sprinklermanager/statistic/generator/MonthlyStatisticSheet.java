@@ -17,6 +17,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repositor
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.domain.vo.MonthlyStatisticExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.repository.StatisticRepository;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
+import net.lab1024.sa.base.common.exception.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -41,7 +42,6 @@ public class MonthlyStatisticSheet extends SheetGenerator {
 
     private static final String[] RETMAINTAINENCEREASONTYPES = {"活性堵嘴歪针", "分散堵嘴歪针", "活性湿浆堵嘴歪针", "分散湿浆堵嘴歪针", "物理破损", "报错驱动过流", "电路受损", "漏气", "内色差或持续性差", "金手指损坏", "测试", "其他", "轮转机", "共计"};
     private static final String[] RETMAINTAINENCEREASONTYPESVO = {"活性堵嘴歪针", "分散堵嘴歪针", "活性湿浆堵嘴歪针", "分散湿浆堵嘴歪针", "物理破损", "报错驱动过流", "电路受损：白条、常喷、断喷、接触不良、不喷、不打印", "漏气", "喷头内色差或持续性差", "金手指损坏", "测试", "其他", "轮转机", "共计"};
-
     private static final String[] MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS = {"大昌德1#", "大昌德2#", "宇华1#", "宇华2#", "宇华3#", "华都1#", "华都2#", "大昌祥1#", "大昌祥2#", "大昌祥扫描机", "鸿大北海1#大机", "鸿大北海2#大机", "鸿大北海3#大机", "吉盛祥1#", "吉盛祥2#", "绍肖1#", "绍肖2#", "绍肖3#", "绍肖4#", "沙印1#", "沙印2#", "宏强1#", "宏强2#", "宏强3#", "稽山1#", "稽山2#", "盛兴1#", "盛兴2#", "超超1#", "超超2#", "宜滨1#", "宜滨2#", "恒晨1#", "恒晨3C1#", "洁彩纺一号车间1#大机", "洁彩纺二号车间1#大机", "金楚1#大机", "鸿大北海1#小机", "鸿大北海2#小机", "鸿大北海3#小机", "鸿大北海5#小机", "轮转机", "其他", "共计"};
 
     private Integer[][] MONTHBEGIN = {
@@ -103,6 +103,8 @@ public class MonthlyStatisticSheet extends SheetGenerator {
                 excelVO.setMonthBegin(MONTHBEGIN[month - 1][i]);
             } catch (ArrayIndexOutOfBoundsException e) {
                 throw new ArrayIndexOutOfBoundsException(e.getMessage());
+            } catch (NullPointerException e) {
+                throw new BusinessException("月度统计出错，未提供对应的月初数据");
             }
             excelVO.setMonthIn(records2.size() + sprinklers.size());
             // 4. 通过预计算Map直接获取统计值（O(1)复杂度）

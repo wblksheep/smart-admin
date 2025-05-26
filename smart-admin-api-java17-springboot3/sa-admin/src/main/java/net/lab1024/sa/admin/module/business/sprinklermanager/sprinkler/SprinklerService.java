@@ -89,7 +89,8 @@ public class SprinklerService {
     public ResponseDTO<PageResult<SprinklerVO>> queryByPage(SprinklerQueryForm queryForm) {
         queryForm.setDeletedFlag(Boolean.FALSE);
         Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
-        List<SprinklerVO> sprinklerList = sprinklerRepository.getListByQueryPage(page, queryForm);
+        List<SprinklerVO> sprinklerList = sprinklerRepository.getListByQueryForm(queryForm);
+        SprinklerSorter.sortBySprinklerSerial(sprinklerList);
         PageResult<SprinklerVO> pageResult = SmartPageUtil.convert2PageResult(page, sprinklerList);
         return ResponseDTO.ok(pageResult);
     }
@@ -306,12 +307,16 @@ public class SprinklerService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ResponseDTO<String> updateSprinkler(@Valid SprinklerUpdateForm updateVO) {
-        Long sprinklerId = updateVO.getSprinklerId();
+        List<SprinklerEntity> sprinklerDetails = sprinklerRepository.getListBySprinklerSerials(Arrays.asList(updateVO.getSprinklerSerial()));
+        if (sprinklerDetails.isEmpty()) {
+            return ResponseDTO.userErrorParam("喷头不存在");
+        }
         // 校验喷头是否存在
-        SprinklerEntity sprinklerDetail = sprinklerRepository.getById(sprinklerId);
+        SprinklerEntity sprinklerDetail = sprinklerDetails.get(0);
         if (Objects.isNull(sprinklerDetail) || sprinklerDetail.getDeletedFlag()) {
             return ResponseDTO.userErrorParam("喷头不存在");
         }
+        Long sprinklerId = sprinklerDetail.getSprinklerId();
         // 验证喷头序列号是否重复
         SprinklerEntity validateSprinkler = sprinklerRepository.queryBySprinklerSerial(updateVO.getSprinklerSerial(), sprinklerId, Boolean.FALSE);
         if (Objects.nonNull(validateSprinkler)) {
@@ -319,6 +324,7 @@ public class SprinklerService {
         }
         SprinklerEntity updateEntity = SmartBeanUtil.copy(sprinklerDetail, SprinklerEntity.class);
         SmartBeanUtil.copyProperties(updateVO, updateEntity);
+        updateEntity.setSprinklerId(sprinklerId);
         Byte oldStatus = sprinklerDetail.getStatus().byteValue();
         Byte newStatus = updateEntity.getStatus().byteValue();
         if (oldStatus == newStatus) {
@@ -334,7 +340,7 @@ public class SprinklerService {
         RepositorySprinklerTransferStrategy nextStrategy = repositorySprinklerTransferStrategyFactory.getStrategy(newStatus);
         nextStrategy.updateRepository(sprinklerDetail);
         RequestUser requestUser = SmartRequestUtil.getRequestUser();
-        updateEntity.setHistory(sprinklerDetail.getHistory() + ";" + LocalDate.now() + requestUser.getUserName() + "将喷头从" + RepositorySprinklerTypeChineseEnum.fromStatus(oldStatus).get().getDesc() + "转入" + RepositorySprinklerTypeChineseEnum.fromStatus(newStatus).get().getDesc());
+        updateEntity.setHistory(updateEntity.getHistory() + LocalDate.now() + requestUser.getUserName() + "将喷头从" + RepositorySprinklerTypeChineseEnum.fromStatus(oldStatus).get().getDesc() + "转入" + RepositorySprinklerTypeChineseEnum.fromStatus(newStatus).get().getDesc() + ";");
         sprinklerRepository.updateById(updateEntity);
         return ResponseDTO.ok();
     }
@@ -395,11 +401,25 @@ public class SprinklerService {
     @Transactional(rollbackFor = Exception.class)
     public ResponseDTO<String> updateBatchSprinkler(@Valid MultipartFile file, RequestUser requestUser) {
         //使用收集器一次性完成字段设置，避免冗余操作
-        List<SprinklerUpdateForm> updateVOs = ExcelUtil.importExcelByClass(file, SprinklerUpdateForm.class)
+        List<SprinklerImportForm> importVOs = ExcelUtil.importExcelByClass(file, SprinklerImportForm.class)
                 .stream()
-                .peek(vo -> initCreateVO(vo, requestUser)) // 提取字段设置为独立方法
+                .peek(vo -> initImportVO(vo, requestUser)) // 提取字段设置为独立方法
                 .toList();
-        updateVOs.forEach(this::updateSprinkler);
+        for (int i = 0; i < importVOs.size(); i++) {
+            SprinklerImportForm importVO = importVOs.get(i);
+            SprinklerUpdateForm updateVO = new SprinklerUpdateForm();
+            BeanUtils.copyProperties(importVO, updateVO);
+            RepositorySprinklerTypeChineseEnum[] values = RepositorySprinklerTypeChineseEnum.values();
+            for (int j = 0; j < values.length; j++) {
+                if (values[j].getDesc().equals(importVO.getStatus())) {
+                    updateVO.setStatus(values[j].getValue());
+                }
+            }
+            if (updateVO.getStatus() == null) {
+                return ResponseDTO.userErrorParam("编辑数据所在仓数据有误");
+            }
+            updateSprinkler(updateVO);
+        }
         return ResponseDTO.ok();
     }
 

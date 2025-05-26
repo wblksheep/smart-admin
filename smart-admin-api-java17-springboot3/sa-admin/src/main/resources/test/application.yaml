@@ -14,7 +14,7 @@ project:
 server:
   port: 11024
   servlet:
-    context-path: /
+    context-path: /api
 
 # 环境
 spring:

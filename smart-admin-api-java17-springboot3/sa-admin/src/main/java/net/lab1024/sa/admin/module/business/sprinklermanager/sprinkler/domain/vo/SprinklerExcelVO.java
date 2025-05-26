@@ -13,9 +13,6 @@ import java.time.LocalDate;
  */
 @Data
 public class SprinklerExcelVO {
-    @ExcelProperty("喷头ID")
-    private Long sprinklerId;
-
 
     @ExcelProperty("购入日期（合同编号）")
     private String purchaseDateContractNumber;

@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,9 @@ public class StatisticService {
     private ExcelGeneratorFactory factory;
 
     public ResponseDTO<String> getMonthlySheetStatisticExcelExportData(LocalDate startDate, LocalDate endDate, HttpServletResponse response, String watermarkString) throws IOException {
-        String fileName = "月度报表.xlsx";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月");
+        String formattedDate = startDate.format(formatter); // 输出格式如"2023-10"
+        String fileName = formattedDate + "月度报表.xlsx";
         // 设置下载消息头
         SmartResponseUtil.setDownloadFileHeader(response, fileName, null);
         try (ExcelWriter excelWriter = FastExcel.write(response.getOutputStream()).inMemory(true).build()) {
