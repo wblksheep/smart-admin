@@ -216,6 +216,7 @@ public class SprinklerService {
         return ResponseDTO.userErrorParam("无有效数据可插入，错误数据：全部为空值或重复序列号");
 
     }
+
     public List<?> getRepositorySprinklerExcelExportData(@Valid CombinedQueryForm queryForm) {
         Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
         BaseQueryForm joinForm = queryForm.getJoinQueryForm();
@@ -298,6 +299,11 @@ public class SprinklerService {
         if (Objects.nonNull(validSprinkler)) {
             return ResponseDTO.userErrorParam("喷头序列号重复");
         }
+        if (updateVO.getHistory() != null) { // 如果历史不为空，则更新
+            sprinklerDetail.setHistory(updateVO.getHistory());
+            sprinklerRepository.updateById(sprinklerDetail);
+        }
+
         Class<?> clazz = typeService.getCachedEntity(type);
         BaseIService<?> repository = typeService.getCachedRepository(type);
 
@@ -417,6 +423,7 @@ public class SprinklerService {
         }
         // 数据插入
         SprinklerEntity insertSprinkler = SmartBeanUtil.copy(createVO, SprinklerEntity.class);
+        insertSprinkler.setStatus((byte) 0);
         sprinklerRepository.save(insertSprinkler);
 
         UsableSprinklerEntity usableSprinkler = new UsableSprinklerEntity();
@@ -479,7 +486,6 @@ public class SprinklerService {
         vo.setCreateUserId(user.getUserId());
         vo.setCreateUserName(user.getUserName());
     }
-
 
 
 }

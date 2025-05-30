@@ -16,7 +16,4 @@ public interface AllocationRetWarehouseRecordRepository extends IService<Allocat
     AllocationRetWarehouseRecordVO getDetail(Long recordId, Boolean deletedFlag);
 
     List<AllocationRetWarehouseRecordVO> getListByQueryPage(Page<?> page, @Param("queryForm") AllocationRetWarehouseQueryForm queryForm);
-//    List<AllocationRetWarehouseRecordVO> getListByQueryPage(Page<?> page, @Param("queryForm") AllocationRetWarehouseRecordQueryForm queryForm);
-//
-//    AllocationRetWarehouseRecordVO getDetail(@Param("recordId") Long recordId, @Param("deletedFlag") Boolean deletedFlag);
 }

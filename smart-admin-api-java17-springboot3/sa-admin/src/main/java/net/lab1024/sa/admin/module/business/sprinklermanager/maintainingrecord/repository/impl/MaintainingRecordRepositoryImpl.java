@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.dao.MaintainingRecordDao;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.entity.MaintainingRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo.MaintainingRecordExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo.MaintainingRecordVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.repository.MaintainingRecordRepository;
 import org.apache.ibatis.annotations.Param;
@@ -37,5 +38,10 @@ public class MaintainingRecordRepositoryImpl extends ServiceImpl<MaintainingReco
         lqw.ge(MaintainingRecordEntity::getRetMaintainenceDate, "2025-02-01");
         lqw.eq(MaintainingRecordEntity::getRetMaintainenceReason, "活性堵嘴歪针");
         return this.list(lqw);
+    }
+
+    @Override
+    public List<MaintainingRecordExcelVO> selectMaintainingRecordExcelExportData(MaintainingRecordQueryForm queryForm) {
+        return this.getBaseMapper().selectExcelExportData(queryForm);
     }
 }

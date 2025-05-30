@@ -17,6 +17,7 @@ public enum DataScopeTypeEnum implements BaseEnum {
      * 系统通知
      */
     NOTICE(1, 20, "系统通知", "系统通知数据范围"),
+    ALLOCATIONRETWAREHOUSERECORD(2, 21, "领用与返仓记录", "领用与返仓记录数据范围"),
     ;
 
     private final Integer value;

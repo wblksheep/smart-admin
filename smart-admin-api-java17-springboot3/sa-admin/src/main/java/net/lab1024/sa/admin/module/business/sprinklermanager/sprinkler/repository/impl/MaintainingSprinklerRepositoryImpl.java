@@ -47,14 +47,14 @@ public class MaintainingSprinklerRepositoryImpl extends BaseServiceImpl<Maintain
     }
 
     @Override
-    public BaseSprinklerVO getDetail(SprinklerEntity sprinklerEntity, Boolean deletedFlag) {
-        MaintainingSprinklerEntity maintainingEntity = this.getById(sprinklerEntity.getSprinklerId());
-        MaintainingSprinklerVO vo = new MaintainingSprinklerVO();
-
-        // 分步拷贝
-        SmartBeanUtil.copyProperties(sprinklerEntity, vo);   // 源1
-        SmartBeanUtil.copyProperties(maintainingEntity, vo);     // 源2
-        return vo;
+    public List<MaintainingSprinklerEntity> getListBySprinklerSerials(List<String> sprinklerSerials, List<Long> sprinklerIds, Boolean deletedFlag) {
+        LambdaQueryWrapper<MaintainingSprinklerEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.in(MaintainingSprinklerEntity::getSprinklerSerial, sprinklerSerials);
+        lqw.eq(MaintainingSprinklerEntity::getDeletedFlag, deletedFlag);
+        if (sprinklerIds != null && sprinklerIds.size() > 0) {
+            lqw.in(MaintainingSprinklerEntity::getSprinklerId, sprinklerIds);
+        }
+        return this.list(lqw);
     }
 
     @Override
@@ -65,6 +65,18 @@ public class MaintainingSprinklerRepositoryImpl extends BaseServiceImpl<Maintain
         lqw.ne(MaintainingSprinklerEntity::getDeletedFlag, deletedFlag);
         return this.getBaseMapper().selectOne(lqw);
     }
+
+    @Override
+    public BaseSprinklerVO getDetail(SprinklerEntity sprinklerEntity, Boolean deletedFlag) {
+        MaintainingSprinklerEntity maintainingEntity = this.getById(sprinklerEntity.getSprinklerId());
+        MaintainingSprinklerVO vo = new MaintainingSprinklerVO();
+
+        // 分步拷贝
+        SmartBeanUtil.copyProperties(sprinklerEntity, vo);   // 源1
+        SmartBeanUtil.copyProperties(maintainingEntity, vo);     // 源2
+        return vo;
+    }
+
 
     @Override
     public void myUpdateById(Object updateEntity) {

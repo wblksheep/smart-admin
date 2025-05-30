@@ -59,5 +59,63 @@
         FROM t_maintaining_record mr
         WHERE mr.record_id = #{recordId} AND mr.deleted_flag = #{deletedFlag}
     </select>
+    <select id="selectExcelExportData"
+            resultType="net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo.MaintainingRecordExcelVO">
+        SELECT t_maintaining_record.*
+        FROM t_maintaining_record
+        <where>
+            deleted_flag = #{queryForm.deletedFlag}
+            <if test="queryForm.retMaintainenceDateStartTime != null">
+                AND DATE_FORMAT(ret_maintainence_date, '%Y-%m-%d') &gt;= #{queryForm.retMaintainenceDateStartTime}
+            </if>
+            <if test="queryForm.retMaintainenceDateEndTime != null">
+                AND DATE_FORMAT(ret_maintainence_date, '%Y-%m-%d') &lt;= #{queryForm.retMaintainenceDateEndTime}
+            </if>
+            <if test="queryForm.sprinklerSerial != null and queryForm.sprinklerSerial != ''">
+                AND INSTR(sprinkler_serial,#{queryForm.sprinklerSerial})
+            </if>
+
+            <if test="queryForm.retMaintainenceReason != null and queryForm.retMaintainenceReason != ''">
+                AND INSTR(ret_maintainence_reason,#{queryForm.retMaintainenceReason})
+            </if>
+
+            <if test="queryForm.realReason != null and queryForm.realReason != ''">
+                AND INSTR(real_reason,#{queryForm.realReason})
+            </if>
+
+            <if test="queryForm.customer != null and queryForm.customer != ''">
+                AND INSTR(customer,#{queryForm.customer})
+            </if>
+
+            <if test="queryForm.retWarehouseDateStartTime != null">
+                AND DATE_FORMAT(ret_warehouse_date, '%Y-%m-%d') &gt;= #{queryForm.retWarehouseDateStartTime}
+            </if>
+            <if test="queryForm.retWarehouseDateEndTime != null">
+                AND DATE_FORMAT(ret_warehouse_date, '%Y-%m-%d') &lt;= #{queryForm.retWarehouseDateEndTime}
+            </if>
+
+            <if test="queryForm.retWarehouseType != null and queryForm.retWarehouseType != ''">
+                AND INSTR(ret_warehouse_type,#{queryForm.retWarehouseType})
+            </if>
+
+            <if test="queryForm.allocateLimitation != null and queryForm.allocateLimitation != ''">
+                AND INSTR(allocate_limitation,#{queryForm.allocateLimitation})
+            </if>
+
+            <if test="queryForm.disabledFlag != null">
+                AND disabled_flag = #{queryForm.disabledFlag}
+            </if>
+        </where>
+        <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
+            ORDER BY create_time DESC
+        </if>
+        <if test="queryForm.sortItemList != null and !queryForm.sortItemList.isEmpty()">
+            ORDER BY
+            <foreach collection="queryForm.sortItemList" item="sortItem" separator=",">
+                <!-- 安全处理字段名防止SQL注入 -->
+                `${sortItem.column}` ${sortItem.isAsc ? 'ASC' : 'DESC'}
+            </foreach>
+        </if>
+    </select>
 
 </mapper>

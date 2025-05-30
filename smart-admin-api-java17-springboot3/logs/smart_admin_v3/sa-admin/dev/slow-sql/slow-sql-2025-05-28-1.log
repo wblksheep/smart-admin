@@ -1,0 +1,1 @@
+[2025-05-28 11:15:15,008][ERROR][SmartJobExecutor-1] slow sql 1310 millis. SELECT job_id,job_name,job_class,trigger_type,trigger_value,param,enabled_flag,last_execute_time,last_execute_log_id,remark,sort,deleted_flag,update_name,update_time,create_time FROM t_smart_job WHERE job_id=? [1] (StatFilter.java:518)

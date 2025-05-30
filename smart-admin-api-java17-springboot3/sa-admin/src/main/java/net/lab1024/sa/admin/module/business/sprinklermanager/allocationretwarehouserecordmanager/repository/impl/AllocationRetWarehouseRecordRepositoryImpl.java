@@ -45,17 +45,5 @@ public class AllocationRetWarehouseRecordRepositoryImpl extends ServiceImpl<Allo
         // 3. 执行分页查询（遵循MyBatis-Plus分页规范）
         return this.getBaseMapper().queryPage(page, distinctIds);
 
-//        // 1.获取无分页的记录
-//        List<AllocationRetWarehouseRecordVO> recordVOs = this.getBaseMapper().queryPageWithoutPage(queryForm);
-//        // 2. 对记录去重，获取去重后的id
-//        Map<Long, AllocationRetWarehouseRecordVO> recordMap = recordVOs.getRecords().stream()
-//                .collect(Collectors.toMap(
-//                        AllocationRetWarehouseRecordVO::getRecordId,
-//                        Function.identity(),
-//                        (existing, replacement) -> replacement
-//                ));
-//        List<Long> ids = recordMap.getIds();
-//        // 3.根据id分页查询
-//        return this.getBaseMapper().queryPageByIds(page, ids);
     }
 }

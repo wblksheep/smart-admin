@@ -32,6 +32,13 @@ public class UsableSprinklerRepositoryImpl extends BaseServiceImpl<UsableSprinkl
     }
 
     @Override
+    public List<UsableSprinklerEntity> getListBySprinklerSerials(List<String> sprinklerSerials) {
+        LambdaQueryWrapper<UsableSprinklerEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.in(UsableSprinklerEntity::getSprinklerSerial, sprinklerSerials);
+        return this.list(lqw);
+    }
+
+    @Override
     public BaseSprinklerVO getDetail(SprinklerEntity sprinklerEntity, Boolean deletedFlag) {
         UsableSprinklerEntity usableEntity = this.getById(sprinklerEntity.getSprinklerId());
         UsableSprinklerVO vo = new UsableSprinklerVO();

@@ -31,6 +31,10 @@ public abstract class BaseUpdateForm {
     @Length(max = 20, message = "sprinklerSerial最多20字符")
     private String sprinklerSerial;
 
+    @ExcelProperty("历史")
+    @Schema(description = "历史")
+    private String history;
+
     @ExcelIgnore
     @Schema(description = "禁用状态")
 //    @NotNull(message = "禁用状态不能为空")

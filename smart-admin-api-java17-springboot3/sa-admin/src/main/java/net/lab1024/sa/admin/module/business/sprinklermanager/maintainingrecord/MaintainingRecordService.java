@@ -15,16 +15,22 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.d
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordCreateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordUpdateForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo.MaintainingRecordExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo.MaintainingRecordVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.repository.MaintainingRecordRepository;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.MaintainingSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.UsableSprinklerEntity;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.MaintainingSprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.UsableSprinklerRepository;
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
 import net.lab1024.sa.base.common.util.ExcelUtil;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
 import net.lab1024.sa.base.common.util.SmartPageUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,6 +48,10 @@ public class MaintainingRecordService {
 
     @Resource
     private MaintainingRecordRepository maintainingRecordRepository;
+    @Autowired
+    private UsableSprinklerRepository usableSprinklerRepository;
+    @Autowired
+    private MaintainingSprinklerRepository maintainingSprinklerRepository;
 
     /**
      * 批量导入维修记录
@@ -167,12 +177,12 @@ public class MaintainingRecordService {
     @Transactional(rollbackFor = Exception.class)
     public ResponseDTO<String> createMaintainingRecord(MaintainingRecordCreateForm createVO) {
         // 验证喷头是否存在
-        List<SprinklerEntity> validateSprinkler = sprinklerRepository.getListBySprinklerSerials(Arrays.asList(createVO.getSprinklerSerial()));
-        if (validateSprinkler.isEmpty()) {
+        List<MaintainingSprinklerEntity> validateMaintainingSprinkler = maintainingSprinklerRepository.getListBySprinklerSerials(Arrays.asList(createVO.getSprinklerSerial()), null, Boolean.FALSE);
+        if (validateMaintainingSprinkler.isEmpty()) {
             return ResponseDTO.userErrorParam("无效的喷头");
         }
         MaintainingRecordEntity insertMaintainingRecord = SmartBeanUtil.copy(createVO, MaintainingRecordEntity.class);
-        insertMaintainingRecord.setSprinklerId(validateSprinkler.get(0).getSprinklerId());
+        insertMaintainingRecord.setSprinklerId(validateMaintainingSprinkler.get(0).getSprinklerId());
         maintainingRecordRepository.save(insertMaintainingRecord);
         return ResponseDTO.ok();
     }
@@ -233,5 +243,13 @@ public class MaintainingRecordService {
         MaintainingRecordEntity updateMaintainingRecord = SmartBeanUtil.copy(updateVO, MaintainingRecordEntity.class);
         maintainingRecordRepository.updateById(updateMaintainingRecord);
         return ResponseDTO.ok();
+    }
+
+    /**
+     * 获取导出数据
+     */
+    public List<MaintainingRecordExcelVO> getMaintainingRecordExcelExportData(@Valid MaintainingRecordQueryForm queryForm) {
+        queryForm.setDeletedFlag(Boolean.FALSE);
+        return maintainingRecordRepository.selectMaintainingRecordExcelExportData(queryForm);
     }
 }

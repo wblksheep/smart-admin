@@ -2,8 +2,10 @@ package net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import jakarta.validation.Valid;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.entity.MaintainingRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo.MaintainingRecordExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo.MaintainingRecordVO;
 import org.apache.ibatis.annotations.Param;
 
@@ -18,4 +20,5 @@ public interface MaintainingRecordRepository extends IService<MaintainingRecordE
 
     List<MaintainingRecordEntity> getListByCondition();
 
+    List<MaintainingRecordExcelVO> selectMaintainingRecordExcelExportData(@Param("queryForm") MaintainingRecordQueryForm queryForm);
 }

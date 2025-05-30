@@ -18,4 +18,6 @@ public interface MaintainingSprinklerRepository extends BaseIService<Maintaining
     List<MaintainingSprinklerExcelVO> getListByQueryPage(@Param("queryForm") SprinklerQueryForm queryForm, @Param("joinForm") MaintainingSprinklerQueryForm joinForm);
 
     List<MaintainingSprinklerEntity> getListByCondition();
+
+    List<MaintainingSprinklerEntity> getListBySprinklerSerials(@Param("sprinklerSerials") List<String> sprinklerSerials, @Param("sprinklerIds") List<Long> sprinklerIds, @Param("deletedFlag") Boolean deletedFlag);
 }

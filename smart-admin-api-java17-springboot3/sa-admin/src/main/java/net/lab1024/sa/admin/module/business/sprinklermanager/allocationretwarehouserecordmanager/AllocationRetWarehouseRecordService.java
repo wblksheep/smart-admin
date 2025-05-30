@@ -15,12 +15,16 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwareho
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.repository.AllocationRetWarehouseRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
+import net.lab1024.sa.admin.module.system.role.dao.RoleEmployeeDao;
+import net.lab1024.sa.admin.module.system.role.domain.entity.RoleEmployeeEntity;
+import net.lab1024.sa.admin.module.system.role.domain.vo.RoleVO;
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
 import net.lab1024.sa.base.common.util.SmartPageUtil;
 import net.lab1024.sa.base.common.util.SmartRequestUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +44,8 @@ public class AllocationRetWarehouseRecordService {
 
     @Resource
     private AllocationRetWarehouseRepository allocationRetWarehouseRepository;
+    @Autowired
+    private RoleEmployeeDao roleEmployeeDao;
 
 
     /**
@@ -136,7 +142,6 @@ public class AllocationRetWarehouseRecordService {
         queryForm.setDeletedFlag(Boolean.FALSE);
         Page<?> page = SmartPageUtil.convert2PageQuery(queryForm);
         List<AllocationRetWarehouseRecordVO> allocationRetWarehouseRecordList = allocationRetWarehouseRecordRepository.getListByQueryPage(page, queryForm);
-
         PageResult<AllocationRetWarehouseRecordVO> pageResult = SmartPageUtil.convert2PageResult(page, allocationRetWarehouseRecordList);
         return ResponseDTO.ok(pageResult);
     }
@@ -146,7 +151,7 @@ public class AllocationRetWarehouseRecordService {
      */
     public AllocationRetWarehouseRecordVO getDetail(Long recordId) {
 
-        AllocationRetWarehouseRecordVO allocationRetWarehouseRecordVO =allocationRetWarehouseRecordRepository.getDetail(recordId, Boolean.FALSE);
+        AllocationRetWarehouseRecordVO allocationRetWarehouseRecordVO = allocationRetWarehouseRecordRepository.getDetail(recordId, Boolean.FALSE);
         List<AllocationRetWarehouseVO> vos = allocationRetWarehouseRepository.getDetail(recordId, Boolean.FALSE);
         allocationRetWarehouseRecordVO.setAllocationRetWarehouseVO(vos);
         return allocationRetWarehouseRecordVO;
@@ -258,15 +263,14 @@ public class AllocationRetWarehouseRecordService {
         if (Objects.isNull(recordDetail) || recordDetail.getDeletedFlag()) {
             return ResponseDTO.userErrorParam("领用与返仓记录不存在");
         }
-        if(isApproved){
+        if (isApproved) {
             recordDetail.setStatus(AllocationRetWarehouseTypeEnum.APPROVED.getValue());
-        }else {
+        } else {
             recordDetail.setStatus(AllocationRetWarehouseTypeEnum.NOTAPPROVED.getValue());
         }
         allocationRetWarehouseRecordRepository.updateById(recordDetail);
-        return ResponseDTO.okMsg(isApproved?"审核通过":"审核不通过");
+        return ResponseDTO.okMsg(isApproved ? "审核通过" : "审核不通过");
     }
-
 
 
 }

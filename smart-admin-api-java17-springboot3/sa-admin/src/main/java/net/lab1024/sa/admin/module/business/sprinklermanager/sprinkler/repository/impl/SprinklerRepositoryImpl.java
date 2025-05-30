@@ -23,9 +23,9 @@ public class SprinklerRepositoryImpl extends ServiceImpl<SprinklerDao, Sprinkler
 
     @Override
     public List<SprinklerEntity> getListBySprinklerSerials(List<String> sprinklerSerials) {
-        LambdaQueryWrapper<SprinklerEntity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(SprinklerEntity::getSprinklerSerial, sprinklerSerials);
-        return this.list(queryWrapper);
+        LambdaQueryWrapper<SprinklerEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.in(SprinklerEntity::getSprinklerSerial, sprinklerSerials);
+        return this.list(lqw);
     }
 
     @Override

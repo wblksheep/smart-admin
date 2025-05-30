@@ -96,7 +96,7 @@ public class SprinklerController {
     @Operation(summary = "喷头转仓 @author 芦苇")
     @PostMapping("/sprinklermanager/sprinkler/transfer")
     @SaCheckPermission("sprinklermanager:sprinkler:transfer")
-    public ResponseDTO<String> transferRepo(Long sprinklerId, @RequestParam @Valid @Min(0) @Max(4) Byte type){
+    public ResponseDTO<String> transferRepo(Long sprinklerId, @RequestParam @Valid @Min(0) @Max(4) Byte type) {
         return sprinklerService.transferRepo(sprinklerId, type);
     }
 
@@ -142,7 +142,6 @@ public class SprinklerController {
     @PostMapping("/sprinklermanager/sprinkler/exportSprinklerExcel")
     public void exportSprinklerExcel(@RequestBody @Valid SprinklerQueryForm queryForm, HttpServletResponse response) throws IOException {
         List<SprinklerExcelVO> data = sprinklerService.getSprinklerExcelExportData(queryForm);
-        SprinklerSorter.sortBySprinklerSerial(data);
         if (CollectionUtils.isEmpty(data)) {
             SmartResponseUtil.write(response, ResponseDTO.userErrorParam("暂无数据"));
             return;

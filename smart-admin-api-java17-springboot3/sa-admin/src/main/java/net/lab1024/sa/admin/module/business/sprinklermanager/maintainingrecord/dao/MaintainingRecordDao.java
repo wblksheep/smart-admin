@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.entity.MaintainingRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo.MaintainingRecordExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo.MaintainingRecordVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.UsableSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.SprinklerQueryForm;
@@ -32,6 +33,8 @@ public interface MaintainingRecordDao extends BaseMapper<MaintainingRecordEntity
     List<MaintainingRecordVO> queryPage(Page<?> page, @Param("queryForm") MaintainingRecordQueryForm queryForm);
 
     MaintainingRecordVO getDetail(@Param("recordId") Long recordId,@Param("deletedFlag") Boolean deletedFlag);
+
+    List<MaintainingRecordExcelVO> selectExcelExportData(@Param("queryForm") MaintainingRecordQueryForm queryForm);
 
 //    List<UsableSprinklerExcelVO> queryExcel(@Param("queryForm") SprinklerQueryForm queryForm, @Param("joinForm") UsableSprinklerQueryForm joinForm);
 }
