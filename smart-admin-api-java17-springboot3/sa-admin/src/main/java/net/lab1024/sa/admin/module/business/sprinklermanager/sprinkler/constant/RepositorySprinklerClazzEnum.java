@@ -1,24 +1,19 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant;
 
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.BaseCreateForm;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.DamagedSprinklerCreateForm;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.MachineSprinklerCreateForm;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.MaintainingSprinklerCreateForm;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.RmaSprinklerCreateForm;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.UsableSprinklerCreateForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.*;
 
 public enum RepositorySprinklerClazzEnum {
-    USABLE(0, UsableSprinklerCreateForm.class),
-    MACHINE(1, MachineSprinklerCreateForm.class),
-    MAINTAINING(2, MaintainingSprinklerCreateForm.class),
-    DAMAGED(3, DamagedSprinklerCreateForm.class),
-    RMA(4, RmaSprinklerCreateForm.class),
+    USABLE(0, UsableSprinklerImportForm.class),
+    MACHINE(1, MachineSprinklerImportForm.class),
+    MAINTAINING(2, MaintainingSprinklerImportForm.class),
+    DAMAGED(3, DamagedSprinklerImportForm.class),
+    RMA(4, RmaSprinklerImportForm.class),
     ;
 
     private final int code;
-    private final Class<? extends BaseCreateForm> clazz;
+    private final Class<? extends BaseImportForm> clazz;
 
-    RepositorySprinklerClazzEnum(int code, Class<? extends BaseCreateForm> clazz) {
+    RepositorySprinklerClazzEnum(int code, Class<? extends BaseImportForm> clazz) {
         this.code = code;
         this.clazz = clazz;
     }
@@ -34,7 +29,7 @@ public enum RepositorySprinklerClazzEnum {
     }
 
     // 获取关联的Class对象
-    public Class<? extends BaseCreateForm> getSprinklerClass() {
+    public Class<? extends BaseImportForm> getSprinklerClass() {
         return this.clazz;
     }
 }

@@ -14,7 +14,7 @@ public class DamagedSprinklerImportForm extends BaseImportForm{
 
     @ExcelProperty("返仓日期")
     @Schema(description = "返仓日期")
-    private LocalDate retWarehouseDate;
+    private String retWarehouseDate;
 
     @ExcelProperty("历史")
     @Schema(description = "历史")
@@ -32,16 +32,4 @@ public class DamagedSprinklerImportForm extends BaseImportForm{
     @Schema(description = "具体破损原因")
     private String realDamagedReason;
 
-    @ExcelIgnore
-    @Schema(description = "禁用状态")
-    @NotNull(message = "禁用状态不能为空")
-    private Boolean disabledFlag;
-
-    @ExcelIgnore
-    @Schema(description = "创建人", hidden = true)
-    private Long createUserId;
-
-    @ExcelIgnore
-    @Schema(description = "创建人", hidden = true)
-    private String createUserName;
 }

@@ -14,7 +14,7 @@ public class RmaSprinklerImportForm extends BaseImportForm{
 
     @ExcelProperty("返修日期")
     @Schema(description = "返修日期")
-    private LocalDate retMaintainenceDate;
+    private String retMaintainenceDate;
 
     @ExcelProperty("返修原因")
     @Schema(description = "返修原因")
@@ -22,7 +22,7 @@ public class RmaSprinklerImportForm extends BaseImportForm{
 
     @ExcelProperty("返仓日期")
     @Schema(description = "返仓日期")
-    private LocalDate retWarehouseDate;
+    private String retWarehouseDate;
 
     @ExcelProperty("返修客户")
     @Schema(description = "返修客户")
@@ -40,16 +40,4 @@ public class RmaSprinklerImportForm extends BaseImportForm{
     @Schema(description = "系统核对")
     private String warehouseCheck;
 
-    @ExcelIgnore
-    @Schema(description = "禁用状态")
-    @NotNull(message = "禁用状态不能为空")
-    private Boolean disabledFlag;
-
-    @ExcelIgnore
-    @Schema(description = "创建人", hidden = true)
-    private Long createUserId;
-
-    @ExcelIgnore
-    @Schema(description = "创建人", hidden = true)
-    private String createUserName;
 }

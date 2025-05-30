@@ -138,7 +138,7 @@ public class SprinklerService {
 
 
     @Resource
-    private RepositorySprinklerCreateFormFactory createFormFactory;
+    private RepositorySprinklerImportFormFactory importFormFactory;
 
     @Resource
     private DataProcessorFactory processorFactory;
@@ -147,11 +147,11 @@ public class SprinklerService {
      * 导入各仓喷头模块
      */
     public ResponseDTO<String> batchRepositorySprinklerImport(@Valid MultipartFile file, RequestUser requestUser, @Valid Integer type) {
-        Class<? extends BaseCreateForm> createVOClazz = createFormFactory.getSprinklerClass(type);
-        List<? extends BaseCreateForm> list = ExcelUtil
-                .importExcelByClass(file, createVOClazz)
+        Class<? extends BaseImportForm> importVOClazz = importFormFactory.getSprinklerClass(type);
+        List<? extends BaseImportForm> list = ExcelUtil
+                .importExcelByClass(file, importVOClazz)
                 .stream()
-                .peek(vo -> initCreateVO(vo, requestUser))
+                .peek(vo -> initImportVO(vo, requestUser))
                 .toList();
         DataProcessor dataProcessor = processorFactory
                 .getProcessor(RepositorySprinklerTypeEnum.values()[type].getDesc());
