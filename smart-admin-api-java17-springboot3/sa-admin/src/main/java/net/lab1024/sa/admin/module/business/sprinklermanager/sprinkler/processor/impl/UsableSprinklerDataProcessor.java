@@ -17,6 +17,7 @@ import net.lab1024.sa.base.common.domain.ResponseDTO;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
 import org.springframework.stereotype.Component;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -131,6 +132,12 @@ public class UsableSprinklerDataProcessor implements DataProcessor<UsableSprinkl
     ) {
         // 使用Bean拷贝工具优化属性复制
         UsableSprinklerEntity entity = SmartBeanUtil.copy(form, UsableSprinklerEntity.class);
+        // 预定义支持的日期格式
+        final List<DateTimeFormatter> DATE_FORMATTERS = Arrays.asList(
+                DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+                DateTimeFormatter.ofPattern("yyyy/MM/dd"),
+                DateTimeFormatter.ofPattern("yyyy/M/d")
+        );
         SprinklerEntity mainEntity = mainTableMap.get(form.getSprinklerSerial());
         if (mainEntity != null) {
             entity.setSprinklerId(mainEntity.getSprinklerId());

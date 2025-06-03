@@ -26,10 +26,10 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
+import net.lab1024.sa.base.common.exception.BusinessException;
 import net.lab1024.sa.base.common.util.ExcelUtil;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
 import net.lab1024.sa.base.common.util.SmartPageUtil;
-import net.lab1024.sa.base.common.util.SmartRequestUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,8 +39,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -90,23 +94,13 @@ public class SprinklerService {
         BaseQueryForm joinForm = queryForm.getJoinQueryForm();
 
         // 获取具体策略
-        @SuppressWarnings("unchecked")
-        RepositorySprinklerQueryStrategy<BaseQueryForm, R, EXCEL> strategy =
-                (RepositorySprinklerQueryStrategy<BaseQueryForm, R, EXCEL>)
-                        repositorySprinklerStrategyFactory.getStrategy(joinForm.getClass());
+        @SuppressWarnings("unchecked") RepositorySprinklerQueryStrategy<BaseQueryForm, R, EXCEL> strategy = (RepositorySprinklerQueryStrategy<BaseQueryForm, R, EXCEL>) repositorySprinklerStrategyFactory.getStrategy(joinForm.getClass());
 
         // 执行策略查询
-        List<R> resultList = strategy.executeQuery(
-                page,
-                queryForm.getQueryForm(),
-                joinForm
-        );
+        List<R> resultList = strategy.executeQuery(page, queryForm.getQueryForm(), joinForm);
 
         // 带类型转换的分页结果构建
-        PageResult<R> pageResult = SmartPageUtil.convert2PageResult(
-                page,
-                resultList,
-                strategy.getResultType()  // 使用策略提供的类型信息
+        PageResult<R> pageResult = SmartPageUtil.convert2PageResult(page, resultList, strategy.getResultType()  // 使用策略提供的类型信息
         );
 
         return ResponseDTO.ok(pageResult);
@@ -119,8 +113,7 @@ public class SprinklerService {
         // 1. 获取喷头实体
         SprinklerEntity sprinklerEntity = sprinklerRepository.getById(sprinklerId);
         // 2. 根据状态值获取枚举类型（核心优化点）
-        RepositorySprinklerTypeEnum type = RepositorySprinklerTypeEnum.fromStatus(sprinklerEntity.getStatus().byteValue())
-                .orElseThrow(() -> new IllegalArgumentException("无效的状态值：" + sprinklerEntity.getStatus()));
+        RepositorySprinklerTypeEnum type = RepositorySprinklerTypeEnum.fromStatus(sprinklerEntity.getStatus().byteValue()).orElseThrow(() -> new IllegalArgumentException("无效的状态值：" + sprinklerEntity.getStatus()));
         // 3. 类型安全获取仓库实现类
         BaseServiceImpl<?, ?> repository = sprinklerRepositoryFactory.getRepository(type);
 
@@ -148,13 +141,8 @@ public class SprinklerService {
      */
     public ResponseDTO<String> batchRepositorySprinklerImport(@Valid MultipartFile file, RequestUser requestUser, @Valid Integer type) {
         Class<? extends BaseImportForm> importVOClazz = importFormFactory.getSprinklerClass(type);
-        List<? extends BaseImportForm> list = ExcelUtil
-                .importExcelByClass(file, importVOClazz)
-                .stream()
-                .peek(vo -> initImportVO(vo, requestUser))
-                .toList();
-        DataProcessor dataProcessor = processorFactory
-                .getProcessor(RepositorySprinklerTypeEnum.values()[type].getDesc());
+        List<? extends BaseImportForm> list = ExcelUtil.importExcelByClass(file, importVOClazz).stream().peek(vo -> initImportVO(vo, requestUser)).toList();
+        DataProcessor dataProcessor = processorFactory.getProcessor(RepositorySprinklerTypeEnum.values()[type].getDesc());
         dataProcessor.process(list);
         return ResponseDTO.ok();
     }
@@ -164,9 +152,7 @@ public class SprinklerService {
      */
     public ResponseDTO<String> batchSprinklerImport(@Valid MultipartFile file, RequestUser requestUser) {
         //使用收集器一次性完成字段设置，避免冗余操作
-        List<SprinklerImportForm> importVOs = ExcelUtil.importExcelByClass(file, SprinklerImportForm.class)
-                .stream()
-                .peek(vo -> initImportVO(vo, requestUser)) // 提取字段设置为独立方法
+        List<SprinklerImportForm> importVOs = ExcelUtil.importExcelByClass(file, SprinklerImportForm.class).stream().peek(vo -> initImportVO(vo, requestUser)) // 提取字段设置为独立方法
                 .toList();
 
         //提前返回空值情况
@@ -175,9 +161,7 @@ public class SprinklerService {
         }
 
         // 校验1：收集无效数据（空值或空字符串）
-        Set<String> invalidSerials = importVOs.stream()
-                .filter(vo -> StringUtils.isBlank(vo.getSprinklerSerial()))
-                .map(SprinklerImportForm::getSprinklerSerial) // 实际会得到null或空字符串
+        Set<String> invalidSerials = importVOs.stream().filter(vo -> StringUtils.isBlank(vo.getSprinklerSerial())).map(SprinklerImportForm::getSprinklerSerial) // 实际会得到null或空字符串
                 .collect(Collectors.toSet());
 
         //使用提取方法优化可读性
@@ -185,28 +169,17 @@ public class SprinklerService {
         Set<String> existingSerials = getExistingSprinklerSerials(importVOs);
 
         //合并校验结果
-        Map<Boolean, List<SprinklerImportForm>> partitionedData = importVOs.stream()
-                .collect(Collectors.partitioningBy(
-                        vo -> StringUtils.isNotBlank(vo.getSprinklerSerial())
-                                && !existingSerials.contains(vo.getSprinklerSerial())
-                ));
+        Map<Boolean, List<SprinklerImportForm>> partitionedData = importVOs.stream().collect(Collectors.partitioningBy(vo -> StringUtils.isNotBlank(vo.getSprinklerSerial()) && !existingSerials.contains(vo.getSprinklerSerial())));
 
-        List<SprinklerEntity> validData = partitionedData.get(true).stream()
-                .map(this::convertToEntity)
-                .toList();
+        List<SprinklerEntity> validData = partitionedData.get(true).stream().map(this::convertToEntity).toList();
 
         // 错误数据合并（空值+重复值）
         Set<String> errorData = new HashSet<>();
         errorData.addAll(invalidSerials);
-        errorData.addAll(partitionedData.get(false).stream()
-                .map(SprinklerImportForm::getSprinklerSerial)
-                .filter(StringUtils::isNotBlank)
-                .collect(Collectors.toSet()));
+        errorData.addAll(partitionedData.get(false).stream().map(SprinklerImportForm::getSprinklerSerial).filter(StringUtils::isNotBlank).collect(Collectors.toSet()));
 
         // 重复数据去重
-        validData = validData.stream()
-                .filter(distinctByKey(SprinklerEntity::getSprinklerSerial))
-                .collect(Collectors.toList());
+        validData = validData.stream().filter(distinctByKey(SprinklerEntity::getSprinklerSerial)).collect(Collectors.toList());
 
         // 执行插入并返回详细信息
         if (!validData.isEmpty()) {
@@ -222,16 +195,10 @@ public class SprinklerService {
         BaseQueryForm joinForm = queryForm.getJoinQueryForm();
 
         // 获取具体策略
-        @SuppressWarnings("unchecked")
-        RepositorySprinklerQueryStrategy<BaseQueryForm, ?, ?> strategy =
-                (RepositorySprinklerQueryStrategy<BaseQueryForm, ?, ?>)
-                        repositorySprinklerStrategyFactory.getStrategy(joinForm.getClass());
+        @SuppressWarnings("unchecked") RepositorySprinklerQueryStrategy<BaseQueryForm, ?, ?> strategy = (RepositorySprinklerQueryStrategy<BaseQueryForm, ?, ?>) repositorySprinklerStrategyFactory.getStrategy(joinForm.getClass());
 
         // 执行策略查询
-        List<?> resultList = strategy.executeExport(
-                queryForm.getQueryForm(),
-                joinForm
-        );
+        List<?> resultList = strategy.executeExport(queryForm.getQueryForm(), joinForm);
 
         return resultList;
     }
@@ -340,9 +307,7 @@ public class SprinklerService {
     @Transactional(rollbackFor = Exception.class)
     public ResponseDTO<String> updateBatchSprinkler(@Valid MultipartFile file, RequestUser requestUser) {
         //使用收集器一次性完成字段设置，避免冗余操作
-        List<SprinklerImportForm> importVOs = ExcelUtil.importExcelByClass(file, SprinklerImportForm.class)
-                .stream()
-                .peek(vo -> initImportVO(vo, requestUser)) // 提取字段设置为独立方法
+        List<SprinklerImportForm> importVOs = ExcelUtil.importExcelByClass(file, SprinklerImportForm.class).stream().peek(vo -> initImportVO(vo, requestUser)) // 提取字段设置为独立方法
                 .toList();
         for (int i = 0; i < importVOs.size(); i++) {
             SprinklerImportForm importVO = importVOs.get(i);
@@ -368,9 +333,7 @@ public class SprinklerService {
     public <T extends BaseUpdateForm> ResponseDTO<String> updateBatchSprinkler(@Valid MultipartFile file, Byte type, RequestUser requestUser) {
         Class<T> baseUpdateFormClass = (Class<T>) typeService.getCachedUpdateForm(type);
         //使用收集器一次性完成字段设置，避免冗余操作
-        List<T> updateVOs = ExcelUtil.importExcelByClass(file, baseUpdateFormClass)
-                .stream()
-                .peek(vo -> initUpdateVO(vo, requestUser)) // 提取字段设置为独立方法
+        List<T> updateVOs = ExcelUtil.importExcelByClass(file, baseUpdateFormClass).stream().peek(vo -> initUpdateVO(vo, requestUser)) // 提取字段设置为独立方法
                 .toList();
         updateVOs.forEach(vo -> {
             try {
@@ -448,29 +411,77 @@ public class SprinklerService {
     }
 
     private ResponseDTO<String> buildResponse(int successCount, Set<String> errorData) {
-        String msg = String.format(
-                "成功插入%d条，错误数据（空值/重复）:%s",
-                successCount,
-                errorData.isEmpty() ? "无" : "存在空值或重复数据"
-        );
+        String msg = String.format("成功插入%d条，错误数据（空值/重复）:%s", successCount, errorData.isEmpty() ? "无" : "存在空值或重复数据");
         return ResponseDTO.okMsg(msg);
     }
 
     // 辅助方法：对象转换
     private SprinklerEntity convertToEntity(SprinklerImportForm form) {
-        return SmartBeanUtil.copy(form, SprinklerEntity.class);
+        SprinklerEntity validSprinkler = SmartBeanUtil.copy(form, SprinklerEntity.class);
+
+        // 预定义支持的日期格式
+        final List<DateTimeFormatter> DATE_FORMATTERS = Arrays.asList(
+                DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+                DateTimeFormatter.ofPattern("yyyy/MM/dd"),
+                DateTimeFormatter.ofPattern("yyyy/M/d")
+        );
+
+        // 通用日期解析方法
+        Function<String, LocalDate> parseDate = (dateStr) -> {
+            if (dateStr == null || dateStr.isEmpty()) {
+                return null;
+            }
+
+            for (DateTimeFormatter formatter : DATE_FORMATTERS) {
+                try {
+                    return LocalDate.parse(dateStr, formatter);
+                } catch (DateTimeParseException ignored) {
+                    // 尝试下一个格式
+                }
+            }
+            throw new BusinessException("非法日期格式: " + dateStr);
+        };
+
+        // 处理日期字段（支持动态添加新字段）
+        Map<String, Consumer<LocalDate>> dateSetters = Map.of(
+                "allocateDate", validSprinkler::setAllocateDate,
+                "shippingDate", validSprinkler::setShippingDate,
+                "warehouseDate", validSprinkler::setWarehouseDate);
+
+        dateSetters.forEach((fieldName, setter) -> {
+            try {
+                setter.accept(parseDate.apply(getDateField(form, fieldName)));
+            } catch (BusinessException e) {
+                throw new BusinessException(String.format("喷头序列号 %s 的%s失败: %s", form.getSprinklerSerial(), fieldName, e.getMessage()));
+            }
+        });
+
+        // 处理布尔值转换
+        Optional.ofNullable(form.getIsNew()).filter(Predicate.not(String::isEmpty)).ifPresent(val -> validSprinkler.setIsNew("新喷头".equals(val)));
+        validSprinkler.setJetsout(Byte.parseByte(form.getJetsout()));
+        validSprinkler.setVoltage(Float.parseFloat(form.getVoltage()));
+        validSprinkler.setStatus((byte) 0);
+        return validSprinkler;
+    }
+
+    private String getDateField(SprinklerImportForm form, String fieldName) {
+        switch (fieldName) {
+            case "allocateDate":
+                return form.getAllocateDate();
+            case "shippingDate":
+                return form.getShippingDate();
+            case "warehouseDate":
+                return form.getWarehouseDate();
+            default:
+                throw new BusinessException("非法的参数：" + fieldName);
+        }
     }
 
     // 辅助方法：获取已存在序列号
     private Set<String> getExistingSprinklerSerials(List<SprinklerImportForm> createVOs) {
-        List<String> serials = createVOs.stream()
-                .map(SprinklerImportForm::getSprinklerSerial)
-                .toList();
+        List<String> serials = createVOs.stream().map(SprinklerImportForm::getSprinklerSerial).toList();
 
-        return sprinklerRepository.getListBySprinklerSerials(serials)
-                .stream()
-                .map(SprinklerEntity::getSprinklerSerial)
-                .collect(Collectors.toCollection(LinkedHashSet::new)); // 保持查询顺序
+        return sprinklerRepository.getListBySprinklerSerials(serials).stream().map(SprinklerEntity::getSprinklerSerial).collect(Collectors.toCollection(LinkedHashSet::new)); // 保持查询顺序
     }
 
     // 辅助方法：初始化创建对象

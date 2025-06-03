@@ -22,7 +22,7 @@ public class SprinklerImportForm extends BaseImportForm {
 
     @ExcelProperty("发货日期")
     @Schema(description = "发货日期")
-    private LocalDate shippingDate;
+    private String shippingDate;
 
     @ExcelProperty("入仓日期")
     @Schema(description = "入仓日期")

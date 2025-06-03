@@ -1,0 +1,4 @@
+[2025-05-29 17:22:36,456][ERROR][http-nio-1024-exec-4] slow sql 5950 millis. select *
+        from t_table_column
+        where user_id = ?
+          and table_id = ? [75,40001] (StatFilter.java:518)
