@@ -14,7 +14,9 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.processor
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.MachineSprinklerRepository;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
+import net.lab1024.sa.base.common.exception.BusinessException;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -109,11 +111,15 @@ public class MachineSprinklerDataProcessor implements DataProcessor<MachineSprin
             }
             // 8.2 批量插入机台数据（使用MyBatis-Plus批量操作优化）
             if (!entities.isEmpty()) {
-                machineSprinklerRepository.saveBatch(entities);
+                try {
+                    machineSprinklerRepository.saveBatch(entities);
+                } catch (DuplicateKeyException e) {
+                    throw new BusinessException("存在重复的喷头序列号");
+                }
             }
 
             // 9. 返回处理结果（结果信息优化）
-            return ResponseDTO.ok("处理成功，无效数据：" + invalidSerials);
+            return ResponseDTO.okMsg(invalidSerials.isEmpty() ? "处理成功" : "处理成功，但存在无效数据");
         }catch (NullPointerException e){
             return ResponseDTO.userErrorParam("所在仓status不能为空");
         }
@@ -131,6 +137,9 @@ public class MachineSprinklerDataProcessor implements DataProcessor<MachineSprin
     ) {
         // 使用Bean拷贝工具优化属性复制
         MachineSprinklerEntity entity = SmartBeanUtil.copy(form, MachineSprinklerEntity.class);
+        if (!form.getStatus().equals("机台")) {
+            throw new BusinessException(String.format("喷头序列号 %s 的仓参数非法: %s", form.getSprinklerSerial(), form.getStatus()));
+        }
         SprinklerEntity mainEntity = mainTableMap.get(form.getSprinklerSerial());
         if (mainEntity != null) {
             entity.setSprinklerId(mainEntity.getSprinklerId());

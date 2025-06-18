@@ -159,7 +159,6 @@ public class SprinklerController {
     @PostMapping("/sprinklermanager/sprinkler/exportRepositorySprinklerExcel")
     public void exportRepositorySprinklerExcel(@RequestBody @Valid CombinedQueryForm queryForm, HttpServletResponse response) throws IOException {
         List<?> data = sprinklerService.getRepositorySprinklerExcelExportData(queryForm);
-        SprinklerSorter.sortBySprinklerSerial(data);
         if (CollectionUtils.isEmpty(data)) {
             SmartResponseUtil.write(response, ResponseDTO.userErrorParam("暂无数据"));
             return;

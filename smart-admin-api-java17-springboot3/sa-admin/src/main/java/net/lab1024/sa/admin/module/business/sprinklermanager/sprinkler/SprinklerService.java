@@ -31,7 +31,6 @@ import net.lab1024.sa.base.common.util.ExcelUtil;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
 import net.lab1024.sa.base.common.util.SmartPageUtil;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,7 +40,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -69,9 +67,9 @@ public class SprinklerService {
 
     @Resource
     private RepositorySprinklerTransferStrategyFactory repositorySprinklerTransferStrategyFactory;
-    @Autowired
+    @Resource
     private UsableSprinklerRepository usableSprinklerRepository;
-    @Autowired
+    @Resource
     private EnterpriseDao enterpriseDao;
 
 
@@ -143,8 +141,7 @@ public class SprinklerService {
         Class<? extends BaseImportForm> importVOClazz = importFormFactory.getSprinklerClass(type);
         List<? extends BaseImportForm> list = ExcelUtil.importExcelByClass(file, importVOClazz).stream().peek(vo -> initImportVO(vo, requestUser)).toList();
         DataProcessor dataProcessor = processorFactory.getProcessor(RepositorySprinklerTypeEnum.values()[type].getDesc());
-        dataProcessor.process(list);
-        return ResponseDTO.ok();
+        return dataProcessor.process(list);
     }
 
     /**
@@ -232,6 +229,7 @@ public class SprinklerService {
             // 更新对应仓喷头
             SprinklerEntity updateEntity2 = SmartBeanUtil.copy(sprinklerDetail, SprinklerEntity.class);
             SmartBeanUtil.copyProperties(updateVO, updateEntity2);
+            updateEntity2.setSprinklerId(sprinklerId);
             sprinklerRepository.updateById(updateEntity2);
             return ResponseDTO.ok();
         }
@@ -255,12 +253,15 @@ public class SprinklerService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ResponseDTO<String> updateRepositorySprinkler(@Valid BaseUpdateForm updateVO, Byte type) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchFieldException {
-        Long sprinklerId = updateVO.getSprinklerId();
+
+        String sprinklerSerial = updateVO.getSprinklerSerial();
         // 校验喷头是否存在
-        SprinklerEntity sprinklerDetail = sprinklerRepository.getById(sprinklerId);
+        SprinklerEntity sprinklerDetail = sprinklerRepository.getBySprinklerSerial(sprinklerSerial);
         if (Objects.isNull(sprinklerDetail) || sprinklerDetail.getDeletedFlag()) {
             return ResponseDTO.userErrorParam("喷头不存在");
         }
+        Long sprinklerId = sprinklerDetail.getSprinklerId();
+        updateVO.setSprinklerId(sprinklerId);
         // 验证喷头序列号是否重复
         SprinklerEntity validSprinkler = sprinklerRepository.queryBySprinklerSerial(updateVO.getSprinklerSerial(), sprinklerId, Boolean.FALSE);
         if (Objects.nonNull(validSprinkler)) {
@@ -303,7 +304,9 @@ public class SprinklerService {
         repository.myUpdateById(updateEntity);
         return ResponseDTO.ok();
     }
-
+    /**
+     * 批量编辑各仓喷头
+     */
     @Transactional(rollbackFor = Exception.class)
     public ResponseDTO<String> updateBatchSprinkler(@Valid MultipartFile file, RequestUser requestUser) {
         //使用收集器一次性完成字段设置，避免冗余操作
@@ -322,13 +325,17 @@ public class SprinklerService {
             if (updateVO.getStatus() == null) {
                 return ResponseDTO.userErrorParam("编辑数据所在仓数据有误");
             }
-            updateSprinkler(updateVO);
+            try {
+                updateSprinkler(updateVO);
+            } catch (Exception e) {
+                throw new BusinessException("数据操作异常");
+            }
         }
         return ResponseDTO.ok();
     }
 
     /**
-     * 批量编辑全部喷头
+     * 批量编辑各仓喷头
      */
     public <T extends BaseUpdateForm> ResponseDTO<String> updateBatchSprinkler(@Valid MultipartFile file, Byte type, RequestUser requestUser) {
         Class<T> baseUpdateFormClass = (Class<T>) typeService.getCachedUpdateForm(type);
@@ -423,7 +430,11 @@ public class SprinklerService {
         final List<DateTimeFormatter> DATE_FORMATTERS = Arrays.asList(
                 DateTimeFormatter.ofPattern("yyyy-MM-dd"),
                 DateTimeFormatter.ofPattern("yyyy/MM/dd"),
-                DateTimeFormatter.ofPattern("yyyy/M/d")
+                DateTimeFormatter.ofPattern("yyyy/M/d"),
+                DateTimeFormatter.ofPattern("yyyy.M.d"),
+                DateTimeFormatter.ofPattern("yyyy.M.dd"),
+                DateTimeFormatter.ofPattern("yyyy.MM.d"),
+                DateTimeFormatter.ofPattern("yyyy.MM.dd")
         );
 
         // 通用日期解析方法
@@ -458,9 +469,22 @@ public class SprinklerService {
 
         // 处理布尔值转换
         Optional.ofNullable(form.getIsNew()).filter(Predicate.not(String::isEmpty)).ifPresent(val -> validSprinkler.setIsNew("新喷头".equals(val)));
-        validSprinkler.setJetsout(Byte.parseByte(form.getJetsout()));
-        validSprinkler.setVoltage(Float.parseFloat(form.getVoltage()));
-        validSprinkler.setStatus((byte) 0);
+        // 检查form是否为空（根据调用上下文确保form非空）
+        if (form != null) {
+            // 处理jetsout
+            String jetsoutStr = form.getJetsout();
+            if (jetsoutStr != null && !jetsoutStr.trim().isEmpty()) {
+                validSprinkler.setJetsout(Byte.parseByte(jetsoutStr));
+            }
+
+            // 处理voltage
+            String voltageStr = form.getVoltage();
+            if (voltageStr != null && !voltageStr.trim().isEmpty()) {
+                validSprinkler.setVoltage(Float.parseFloat(voltageStr));
+            }
+
+            validSprinkler.setStatus((byte) 0); // 无风险
+        }
         return validSprinkler;
     }
 

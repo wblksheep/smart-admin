@@ -1,0 +1,5 @@
+[2025-06-13 16:59:22,374][ERROR][smart-reload] slow sql 1287 millis. SELECT  tag,args,identification,update_time,create_time  FROM t_reload_item [] (StatFilter.java:518)
+[2025-06-13 17:00:18,533][ERROR][smart-heart-beat] slow sql 3647 millis. update t_heart_beat_record
+        set heart_beat_time = ?
+         WHERE heart_beat_record_id = ? ["2025-06-13 17:00:14",840] (StatFilter.java:518)
+[2025-06-13 17:23:55,925][ERROR][SmartJobExecutor-1] slow sql 30641 millis. SELECT job_id,job_name,job_class,trigger_type,trigger_value,param,enabled_flag,last_execute_time,last_execute_log_id,remark,sort,deleted_flag,update_name,update_time,create_time FROM t_smart_job WHERE job_id=? [2] (StatFilter.java:518)

@@ -4,7 +4,7 @@
     <select id="queryPage"
             resultType="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.MachineSprinklerVO">
         SELECT t_machine_sprinkler.*,
-               t_sprinkler.*
+        t_sprinkler.*
         FROM t_machine_sprinkler
         LEFT JOIN t_sprinkler ON t_sprinkler.sprinkler_id = t_machine_sprinkler.sprinkler_id
         <where>
@@ -49,14 +49,24 @@
                 <choose>
                     <!-- 特殊处理颜色位置排序 -->
                     <when test="sortItem.column == 'allocate_position'">
-                        CASE WHEN LEFT(allocate_position, 2) = 'LK' THEN 7
-                        ELSE FIELD(LEFT(allocate_position, 1), 'K','C','M','Y','O','B','R')
+                        CASE
+                        WHEN LEFT(t_sprinkler.allocate_position, 2) = 'LK' THEN 7
+                        WHEN LEFT(t_sprinkler.allocate_position, 1) = 'K' THEN 1
+                        WHEN LEFT(t_sprinkler.allocate_position, 1) = 'C' THEN 2
+                        WHEN LEFT(t_sprinkler.allocate_position, 1) = 'M' THEN 3
+                        WHEN LEFT(t_sprinkler.allocate_position, 1) = 'Y' THEN 4
+                        WHEN LEFT(t_sprinkler.allocate_position, 1) = 'O' THEN 5
+                        WHEN LEFT(t_sprinkler.allocate_position, 1) = 'B' THEN 6
+                        WHEN LEFT(t_sprinkler.allocate_position, 1) = 'R' THEN 8
+                        ELSE 0 -- 显式处理未匹配情况
                         END,
-                        CAST(REGEXP_REPLACE(allocate_position, '[^0-9]', '') AS UNSIGNED) ${sortItem.isAsc ? 'ASC' : 'DESC'}
+                        CAST(REGEXP_REPLACE(t_sprinkler.allocate_position, '[^0-9]', '') AS UNSIGNED)
+                        ${sortItem.isAsc ? 'ASC' : 'DESC'}
                     </when>
                     <!-- 特殊处理喷头序列号排序 -->
                     <when test="sortItem.column == 'sprinkler_serial'">
-                        CASE WHEN t_sprinkler.sprinkler_serial REGEXP '^\\w{6}-\\d{2}$' THEN 0 ELSE 1 END ${sortItem.isAsc ? 'ASC' : 'DESC'},
+                        CASE WHEN t_sprinkler.sprinkler_serial REGEXP '^\\w{6}-\\d{2}$' THEN 0 ELSE 1 END
+                        ${sortItem.isAsc ? 'ASC' : 'DESC'},
                         SUBSTRING(t_sprinkler.sprinkler_serial, 1, 6) ${sortItem.isAsc ? 'ASC' : 'DESC'},
                         CAST(SUBSTRING(t_sprinkler.sprinkler_serial, 8, 2) AS UNSIGNED) ${sortItem.isAsc ? 'ASC' : 'DESC'}
                     </when>
@@ -110,6 +120,39 @@
         </where>
         <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
             ORDER BY t_sprinkler.create_time DESC
+        </if>
+        <if test="queryForm.sortItemList != null and !queryForm.sortItemList.isEmpty()">
+            ORDER BY
+            <foreach collection="queryForm.sortItemList" item="sortItem" separator=",">
+                <choose>
+                    <!-- 特殊处理颜色位置排序 -->
+                    <when test="sortItem.column == 'allocate_position'">
+                        CASE
+                        WHEN LEFT(t_sprinkler.allocate_position, 2) = 'LK' THEN 7
+                        WHEN LEFT(t_sprinkler.allocate_position, 1) = 'K' THEN 1
+                        WHEN LEFT(t_sprinkler.allocate_position, 1) = 'C' THEN 2
+                        WHEN LEFT(t_sprinkler.allocate_position, 1) = 'M' THEN 3
+                        WHEN LEFT(t_sprinkler.allocate_position, 1) = 'Y' THEN 4
+                        WHEN LEFT(t_sprinkler.allocate_position, 1) = 'O' THEN 5
+                        WHEN LEFT(t_sprinkler.allocate_position, 1) = 'B' THEN 6
+                        WHEN LEFT(t_sprinkler.allocate_position, 1) = 'R' THEN 8
+                        ELSE 0 -- 显式处理未匹配情况
+                        END,
+                        CAST(REGEXP_REPLACE(t_sprinkler.allocate_position, '[^0-9]', '') AS UNSIGNED) ${sortItem.isAsc ? 'ASC' : 'DESC'}
+                    </when>
+                    <!-- 特殊处理喷头序列号排序 -->
+                    <when test="sortItem.column == 'sprinkler_serial'">
+                        CASE WHEN t_sprinkler.sprinkler_serial REGEXP '^\\w{6}-\\d{2}$' THEN 0 ELSE 1 END ${sortItem.isAsc ? 'ASC' : 'DESC'},
+                        SUBSTRING(t_sprinkler.sprinkler_serial, 1, 6) ${sortItem.isAsc ? 'ASC' : 'DESC'},
+                        CAST(SUBSTRING(t_sprinkler.sprinkler_serial, 8, 2) AS UNSIGNED) ${sortItem.isAsc ? 'ASC' : 'DESC'}
+                    </when>
+                    <!-- 其他字段常规排序 -->
+                    <otherwise>
+                        <!-- 安全处理字段名防止SQL注入 -->
+                        `${sortItem.column}` ${sortItem.isAsc ? 'ASC' : 'DESC'}
+                    </otherwise>
+                </choose>
+            </foreach>
         </if>
     </select>
 

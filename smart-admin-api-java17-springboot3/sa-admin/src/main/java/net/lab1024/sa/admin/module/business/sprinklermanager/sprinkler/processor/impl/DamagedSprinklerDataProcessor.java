@@ -10,14 +10,21 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.DamagedSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.DamagedSprinklerImportForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.form.UsableSprinklerImportForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.processor.DataProcessor;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.DamagedSprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
+import net.lab1024.sa.base.common.exception.BusinessException;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -110,11 +117,15 @@ public class DamagedSprinklerDataProcessor implements DataProcessor<DamagedSprin
             }
             // 8.2 批量插入破损仓数据（使用MyBatis-Plus批量操作优化）
             if (!entities.isEmpty()) {
-                damagedSprinklerRepository.saveBatch(entities);
+                try {
+                    damagedSprinklerRepository.saveBatch(entities);
+                } catch (DuplicateKeyException e) {
+                    throw new BusinessException("存在重复的喷头序列号");
+                }
             }
 
             // 9. 返回处理结果（结果信息优化）
-            return ResponseDTO.ok("处理成功，无效数据：" + invalidSerials);
+            return ResponseDTO.okMsg(invalidSerials.isEmpty() ? "处理成功" : "处理成功，但存在无效数据");
         } catch (NullPointerException e) {
             return ResponseDTO.userErrorParam("所在仓status不能为空");
         }
@@ -132,12 +143,59 @@ public class DamagedSprinklerDataProcessor implements DataProcessor<DamagedSprin
             Map<String, SprinklerEntity> mainTableMap
     ) {
         // 使用Bean拷贝工具优化属性复制
-        DamagedSprinklerEntity entity = SmartBeanUtil.copy(form, DamagedSprinklerEntity.class);
+        DamagedSprinklerEntity validSprinkler = SmartBeanUtil.copy(form, DamagedSprinklerEntity.class);
+        // 预定义支持的日期格式
+        final List<DateTimeFormatter> DATE_FORMATTERS = Arrays.asList(
+                DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+                DateTimeFormatter.ofPattern("yyyy/MM/dd"),
+                DateTimeFormatter.ofPattern("yyyy/M/d"),
+                DateTimeFormatter.ofPattern("yyyy.M.d"),
+                DateTimeFormatter.ofPattern("yyyy.M.dd"),
+                DateTimeFormatter.ofPattern("yyyy.MM.d"),
+                DateTimeFormatter.ofPattern("yyyy.MM.dd")
+        );
+        // 通用日期解析方法
+        Function<String, LocalDate> parseDate = (dateStr) -> {
+            if (dateStr == null || dateStr.isEmpty()) {
+                return null;
+            }
+
+            for (DateTimeFormatter formatter : DATE_FORMATTERS) {
+                try {
+                    return LocalDate.parse(dateStr, formatter);
+                } catch (DateTimeParseException ignored) {
+                    // 尝试下一个格式
+                }
+            }
+            throw new BusinessException("非法日期格式: " + dateStr);
+        };
+        // 处理日期字段（支持动态添加新字段）
+        Map<String, Consumer<LocalDate>> dateSetters = Map.of(
+                "retWarehouseDate", validSprinkler::setRetWarehouseDate);
+        dateSetters.forEach((fieldName, setter) -> {
+            try {
+                setter.accept(parseDate.apply(getDateField(form, fieldName)));
+            } catch (BusinessException e) {
+                throw new BusinessException(String.format("喷头序列号 %s 的%s失败: %s", form.getSprinklerSerial(), fieldName, e.getMessage()));
+            }
+        });
+        if (!form.getStatus().equals("破损仓")) {
+            throw new BusinessException(String.format("喷头序列号 %s 的仓参数非法: %s", form.getSprinklerSerial(), form.getStatus()));
+        }
         SprinklerEntity mainEntity = mainTableMap.get(form.getSprinklerSerial());
         if (mainEntity != null) {
-            entity.setSprinklerId(mainEntity.getSprinklerId());
+            validSprinkler.setSprinklerId(mainEntity.getSprinklerId());
         }
-        return entity;
+        return validSprinkler;
+    }
+
+    private String getDateField(DamagedSprinklerImportForm form, String fieldName) {
+        switch (fieldName) {
+            case "retWarehouseDate":
+                return form.getRetWarehouseDate();
+            default:
+                throw new BusinessException("非法的参数：" + fieldName);
+        }
     }
 
     /**

@@ -49,4 +49,11 @@ public class SprinklerRepositoryImpl extends ServiceImpl<SprinklerDao, Sprinkler
         return this.getBaseMapper().selectOne(lqw);
     }
 
+    @Override
+    public SprinklerEntity getBySprinklerSerial(String sprinklerSerial) {
+        LambdaQueryWrapper<SprinklerEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(SprinklerEntity::getSprinklerSerial, sprinklerSerial);
+        return this.getBaseMapper().selectOne(lqw);
+    }
+
 }

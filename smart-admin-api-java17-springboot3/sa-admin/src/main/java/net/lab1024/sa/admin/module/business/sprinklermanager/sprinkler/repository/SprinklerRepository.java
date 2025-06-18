@@ -21,4 +21,6 @@ public interface SprinklerRepository extends IService<SprinklerEntity> {
     List<SprinklerExcelVO> selectSprinklerExcelExportData(@Param("queryForm") SprinklerQueryForm queryForm);
 
     SprinklerEntity queryBySprinklerSerial(@Param("sprinklerSerial") String sprinklerSerial,@Param("excludeSprinklerId") Long sprinklerId, Boolean deletedFlag);
+
+    SprinklerEntity getBySprinklerSerial(String sprinklerSerial);
 }
