@@ -1,1 +1,0 @@
-[2025-06-10 17:08:22,222][ERROR][smart-heart-beat] slow sql 2364 millis. select * from t_heart_beat_record where project_path = ? and server_ip = ? and process_no =? ["C:\\Users\\Bulrush\\IdeaProjects\\smart-admin\\smart-admin-api-java17-springboot3","127.0.0.1;169.254.13.139;169.254.1.233;192.168.110.234;198.18.0.1",29700] (StatFilter.java:518)
