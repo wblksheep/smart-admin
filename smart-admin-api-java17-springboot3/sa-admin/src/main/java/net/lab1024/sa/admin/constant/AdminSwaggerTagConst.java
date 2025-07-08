@@ -33,6 +33,8 @@ public class AdminSwaggerTagConst extends SwaggerTagConst {
         public static final String SPRINKLER_ALLOCATIONRECORD = "喷头-领用记录";
 
         public static final String SPRINKLER_ALLOCATIONRETWAREHOUSE = "喷头-领用与返仓记录管理";
+
+        public static final String SPRINKLER_MACHINE = "喷头-机台管理";
     }
 
 

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.lab1024.sa.admin.module.business.sprinklermanager.machine.dao.MachineDao">
+    <select id="queryPage"
+            resultType="net.lab1024.sa.admin.module.business.sprinklermanager.machine.domain.vo.MachineVO">
+        SELECT t_machine.*
+        FROM t_machine
+        <where>
+            deleted_flag = #{queryForm.deletedFlag}
+            <if test="queryForm.keywords != null and queryForm.keywords != ''">
+                AND (INSTR(machine_name,#{queryForm.keywords}) OR INSTR(create_user_name,#{queryForm.keywords}))
+            </if>
+            <if test="queryForm.startTime != null">
+                AND DATE_FORMAT(create_time, '%Y-%m-%d') &gt;= #{queryForm.startTime}
+            </if>
+            <if test="queryForm.endTime != null">
+                AND DATE_FORMAT(create_time, '%Y-%m-%d') &lt;= #{queryForm.endTime}
+            </if>
+            <if test="queryForm.disabledFlag != null">
+                AND disabled_flag = #{queryForm.disabledFlag}
+            </if>
+        </where>
+        <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
+            ORDER BY create_time DESC
+        </if>
+    </select>
+    <select id="getDetail"
+            resultType="net.lab1024.sa.admin.module.business.sprinklermanager.machine.domain.vo.MachineVO">
+        SELECT tm.*
+        FROM t_machine tm
+        WHERE tm.machine_id = #{machineId} AND tm.deleted_flag = #{deletedFlag}
+    </select>
+</mapper>

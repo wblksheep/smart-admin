@@ -93,6 +93,12 @@ public class SprinklerEntity {
     private Byte jetsout;
 
     /**
+     * jetsoutNew
+     */
+    @DataTracerFieldLabel("jetsoutNew")
+    private Float jetsoutNew;
+
+    /**
      * 历史
      */
     @DataTracerFieldLabel("历史")

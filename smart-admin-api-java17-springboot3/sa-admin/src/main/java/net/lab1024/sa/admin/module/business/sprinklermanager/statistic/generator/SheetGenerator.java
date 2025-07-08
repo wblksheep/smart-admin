@@ -13,5 +13,5 @@ public abstract class SheetGenerator {
     protected final DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
 
 
-    public abstract void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate) throws ExcelGenerateException, IOException;
+    public abstract void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate, String machineType) throws ExcelGenerateException, IOException;
 }

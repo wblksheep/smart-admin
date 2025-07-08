@@ -18,6 +18,7 @@ public class TypeService {
     private static final Map<Byte, Class<?>> ENTITY_CLASS_CACHE = new ConcurrentHashMap<>();
     private static final Map<Class<?>, BaseIService<?>> REPOSITORY_CACHE = new ConcurrentHashMap<>();
     private static final Map<Byte, Class<?>> UPDATE_FORM_CLASS_CACHE = new ConcurrentHashMap<>();
+    private static final Map<Byte, Class<?>> IMPORT_FORM_CLASS_CACHE = new ConcurrentHashMap<>();
 
     @Resource
     private UsableSprinklerRepository usableSprinklerRepository;
@@ -106,6 +107,31 @@ public class TypeService {
                 return DamagedSprinklerUpdateForm.class;
             case 4:
                 return RmaSprinklerUpdateForm.class;
+            default:
+                throw new IllegalArgumentException("未知的类型：" + type);
+        }
+    }
+
+    public Class<?> getCachedImportForm(Byte type) {
+        // 先获取或缓存实体类
+        return IMPORT_FORM_CLASS_CACHE.computeIfAbsent(
+                type,
+                t -> this.getImportFormClass(t)
+        );
+    }
+
+    private Class<?> getImportFormClass(Byte type) {
+        switch (type) {
+            case 0:
+                return UsableSprinklerImportForm.class;
+            case 1:
+                return MachineSprinklerImportForm.class;
+            case 2:
+                return MaintainingSprinklerImportForm.class;
+            case 3:
+                return DamagedSprinklerImportForm.class;
+            case 4:
+                return RmaSprinklerImportForm.class;
             default:
                 throw new IllegalArgumentException("未知的类型：" + type);
         }

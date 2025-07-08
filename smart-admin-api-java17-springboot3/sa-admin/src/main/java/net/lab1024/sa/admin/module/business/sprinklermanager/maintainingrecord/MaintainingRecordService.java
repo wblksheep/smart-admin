@@ -13,6 +13,7 @@ import net.lab1024.sa.admin.module.business.oa.enterprise.domain.form.Enterprise
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationrecord.domain.entity.AllocationRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.entity.MaintainingRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordCreateForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordImportForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordQueryForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.form.MaintainingRecordUpdateForm;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.vo.MaintainingRecordExcelVO;
@@ -27,6 +28,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repositor
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
+import net.lab1024.sa.base.common.exception.BusinessException;
 import net.lab1024.sa.base.common.util.ExcelUtil;
 import net.lab1024.sa.base.common.util.SmartBeanUtil;
 import net.lab1024.sa.base.common.util.SmartPageUtil;
@@ -35,8 +37,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,12 +68,15 @@ public class MaintainingRecordService {
      * @return
      */
     public ResponseDTO<String> batchMaintainingRecordImport(@Valid MultipartFile file, RequestUser requestUser) {
-        // 1. 数据导入
+        // 1. 数据导入并转换
         List<MaintainingRecordCreateForm> createVOs = ExcelUtil
-                .importExcelByClass(file, MaintainingRecordCreateForm.class)
+                .importExcelByClass(file, MaintainingRecordImportForm.class)
                 .stream()
-                .peek(vo -> initCreateVO(vo, requestUser))
+                .peek(vo -> initImportVO(vo, requestUser))
+                .map(vo -> convertToCreateVOs(vo))
                 .toList();
+
+
         // 2. 空数据校验（基础校验优化）
         if (CollectionUtils.isEmpty(createVOs)) {
             return ResponseDTO.userErrorParam("导入数据为空");
@@ -100,6 +110,69 @@ public class MaintainingRecordService {
             maintainingRecordRepository.saveBatch(entities);
         }
         return ResponseDTO.ok("处理成功，无效数据：" + invalidSerials);
+    }
+
+    private MaintainingRecordCreateForm convertToCreateVOs(MaintainingRecordImportForm form) {
+        MaintainingRecordCreateForm creatVO = SmartBeanUtil.copy(form, MaintainingRecordCreateForm.class);
+
+        // 预定义支持的日期格式
+        final List<DateTimeFormatter> DATE_FORMATTERS = Arrays.asList(
+                DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+                DateTimeFormatter.ofPattern("yyyy/MM/dd"),
+                DateTimeFormatter.ofPattern("yyyy/M/d"),
+                DateTimeFormatter.ofPattern("yyyy.M.d"),
+                DateTimeFormatter.ofPattern("yyyy.M.dd"),
+                DateTimeFormatter.ofPattern("yyyy.MM.d"),
+                DateTimeFormatter.ofPattern("yyyy.MM.dd")
+        );
+
+        // 通用日期解析方法
+        Function<String, LocalDate> parseDate = (dateStr) -> {
+            if (dateStr == null || dateStr.isEmpty()) {
+                return null;
+            }
+
+            for (DateTimeFormatter formatter : DATE_FORMATTERS) {
+                try {
+                    return LocalDate.parse(dateStr, formatter);
+                } catch (DateTimeParseException ignored) {
+                    // 尝试下一个格式
+                }
+            }
+            throw new BusinessException("非法日期格式: " + dateStr);
+        };
+
+        // 处理日期字段（支持动态添加新字段）
+        Map<String, Consumer<LocalDate>> dateSetters = Map.of(
+                "retMaintainenceDate", creatVO::setRetMaintainenceDate,
+                "retWarehouseDate", creatVO::setRetWarehouseDate);
+
+        dateSetters.forEach((fieldName, setter) -> {
+            try {
+                setter.accept(parseDate.apply(getDateField(form, fieldName)));
+            } catch (BusinessException e) {
+                throw new BusinessException(String.format("喷头序列号 %s 的%s失败: %s", form.getSprinklerSerial(), fieldName, e.getMessage()));
+            }
+        });
+
+        return creatVO;
+    }
+
+    private String getDateField(MaintainingRecordImportForm form, String fieldName) {
+        switch (fieldName) {
+            case "retMaintainenceDate":
+                return form.getRetMaintainenceDate();
+            case "retWarehouseDate":
+                return form.getRetWarehouseDate();
+            default:
+                throw new BusinessException("非法的参数：" + fieldName);
+        }
+    }
+
+    private void initImportVO(MaintainingRecordImportForm vo, RequestUser requestUser) {
+        vo.setDisabledFlag(Boolean.FALSE);
+        vo.setCreateUserId(requestUser.getUserId());
+        vo.setCreateUserName(requestUser.getUserName());
     }
 
     /**

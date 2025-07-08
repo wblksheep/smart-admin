@@ -50,7 +50,7 @@ public class SprinklerImportForm extends BaseImportForm {
 
     @ExcelProperty("jetsout")
     @Schema(description = "jetsout")
-    private String jetsout;
+    private String jetsoutNew;
 
     @ExcelProperty("历史")
     @Schema(description = "history")
@@ -63,7 +63,6 @@ public class SprinklerImportForm extends BaseImportForm {
     @ExcelProperty("喷头详情")
     @Schema(description = "喷头详情")
     private String sprinklerDetail;
-
 
 
 }

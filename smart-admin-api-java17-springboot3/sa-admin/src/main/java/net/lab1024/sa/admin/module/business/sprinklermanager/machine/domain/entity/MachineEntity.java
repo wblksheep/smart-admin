@@ -1,57 +1,43 @@
-package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity;
+package net.lab1024.sa.admin.module.business.sprinklermanager.machine.domain.entity;
 
+
+import cn.idev.excel.annotation.ExcelProperty;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import net.lab1024.sa.base.module.support.datatracer.annoation.DataTracerFieldLabel;
+import org.hibernate.validator.constraints.Length;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * 破损仓喷头
+ * 机台
  *
  * @Author 海印: 芦苇
  */
 @Data
-@TableName("t_damaged_sprinkler")
-public class DamagedSprinklerEntity {
+@TableName("t_machine")
+public class MachineEntity {
     /**
-     * 喷头ID
+     * 机台ID
      */
     @TableId(type = IdType.AUTO)
-    private Long sprinklerId;
+    private Long machineId;
 
     /**
-     * 喷头序列号
+     * 机台名称
      */
-    @DataTracerFieldLabel("喷头序列号")
-    private String sprinklerSerial;
+    @DataTracerFieldLabel("机台名称")
+    private String machineName;
 
     /**
-     * 返仓日期
+     * 机台类型
      */
-    @DataTracerFieldLabel("返仓日期")
-    private LocalDate retWarehouseDate;
-
-    /**
-     * 备注1
-     */
-    @DataTracerFieldLabel("备注1")
-    private String note1;
-
-    /**
-     * 破损原因分类
-     */
-    @DataTracerFieldLabel("破损原因分类")
-    private String damagedReasonType;
-
-    /**
-     * 具体破损原因
-     */
-    @DataTracerFieldLabel("具体破损原因")
-    private String realDamagedReason;
+    @DataTracerFieldLabel("机台类型")
+    private String machineType;
 
     /**
      * 禁用状态

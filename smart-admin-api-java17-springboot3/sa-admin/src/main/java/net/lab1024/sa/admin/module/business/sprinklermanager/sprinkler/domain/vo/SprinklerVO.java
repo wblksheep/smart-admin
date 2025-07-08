@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 /**
  * 喷头信息
+ *
  * @Author 海印: 芦苇
  */
 @Data
@@ -47,7 +48,7 @@ public class SprinklerVO extends BaseSprinklerVO {
     private Float voltage;
 
     @Schema(description = "jetsout")
-    private Byte jetsout;
+    private Float jetsoutNew;
 
     @Schema(description = "历史")
     private String history;

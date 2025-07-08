@@ -3,6 +3,8 @@ package net.lab1024.sa.admin.module.business.sprinklermanager.statistic.reposito
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
+import net.lab1024.sa.admin.module.business.sprinklermanager.machine.domain.entity.MachineEntity;
+import net.lab1024.sa.admin.module.business.sprinklermanager.machine.repository.MachineRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.entity.MaintainingRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.repository.MaintainingRecordRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.MaintainingSprinklerEntity;
@@ -11,6 +13,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.dao.Stati
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.domain.entity.StatisticEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.domain.vo.MonthlyDamagedSprinklerUsingDaysVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.repository.StatisticRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -27,6 +30,8 @@ public class StatisticRepositoryImpl extends ServiceImpl<StatisticDao, Statistic
     @Resource
     private MaintainingSprinklerRepository maintainingSprinklerRepository;
 
+    @Resource
+    private MachineRepository machineRepository;
 
 
     @Override
@@ -104,6 +109,11 @@ public class StatisticRepositoryImpl extends ServiceImpl<StatisticDao, Statistic
         return this.getBaseMapper().queryByRetDamagedAndDate(startDate, endDate);
     }
 
+    @Override
+    public List<MachineEntity> batchQueryMachineName(String type) {
+        return machineRepository.getByMachineNames(type);
+    }
+
     private LambdaQueryWrapper<MaintainingRecordEntity> buildMachinequery7(LocalDate start, LocalDate end, String limit) {
         return new LambdaQueryWrapper<MaintainingRecordEntity>()
                 .ge(MaintainingRecordEntity::getRetWarehouseDate, start)
@@ -121,6 +131,7 @@ public class StatisticRepositoryImpl extends ServiceImpl<StatisticDao, Statistic
     private LambdaQueryWrapper<MaintainingRecordEntity> buildMachineQuery6(LocalDate start, LocalDate end, String machine) {
         return new LambdaQueryWrapper<MaintainingRecordEntity>()
                 .ge(MaintainingRecordEntity::getRetWarehouseDate, end)
+                .ge(MaintainingRecordEntity::getRetMaintainenceDate, start)
                 .le(MaintainingRecordEntity::getRetMaintainenceDate, end)
                 .like(MaintainingRecordEntity::getCustomer, machine);
     }
@@ -156,13 +167,15 @@ public class StatisticRepositoryImpl extends ServiceImpl<StatisticDao, Statistic
 
     // 通用查询条件构建器
     private LambdaQueryWrapper<MaintainingRecordEntity> buildMachineQuery2(LocalDate start,
-                                                                          LocalDate end,
-                                                                          String[] machines,
-                                                                          String[] reasons) {
+                                                                           LocalDate end,
+                                                                           String[] machines,
+                                                                           String[] reasons) {
         return new LambdaQueryWrapper<MaintainingRecordEntity>()
-                .le(MaintainingRecordEntity::getRetMaintainenceDate, end)
                 .ge(MaintainingRecordEntity::getRetMaintainenceDate, start)
-                .in(MaintainingRecordEntity::getRetMaintainenceReason, reasons);
+                .le(MaintainingRecordEntity::getRetMaintainenceDate, end)
+                .in(MaintainingRecordEntity::getRetMaintainenceReason, reasons)
+                .like(MaintainingRecordEntity::getSprinklerSerial, "-")
+                ;
     }
 
     // 通用查询条件构建器
@@ -181,20 +194,22 @@ public class StatisticRepositoryImpl extends ServiceImpl<StatisticDao, Statistic
 
     // 通用查询条件构建器
     private LambdaQueryWrapper<MaintainingSprinklerEntity> buildSprinklerQuery(LocalDate start,
-                                                                          LocalDate end,
-                                                                          String[] machines,
-                                                                          String[] reasons) {
+                                                                               LocalDate end,
+                                                                               String[] machines,
+                                                                               String[] reasons) {
         return new LambdaQueryWrapper<MaintainingSprinklerEntity>()
                 .ge(MaintainingSprinklerEntity::getRetMaintainenceDate, start)
                 .le(MaintainingSprinklerEntity::getRetMaintainenceDate, end)
-                .in(MaintainingSprinklerEntity::getRetMaintainenceReason, reasons);
+                .in(MaintainingSprinklerEntity::getRetMaintainenceReason, reasons)
+                .like(MaintainingSprinklerEntity::getSprinklerSerial, "-")
+                ;
     }
 
     // 通用查询条件构建器
     private LambdaQueryWrapper<MaintainingSprinklerEntity> buildSprinklerQuery2(LocalDate start,
-                                                                               LocalDate end,
-                                                                               String machine,
-                                                                               String reason) {
+                                                                                LocalDate end,
+                                                                                String machine,
+                                                                                String reason) {
         return new LambdaQueryWrapper<MaintainingSprinklerEntity>()
                 .ge(MaintainingSprinklerEntity::getRetMaintainenceDate, start)
                 .le(MaintainingSprinklerEntity::getRetMaintainenceDate, end)

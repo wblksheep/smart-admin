@@ -66,7 +66,7 @@ public class SprinklerController {
     }
 
 
-    @Operation(summary = "批量导入所有喷头 @author 芦苇")
+    @Operation(summary = "批量导入全部喷头 @author 芦苇")
     @PostMapping("/sprinklermanager/sprinkler/create")
     @SaCheckPermission("sprinklermanager:sprinkler:add")
     public ResponseDTO<String> importSprinkler(

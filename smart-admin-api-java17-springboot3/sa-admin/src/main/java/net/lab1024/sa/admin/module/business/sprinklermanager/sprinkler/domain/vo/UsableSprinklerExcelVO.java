@@ -29,7 +29,7 @@ public class UsableSprinklerExcelVO extends BaseSprinklerExcelVO{
     private Float voltage;
 
     @ExcelProperty("jetsout")
-    private Byte jetsout;
+    private Float jetsoutNew;
 
     @ExcelProperty("历史")
     private String history;

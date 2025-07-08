@@ -38,7 +38,7 @@ public class StatisticService {
     @Resource
     private ExcelGeneratorFactory factory;
 
-    public ResponseDTO<String> getMonthlySheetStatisticExcelExportData(LocalDate startDate, LocalDate endDate, HttpServletResponse response, String watermarkString) throws IOException {
+    public ResponseDTO<String> getMonthlySheetStatisticExcelExportData(LocalDate startDate, LocalDate endDate, String machineType, HttpServletResponse response, String watermarkString) throws IOException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月");
         String formattedDate = startDate.format(formatter); // 输出格式如"2023-10"
         String fileName = formattedDate + "月度报表.xlsx";
@@ -49,7 +49,7 @@ public class StatisticService {
             List<SheetGenerator> generators = Arrays.asList(factory.createMonthlyStatisticSheet(), factory.createMonthlyMachineRetWarehouseSprinklerStatisticSheet(), factory.createMonthlyDamagedSprinklerSheet(), factory.createMonthlyMachineSprinklerMaintainingDetailSheet(), factory.createMonthlyRetUsableSprinklerSheet(), factory.createMonthlyDamagedSprinklerUsingDaysSheet());
             generators.forEach(generator -> {
                 try {
-                    generator.generateSheet(excelWriter, startDate, endDate);
+                    generator.generateSheet(excelWriter, startDate, endDate, machineType);
                 } catch (ExcelGenerateException e) {
                     log.error("Sheet生成失败", e);
                 } catch (IOException e) {

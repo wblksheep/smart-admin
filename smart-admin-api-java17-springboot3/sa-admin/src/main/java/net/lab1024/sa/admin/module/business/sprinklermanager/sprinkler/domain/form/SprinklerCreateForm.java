@@ -9,7 +9,7 @@ import org.hibernate.validator.constraints.Length;
 import java.time.LocalDate;
 
 @Data
-public class SprinklerCreateForm extends BaseCreateForm{
+public class SprinklerCreateForm extends BaseCreateForm {
 
     @ExcelProperty("购入日期（合同编号）")
     @Schema(description = "购入日期（合同编号）")
@@ -51,7 +51,7 @@ public class SprinklerCreateForm extends BaseCreateForm{
 
     @ExcelProperty("jetsout")
     @Schema(description = "jetsout")
-    private Byte jetsout;
+    private Float jetsoutNew;
 
     @ExcelProperty("历史")
     @Schema(description = "history")

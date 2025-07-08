@@ -26,7 +26,7 @@ public class MonthlyRetUsableSprinklerSheet extends SheetGenerator{
     @Override
     public void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate) throws ExcelGenerateException {
         WriteSheet sheet = FastExcel.writerSheet("每月返可用喷头统计").head(buildComplexHeader()).build();
-        excelWriter.write(calculateMonthlyData(startDate, endDate), sheet);
+        excelWriter.write(calculateMonthlyData(startDate, endDate,), sheet);
     }
 
     private Collection<?> calculateMonthlyData(LocalDate startDate, LocalDate endDate) {

@@ -45,7 +45,7 @@ public class SprinklerExcelVO {
     private Float voltage;
 
     @ExcelProperty("jetsout")
-    private Byte jetsout;
+    private Float jetsoutNew;
 
     @ExcelProperty("历史")
     private String history;

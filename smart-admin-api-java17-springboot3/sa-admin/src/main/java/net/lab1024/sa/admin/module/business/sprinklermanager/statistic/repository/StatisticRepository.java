@@ -3,6 +3,7 @@ package net.lab1024.sa.admin.module.business.sprinklermanager.statistic.reposito
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import net.lab1024.sa.admin.module.business.sprinklermanager.machine.domain.entity.MachineEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.entity.MaintainingRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.MaintainingSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.dao.StatisticDao;
@@ -51,4 +52,6 @@ public interface StatisticRepository extends IService<StatisticEntity> {
     List<MaintainingRecordEntity> batchQueryMachineData7(LocalDate startDate, LocalDate endDate, String limit);
 
     List<MonthlyDamagedSprinklerUsingDaysVO> listByRetDamagedAndDate(LocalDate startDate, LocalDate endDate);
+
+    List<MachineEntity> batchQueryMachineName(String samba);
 }

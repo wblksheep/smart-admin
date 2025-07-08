@@ -10,6 +10,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import jakarta.annotation.Resource;
+import net.lab1024.sa.admin.module.business.sprinklermanager.machine.domain.entity.MachineEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.entity.MaintainingRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.repository.MaintainingRecordRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.MaintainingSprinklerEntity;
@@ -42,7 +43,7 @@ public class MonthlyStatisticSheet extends SheetGenerator {
 
     private static final String[] RETMAINTAINENCEREASONTYPES = {"活性堵嘴歪针", "分散堵嘴歪针", "活性湿浆堵嘴歪针", "分散湿浆堵嘴歪针", "物理破损", "报错驱动过流", "电路受损", "漏气", "内色差或持续性差", "金手指损坏", "测试", "其他", "轮转机", "共计"};
     private static final String[] RETMAINTAINENCEREASONTYPESVO = {"活性堵嘴歪针", "分散堵嘴歪针", "活性湿浆堵嘴歪针", "分散湿浆堵嘴歪针", "物理破损", "报错驱动过流", "电路受损：白条、常喷、断喷、接触不良、不喷、不打印", "漏气", "喷头内色差或持续性差", "金手指损坏", "测试", "其他", "轮转机", "共计"};
-    private static final String[] MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS = {"大昌德1#", "大昌德2#", "宇华1#", "宇华2#", "宇华3#", "华都1#", "华都2#", "大昌祥1#", "大昌祥2#", "大昌祥扫描机", "鸿大北海1#大机", "鸿大北海2#大机", "鸿大北海3#大机", "吉盛祥1#", "吉盛祥2#", "绍肖1#", "绍肖2#", "绍肖3#", "绍肖4#", "沙印1#", "沙印2#", "宏强1#", "宏强2#", "宏强3#", "稽山1#", "稽山2#", "盛兴1#", "盛兴2#", "超超1#", "超超2#", "宜滨1#", "宜滨2#", "恒晨1#", "恒晨3C1#", "洁彩纺一号车间1#大机", "洁彩纺二号车间1#大机", "金楚1#大机", "鸿大北海1#小机", "鸿大北海2#小机", "鸿大北海3#小机", "鸿大北海5#小机", "轮转机", "其他", "共计"};
+//    private static final String[] MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS = {"大昌德1#", "大昌德2#", "宇华1#", "宇华2#", "宇华3#", "华都1#", "华都2#", "大昌祥1#", "大昌祥2#", "大昌祥扫描机", "鸿大北海1#大机", "鸿大北海2#大机", "鸿大北海3#大机", "吉盛祥1#", "吉盛祥2#", "绍肖1#", "绍肖2#", "绍肖3#", "绍肖4#", "沙印1#", "沙印2#", "宏强1#", "宏强2#", "宏强3#", "稽山1#", "稽山2#", "盛兴1#", "盛兴2#", "超超1#", "超超2#", "宜滨1#", "宜滨2#", "恒晨1#", "恒晨3C1#", "洁彩纺一号车间1#大机", "洁彩纺二号车间1#大机", "金楚1#大机", "鸿大北海1#小机", "鸿大北海2#小机", "鸿大北海3#小机", "鸿大北海5#小机", "轮转机", "其他", "共计"};
 
     private Integer[][] MONTHBEGIN = {
             {13, 9, 20, 2, 9, 2, 10, 0, 8, 1, 0, 8, 20, 102},
@@ -62,9 +63,9 @@ public class MonthlyStatisticSheet extends SheetGenerator {
 
 
     @Override
-    public void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate) throws ExcelGenerateException, IOException {
+    public void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate, String machineType) throws ExcelGenerateException, IOException {
         WriteSheet sheet = FastExcel.writerSheet("每月统计").head(buildComplexHeader(startDate, endDate)).build();
-        excelWriter.write(calculateMonthlyData(startDate, endDate), sheet);
+        excelWriter.write(calculateMonthlyData(startDate, endDate), sheet, machineType);
     }
 
     public List<MonthlyStatisticExcelVO> calculateMonthlyData(LocalDate startDate, LocalDate endDate, Boolean excelFlag) throws IOException {
@@ -73,7 +74,15 @@ public class MonthlyStatisticSheet extends SheetGenerator {
 
     private Collection<?> calculateMonthlyData(LocalDate startDate, LocalDate endDate) throws IOException, ArrayIndexOutOfBoundsException {
         Integer month = startDate.getMonthValue();
+        List<MachineEntity> machines = statisticRepository.batchQueryMachineName("samba");
 
+        String[] MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS = new String[machines.size() + 2];
+        int cnt = 0;
+        for (; cnt < machines.size(); cnt++) {
+            MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS[cnt] = machines.get(cnt).getMachineName();
+        }
+        MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS[cnt++] = "其他";
+        MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS[cnt++] = "共计";
         // 1.1 批量预加载维修记录数据（避免循环内多次查询）返仓记录相关
         Map<String, List<MaintainingRecordEntity>> reasonRecordsMap1 = statisticRepository.batchQueryMachineData(startDate, endDate, MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS, RETMAINTAINENCEREASONTYPES).stream().collect(Collectors.groupingBy(MaintainingRecordEntity::getRetMaintainenceReason));
 

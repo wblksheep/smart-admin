@@ -20,6 +20,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repositor
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.UsableSprinklerRepository;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.abstractimpl.BaseServiceImpl;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.service.ClassEntityTransferService;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.service.TypeService;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.RepositorySprinklerQueryStrategy;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.RepositorySprinklerTransferStrategy;
@@ -149,7 +150,7 @@ public class SprinklerService {
      */
     public ResponseDTO<String> batchSprinklerImport(@Valid MultipartFile file, RequestUser requestUser) {
         //使用收集器一次性完成字段设置，避免冗余操作
-        List<SprinklerImportForm> importVOs = ExcelUtil.importExcelByClass(file, SprinklerImportForm.class).stream().peek(vo -> initImportVO(vo, requestUser)) // 提取字段设置为独立方法
+        List<SprinklerImportForm> importVOs = ExcelUtil.importExcelByClass(file, SprinklerImportForm.class).stream().peek(vo -> initImportVO(vo, requestUser))// 提取字段设置为独立方法
                 .toList();
 
         //提前返回空值情况
@@ -175,8 +176,10 @@ public class SprinklerService {
         errorData.addAll(invalidSerials);
         errorData.addAll(partitionedData.get(false).stream().map(SprinklerImportForm::getSprinklerSerial).filter(StringUtils::isNotBlank).collect(Collectors.toSet()));
 
+
         // 重复数据去重
         validData = validData.stream().filter(distinctByKey(SprinklerEntity::getSprinklerSerial)).collect(Collectors.toList());
+
 
         // 执行插入并返回详细信息
         if (!validData.isEmpty()) {
@@ -248,6 +251,9 @@ public class SprinklerService {
     @Resource
     private TypeService typeService;
 
+    @Resource
+    private ClassEntityTransferService transferService;
+
     /**
      * 编辑各仓喷头
      */
@@ -304,24 +310,18 @@ public class SprinklerService {
         repository.myUpdateById(updateEntity);
         return ResponseDTO.ok();
     }
+
     /**
-     * 批量编辑各仓喷头
+     * 批量编辑全部喷头
      */
     @Transactional(rollbackFor = Exception.class)
     public ResponseDTO<String> updateBatchSprinkler(@Valid MultipartFile file, RequestUser requestUser) {
         //使用收集器一次性完成字段设置，避免冗余操作
         List<SprinklerImportForm> importVOs = ExcelUtil.importExcelByClass(file, SprinklerImportForm.class).stream().peek(vo -> initImportVO(vo, requestUser)) // 提取字段设置为独立方法
                 .toList();
-        for (int i = 0; i < importVOs.size(); i++) {
-            SprinklerImportForm importVO = importVOs.get(i);
-            SprinklerUpdateForm updateVO = new SprinklerUpdateForm();
-            BeanUtils.copyProperties(importVO, updateVO);
-            RepositorySprinklerTypeChineseEnum[] values = RepositorySprinklerTypeChineseEnum.values();
-            for (int j = 0; j < values.length; j++) {
-                if (values[j].getDesc().equals(importVO.getStatus())) {
-                    updateVO.setStatus(values[j].getValue());
-                }
-            }
+        List<SprinklerUpdateForm> updateVOs = importVOs.stream().map(vo -> transferService.transferImportToUpdate(vo)).toList();
+        for (int i = 0; i < updateVOs.size(); i++) {
+            SprinklerUpdateForm updateVO = updateVOs.get(i);
             if (updateVO.getStatus() == null) {
                 return ResponseDTO.userErrorParam("编辑数据所在仓数据有误");
             }
@@ -337,11 +337,12 @@ public class SprinklerService {
     /**
      * 批量编辑各仓喷头
      */
-    public <T extends BaseUpdateForm> ResponseDTO<String> updateBatchSprinkler(@Valid MultipartFile file, Byte type, RequestUser requestUser) {
-        Class<T> baseUpdateFormClass = (Class<T>) typeService.getCachedUpdateForm(type);
+    public <T extends BaseImportForm> ResponseDTO<String> updateBatchSprinkler(@Valid MultipartFile file, Byte type, RequestUser requestUser) {
+        Class<T> baseImportFormClass = (Class<T>) typeService.getCachedImportForm(type);
         //使用收集器一次性完成字段设置，避免冗余操作
-        List<T> updateVOs = ExcelUtil.importExcelByClass(file, baseUpdateFormClass).stream().peek(vo -> initUpdateVO(vo, requestUser)) // 提取字段设置为独立方法
+        List<T> importVOs = ExcelUtil.importExcelByClass(file, baseImportFormClass).stream().peek(vo -> initImportVO(vo, requestUser)) // 提取字段设置为独立方法
                 .toList();
+        List<? extends BaseUpdateForm> updateVOs = importVOs.stream().map(vo -> transferService.transferImportToUpdate(vo, type)).toList();
         updateVOs.forEach(vo -> {
             try {
                 updateRepositorySprinkler(vo, type);
@@ -472,9 +473,13 @@ public class SprinklerService {
         // 检查form是否为空（根据调用上下文确保form非空）
         if (form != null) {
             // 处理jetsout
-            String jetsoutStr = form.getJetsout();
+            String jetsoutStr = form.getJetsoutNew();
             if (jetsoutStr != null && !jetsoutStr.trim().isEmpty()) {
-                validSprinkler.setJetsout(Byte.parseByte(jetsoutStr));
+                try {
+                    validSprinkler.setJetsout(Byte.parseByte(jetsoutStr));
+                } catch (NumberFormatException e) {
+                }
+                validSprinkler.setJetsoutNew(Float.parseFloat(jetsoutStr));
             }
 
             // 处理voltage
