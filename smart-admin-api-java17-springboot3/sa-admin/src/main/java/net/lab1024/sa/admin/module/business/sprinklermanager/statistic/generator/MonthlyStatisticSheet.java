@@ -65,16 +65,16 @@ public class MonthlyStatisticSheet extends SheetGenerator {
     @Override
     public void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate, String machineType) throws ExcelGenerateException, IOException {
         WriteSheet sheet = FastExcel.writerSheet("每月统计").head(buildComplexHeader(startDate, endDate)).build();
-        excelWriter.write(calculateMonthlyData(startDate, endDate), sheet, machineType);
+        excelWriter.write(calculateMonthlyData(startDate, endDate, machineType), sheet);
     }
 
-    public List<MonthlyStatisticExcelVO> calculateMonthlyData(LocalDate startDate, LocalDate endDate, Boolean excelFlag) throws IOException {
-        return (List<MonthlyStatisticExcelVO>) calculateMonthlyData(startDate, endDate);
+    public List<MonthlyStatisticExcelVO> calculateMonthlyData(LocalDate startDate, LocalDate endDate, String machineType, Boolean excelFlag) throws IOException {
+        return (List<MonthlyStatisticExcelVO>) calculateMonthlyData(startDate, endDate, machineType);
     }
 
-    private Collection<?> calculateMonthlyData(LocalDate startDate, LocalDate endDate) throws IOException, ArrayIndexOutOfBoundsException {
+    private Collection<?> calculateMonthlyData(LocalDate startDate, LocalDate endDate, String machineType) throws IOException, ArrayIndexOutOfBoundsException {
         Integer month = startDate.getMonthValue();
-        List<MachineEntity> machines = statisticRepository.batchQueryMachineName("samba");
+        List<MachineEntity> machines = statisticRepository.batchQueryMachineName(machineType);
 
         String[] MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS = new String[machines.size() + 2];
         int cnt = 0;

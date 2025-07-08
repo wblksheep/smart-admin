@@ -32,7 +32,7 @@ public class MonthlyMachineRetWarehouseSprinklerStatisticSheet extends SheetGene
     }
 
     @Override
-    public void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate) throws ExcelGenerateException {
+    public void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate, String machineType) throws ExcelGenerateException {
         WriteSheet sheet = FastExcel.writerSheet("每月机台服务返仓喷头统计").head(buildComplexHeader()).build();
         excelWriter.write(calculateMonthlyData(startDate, endDate), sheet);
     }

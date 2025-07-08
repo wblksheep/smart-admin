@@ -16,7 +16,7 @@ public class MonthlyDamagedSprinklerUsingDaysSheet extends SheetGenerator {
 
     private StatisticRepository statisticRepository;
 
-    private static final String[] MONTHLYDAMAGEDSPRINKLERUSINGDAYSHEADERSVO = {"年份月份","喷头序列号", "领用日期", "破损日期", "使用时间"};
+    private static final String[] MONTHLYDAMAGEDSPRINKLERUSINGDAYSHEADERSVO = {"年份月份", "喷头序列号", "领用日期", "破损日期", "使用时间"};
 
 
     public MonthlyDamagedSprinklerUsingDaysSheet(StatisticRepository statisticRepository) {
@@ -24,17 +24,17 @@ public class MonthlyDamagedSprinklerUsingDaysSheet extends SheetGenerator {
     }
 
     @Override
-    public void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate) throws ExcelGenerateException {
+    public void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate, String machineType) throws ExcelGenerateException {
         WriteSheet sheet = FastExcel.writerSheet("每月报废喷头使用时间").head(buildComplexHeader()).build();
-        excelWriter.write(calculateMonthlyData(startDate, endDate), sheet);
+        excelWriter.write(calculateMonthlyData(startDate, endDate, machineType), sheet);
     }
 
-    private Collection<?> calculateMonthlyData(LocalDate startDate, LocalDate endDate) {
+    private Collection<?> calculateMonthlyData(LocalDate startDate, LocalDate endDate, String machineType) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月");
         String formattedDate = startDate.format(formatter);
         List<List<Object>> data = new ArrayList<>();
         List<MonthlyDamagedSprinklerUsingDaysVO> queryVOs = statisticRepository.listByRetDamagedAndDate(startDate, endDate);
-        for(int i=0;i<queryVOs.size();i++){
+        for (int i = 0; i < queryVOs.size(); i++) {
             List<Object> row = new ArrayList<>();
             row.add(formattedDate);
             row.add(queryVOs.get(i).getSprinklerSerial());

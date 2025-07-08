@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MonthlyRetUsableSprinklerSheet extends SheetGenerator{
+public class MonthlyRetUsableSprinklerSheet extends SheetGenerator {
 
     private static final String[] MONTHLYRETUSABLESPRINKLERHEADERSVO = {"年份月份", "有限制数量", "正常使用数量", "合计"};
     private static final String[] MONTHLYRETUSABLESPRINKLERHEADERS = {"有", "无"};
@@ -24,12 +24,12 @@ public class MonthlyRetUsableSprinklerSheet extends SheetGenerator{
     }
 
     @Override
-    public void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate) throws ExcelGenerateException {
+    public void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate, String machineType) throws ExcelGenerateException {
         WriteSheet sheet = FastExcel.writerSheet("每月返可用喷头统计").head(buildComplexHeader()).build();
-        excelWriter.write(calculateMonthlyData(startDate, endDate,), sheet);
+        excelWriter.write(calculateMonthlyData(startDate, endDate, machineType), sheet);
     }
 
-    private Collection<?> calculateMonthlyData(LocalDate startDate, LocalDate endDate) {
+    private Collection<?> calculateMonthlyData(LocalDate startDate, LocalDate endDate, String machineType) {
         List<List<Object>> data = new ArrayList<>();
         List<Object> row = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月");
