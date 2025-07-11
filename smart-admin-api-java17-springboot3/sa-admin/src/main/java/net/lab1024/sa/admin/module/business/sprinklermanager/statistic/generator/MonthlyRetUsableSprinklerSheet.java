@@ -35,10 +35,10 @@ public class MonthlyRetUsableSprinklerSheet extends SheetGenerator {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月");
         String formattedDate = startDate.format(formatter); // 输出格式如"2023-10"
         row.add(formattedDate);
-        Long count1 = (long) statisticRepository.batchQueryMachineData7(startDate, endDate, MONTHLYRETUSABLESPRINKLERHEADERS[0])
+        Long count1 = (long) statisticRepository.batchQueryMachineData7(startDate, endDate, MONTHLYRETUSABLESPRINKLERHEADERS[0], machineType, Boolean.FALSE)
                 .size();
         row.add(count1);
-        Long count2 = (long) statisticRepository.batchQueryMachineData7(startDate, endDate, MONTHLYRETUSABLESPRINKLERHEADERS[1])
+        Long count2 = (long) statisticRepository.batchQueryMachineData7(startDate, endDate, MONTHLYRETUSABLESPRINKLERHEADERS[1], machineType, Boolean.FALSE)
                 .size();
         row.add(count2);
         row.add(count1 + count2);

@@ -27,17 +27,20 @@ public class MonthlyMachineRetWarehouseSprinklerStatisticSheet extends SheetGene
     //    private static final String[] MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS = {"大昌德1#", "大昌德2#", "宇华1#", "宇华2#", "宇华3#", "华都1#", "华都2#", "大昌祥1#", "大昌祥2#", "大昌祥扫描机", "鸿大北海1#大机", "鸿大北海2#大机", "鸿大北海3#大机", "吉盛祥1#", "吉盛祥2#", "绍肖1#", "绍肖2#", "绍肖3#", "绍肖4#", "沙印1#", "沙印2#", "宏强1#", "宏强2#", "宏强3#", "稽山1#", "稽山2#", "盛兴1#", "盛兴2#", "超超1#", "超超2#", "宜滨1#", "宜滨2#", "恒晨1#", "恒晨3C1#", "洁彩纺一号车间", "洁彩纺二号车间", "金楚1#大机", "鸿大北海1#小机", "鸿大北海2#小机", "鸿大北海3#小机", "鸿大北海5#小机", "轮转机", "其他", "共计"};
     private static final String[] RETMAINTAINENCEREASONTYPES = {"活性堵嘴歪针", "分散堵嘴歪针", "活性湿浆堵嘴歪针", "分散湿浆堵嘴歪针", "物理破损", "报错驱动过流", "电路受损", "漏气", "内色差或持续性差", "金手指损坏", "测试", "其他", "轮转机", "共计"};
 
+    private static String machineType = null;
+
     public MonthlyMachineRetWarehouseSprinklerStatisticSheet(StatisticRepository statisticRepository) {
         this.statisticRepository = statisticRepository;
     }
 
     @Override
     public void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate, String machineType) throws ExcelGenerateException {
+        this.machineType = machineType;
         WriteSheet sheet = FastExcel.writerSheet("每月机台服务返仓喷头统计").head(buildComplexHeader()).build();
-        excelWriter.write(calculateMonthlyData(startDate, endDate), sheet);
+        excelWriter.write(calculateMonthlyData(startDate, endDate, machineType), sheet);
     }
 
-    private Collection<?> calculateMonthlyData(LocalDate startDate, LocalDate endDate) {
+    private Collection<?> calculateMonthlyData(LocalDate startDate, LocalDate endDate, String machineType) {
         List<List<Object>> data = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月");
         String formattedDate = startDate.format(formatter); // 输出格式如"2023-10"
@@ -45,7 +48,7 @@ public class MonthlyMachineRetWarehouseSprinklerStatisticSheet extends SheetGene
         rowSummary.add(formattedDate);
         rowSummary.add(MONTHLYMACHINERETWAREHOUSESPRINKLERTYPESVO[MONTHLYMACHINERETWAREHOUSESPRINKLERTYPESVO.length - 1]);
 
-        List<MachineEntity> machines = statisticRepository.batchQueryMachineName("samba");
+        List<MachineEntity> machines = statisticRepository.batchQueryMachineName(machineType);
 
         String[] MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS = new String[machines.size() + 2];
         int cnt = 0;
@@ -73,11 +76,11 @@ public class MonthlyMachineRetWarehouseSprinklerStatisticSheet extends SheetGene
             Long total = 0L;
             for (int j = 0; j < MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS.length - 1; j++) {
                 Long count1 = statisticRepository.batchQueryMachineData3(
-                        startDate, endDate, MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS[j], reason
+                        startDate, endDate, MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS[j], reason, machineType, Boolean.FALSE
                 ).stream().count();
 
                 Long count2 = statisticRepository.batchQuerySprinklerData2(
-                        startDate, endDate, MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS[j], reason
+                        startDate, endDate, MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS[j], reason, machineType, Boolean.FALSE
                 ).stream().count();
                 Long value = count1 + count2;
 
@@ -99,7 +102,7 @@ public class MonthlyMachineRetWarehouseSprinklerStatisticSheet extends SheetGene
     }
 
     private List<List<String>> buildComplexHeader() {
-        List<MachineEntity> machines = statisticRepository.batchQueryMachineName("samba");
+        List<MachineEntity> machines = statisticRepository.batchQueryMachineName(this.machineType);
 
         String[] MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERSVO = new String[2 + machines.size() + 2];
         MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERSVO[0] = "年份月份";

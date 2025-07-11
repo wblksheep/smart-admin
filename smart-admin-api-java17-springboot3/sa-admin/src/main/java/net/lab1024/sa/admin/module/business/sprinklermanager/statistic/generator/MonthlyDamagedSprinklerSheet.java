@@ -4,8 +4,9 @@ import cn.idev.excel.ExcelWriter;
 import cn.idev.excel.FastExcel;
 import cn.idev.excel.exception.ExcelGenerateException;
 import cn.idev.excel.write.metadata.WriteSheet;
+import lombok.Getter;
 import net.lab1024.sa.admin.module.business.sprinklermanager.maintainingrecord.domain.entity.MaintainingRecordEntity;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.DamagedSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.statistic.repository.StatisticRepository;
 
 import java.time.LocalDate;
@@ -13,7 +14,6 @@ import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class MonthlyDamagedSprinklerSheet extends SheetGenerator {
 
@@ -36,18 +36,58 @@ public class MonthlyDamagedSprinklerSheet extends SheetGenerator {
         String formattedDate = startDate.format(formatter); // 输出格式如"2023-10"
         List<List<Object>> data = new ArrayList<>();
         // 1.1 批量预加载破损仓记录数据（避免循环内多次查询）返仓记录相关
-        List<MaintainingRecordEntity> reasonRecords = statisticRepository.batchQueryMachineData4(startDate, endDate);
-        for (MaintainingRecordEntity maintainingRecordEntity : reasonRecords) {
+        List<MaintainingRecordEntity> reasonRecords = statisticRepository.batchQueryMachineData4(startDate, endDate, machineType, Boolean.FALSE);
+        List<DamagedSprinklerEntity> damagedSprinklers = statisticRepository.batchQueryDamagedSprinklerData(startDate, endDate, machineType, Boolean.FALSE);
+
+        // 3. 定义分组容器类
+        @Getter
+        class SprinklerGroup {
+            private MaintainingRecordEntity record;
+            private DamagedSprinklerEntity damagedSprinkler;
+
+            public void setRecord(MaintainingRecordEntity record) {
+                this.record = record;
+            }
+
+            public void setDamaged(DamagedSprinklerEntity damaged) {
+                this.damagedSprinkler = damaged;
+            }
+        }
+
+        // 定义分组容器
+        Map<String, SprinklerGroup> sprinklerGroupMap = new HashMap<>();
+
+        // 1. 处理维护记录
+        for (MaintainingRecordEntity record : reasonRecords) {
+            String serial = record.getSprinklerSerial();
+            sprinklerGroupMap
+                    .computeIfAbsent(serial, k -> new SprinklerGroup())
+                    .setRecord(record);
+        }
+
+        // 2. 处理破损记录
+        for (DamagedSprinklerEntity damaged : damagedSprinklers) {
+            String serial = damaged.getSprinklerSerial();
+            sprinklerGroupMap
+                    .computeIfAbsent(serial, k -> new SprinklerGroup())
+                    .setDamaged(damaged);
+        }
+
+        for (String serial : sprinklerGroupMap.keySet()) {
+            SprinklerGroup sprinklerGroup = sprinklerGroupMap.get(serial);
+            MaintainingRecordEntity record = sprinklerGroup.getRecord();
+            DamagedSprinklerEntity damagedSprinkler = sprinklerGroup.getDamagedSprinkler();
             List<Object> row = new ArrayList<>();
             row.add(formattedDate);
-            row.add(maintainingRecordEntity.getSprinklerSerial());
-            row.add(maintainingRecordEntity.getCustomer());
-            row.add(maintainingRecordEntity.getRetMaintainenceReason());
-            row.add(maintainingRecordEntity.getRetWarehouseDate());
+            row.add(serial);
+            row.add(record.getCustomer());
+            row.add(damagedSprinkler.getDamagedReasonType());
+            row.add(damagedSprinkler.getRetWarehouseDate());
             data.add(row);
         }
         return data;
     }
+
 
     private List<List<String>> buildComplexHeader() {
         return Arrays.stream(MONTHLYDAMAGEDSPRINKLERHEADERSVO)

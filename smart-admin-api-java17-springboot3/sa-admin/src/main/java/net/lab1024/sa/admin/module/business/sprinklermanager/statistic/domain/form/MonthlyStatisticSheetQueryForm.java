@@ -8,4 +8,5 @@ import java.time.LocalDate;
 public class MonthlyStatisticSheetQueryForm {
     private LocalDate startDate;
     private LocalDate endDate;
+    private String machineType;
 }

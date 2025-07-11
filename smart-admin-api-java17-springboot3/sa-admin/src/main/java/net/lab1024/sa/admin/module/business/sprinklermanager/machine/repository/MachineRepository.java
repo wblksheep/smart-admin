@@ -49,6 +49,7 @@ public class MachineRepository extends ServiceImpl<MachineDao, MachineEntity> {
     public List<MachineEntity> getByMachineNames(String machineType) {
         LambdaQueryWrapper<MachineEntity> lqw = new LambdaQueryWrapper<>();
         lqw.eq(MachineEntity::getMachineType, machineType);
+        lqw.eq(MachineEntity::getDeletedFlag, Boolean.FALSE);
         return this.getBaseMapper().selectList(lqw);
     }
 }

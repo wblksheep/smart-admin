@@ -26,6 +26,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static net.lab1024.sa.admin.module.business.sprinklermanager.statistic.MachineConfigUpdater.updateMachineType;
+
 /**
  * 喷头管理-统计服务
  *
@@ -39,9 +41,10 @@ public class StatisticService {
     private ExcelGeneratorFactory factory;
 
     public ResponseDTO<String> getMonthlySheetStatisticExcelExportData(LocalDate startDate, LocalDate endDate, String machineType, HttpServletResponse response, String watermarkString) throws IOException {
+        updateMachineType(machineType);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月");
         String formattedDate = startDate.format(formatter); // 输出格式如"2023-10"
-        String fileName = formattedDate + "月度报表.xlsx";
+        String fileName = formattedDate + machineType + "喷头月度报表.xlsx";
         // 设置下载消息头
         SmartResponseUtil.setDownloadFileHeader(response, fileName, null);
         try (ExcelWriter excelWriter = FastExcel.write(response.getOutputStream()).inMemory(true).build()) {
@@ -64,10 +67,10 @@ public class StatisticService {
     /**
      * 查询每月统计模块
      */
-    public ResponseDTO<List<MonthlyStatisticSheetVO>> getMonthlyStatisticSheet(LocalDate startDate, LocalDate endDate) throws IOException {
+    public ResponseDTO<List<MonthlyStatisticSheetVO>> getMonthlyStatisticSheet(LocalDate startDate, LocalDate endDate, String machineType) throws IOException {
         MonthlyStatisticSheet statisticSheet = factory.createMonthlyStatisticSheet();
         try {
-            List<MonthlyStatisticExcelVO> datas = statisticSheet.calculateMonthlyData(startDate, endDate, Boolean.FALSE);
+            List<MonthlyStatisticExcelVO> datas = statisticSheet.calculateMonthlyData(startDate, endDate, machineType, Boolean.FALSE);
             return ResponseDTO.ok(datas.stream().map(data -> {
                 MonthlyStatisticSheetVO vo = new MonthlyStatisticSheetVO();
                 SmartBeanUtil.copyProperties(data, vo);

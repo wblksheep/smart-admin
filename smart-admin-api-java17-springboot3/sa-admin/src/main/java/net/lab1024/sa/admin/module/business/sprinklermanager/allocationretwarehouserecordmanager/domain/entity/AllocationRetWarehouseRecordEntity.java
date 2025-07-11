@@ -29,6 +29,12 @@ public class AllocationRetWarehouseRecordEntity {
     private Byte status;
 
     /**
+     * 标记状态
+     */
+    @DataTracerFieldLabel("标记状态")
+    private Boolean markedFlag;
+
+    /**
      * 禁用状态
      */
     @DataTracerFieldLabel("禁用状态")

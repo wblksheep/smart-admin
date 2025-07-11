@@ -111,6 +111,12 @@ public class AllocationRetWarehouseEntity {
     private String retWarehouseReason;
 
     /**
+     * 具体原因
+     */
+    @DataTracerFieldLabel("具体原因")
+    private String retWarehouseRealReason;
+
+    /**
      * 备注
      */
     @DataTracerFieldLabel("备注")

@@ -61,6 +61,10 @@
                 AND INSTR(ret_warehouse_reason,#{queryForm.retWarehouseReason})
             </if>
 
+            <if test="queryForm.retWarehouseRealReason != null and queryForm.retWarehouseRealReason != ''">
+                AND INSTR(ret_warehouse_real_reason,#{queryForm.retWarehouseRealReason})
+            </if>
+
             <if test="queryForm.note != null and queryForm.note != ''">
                 AND INSTR(note,#{queryForm.note})
             </if>
@@ -81,6 +85,86 @@
         SELECT arw.*
         FROM t_allocation_ret_warehouse arw
         WHERE arw.record_id = #{recordId} AND arw.deleted_flag = #{deletedFlag}
+    </select>
+    <select id="query"
+            resultType="net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseExcelVO">
+        SELECT t_allocation_ret_warehouse.*,
+        t_allocation_ret_warehouse_record.record_id, status
+        FROM t_allocation_ret_warehouse
+        LEFT JOIN t_allocation_ret_warehouse_record on t_allocation_ret_warehouse.record_id =
+        t_allocation_ret_warehouse_record.record_id
+        <where>
+            t_allocation_ret_warehouse.deleted_flag = #{queryForm.deletedFlag}
+            <if test="queryForm.allocateSprinklerSerial != null and queryForm.allocateSprinklerSerial != ''">
+                AND INSTR(allocate_sprinkler_serial,#{queryForm.allocateSprinklerSerial})
+            </if>
+
+            <if test="queryForm.allocateSprinklerModel != null and queryForm.allocateSprinklerModel != ''">
+                AND INSTR(allocate_sprinkler_model,#{queryForm.allocateSprinklerModel})
+            </if>
+
+            <if test="queryForm.allocatePurpose != null and queryForm.allocatePurpose != ''">
+                AND INSTR(allocate_purpose,#{queryForm.allocatePurpose})
+            </if>
+
+            <if test="queryForm.allocateColor != null and queryForm.allocateColor != ''">
+                AND INSTR(allocate_color,#{queryForm.allocateColor})
+            </if>
+
+            <if test="queryForm.allocatePosition != null">
+                AND allocate_position = #{queryForm.allocatePosition}
+            </if>
+
+            <if test="queryForm.allocateSprinklerIsNew != null">
+                AND allocate_sprinkler_is_new = #{queryForm.allocateSprinklerIsNew}
+            </if>
+
+            <if test="queryForm.retWarehouseSprinklerSerial != null and queryForm.retWarehouseSprinklerSerial != ''">
+                AND INSTR(ret_warehouse_sprinkler_serial,#{queryForm.retWarehouseSprinklerSerial})
+            </if>
+
+            <if test="queryForm.retWarehouseSprinklerModel != null and queryForm.retWarehouseSprinklerModel != ''">
+                AND INSTR(ret_warehouse_sprinkler_model,#{queryForm.retWarehouseSprinklerModel})
+            </if>
+
+            <if test="queryForm.retWarehouseMachine != null and queryForm.retWarehouseMachine != ''">
+                AND INSTR(ret_warehouse_machine,#{queryForm.retWarehouseMachine})
+            </if>
+
+            <if test="queryForm.retWarehouseColor != null and queryForm.retWarehouseColor != ''">
+                AND INSTR(ret_warehouse_color,#{queryForm.retWarehouseColor})
+            </if>
+
+            <if test="queryForm.retWarehousePosition != null">
+                AND ret_warehouse_position = #{queryForm.retWarehousePosition}
+            </if>
+
+            <if test="queryForm.retWarehouseSprinklerIsNew != null">
+                AND ret_warehouse_sprinkler_is_new = #{queryForm.retWarehouseSprinklerIsNew}
+            </if>
+
+            <if test="queryForm.retWarehouseReason != null and queryForm.retWarehouseReason != ''">
+                AND INSTR(ret_warehouse_reason,#{queryForm.retWarehouseReason})
+            </if>
+
+            <if test="queryForm.retWarehouseRealReason != null and queryForm.retWarehouseRealReason != ''">
+                AND INSTR(ret_warehouse_real_reason,#{queryForm.retWarehouseRealReason})
+            </if>
+
+            <if test="queryForm.note != null and queryForm.note != ''">
+                AND INSTR(note,#{queryForm.note})
+            </if>
+            <if test="queryForm.status != null">
+                AND status = #{queryForm.status}
+            </if>
+            <if test="queryForm.disabledflag != null">
+                AND t_allocation_ret_warehouse.disabled_flag = #{queryForm.disabledFlag}
+            </if>
+        </where>
+        <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
+            ORDER BY t_allocation_ret_warehouse.create_time DESC
+        </if>
+
     </select>
 
 </mapper>

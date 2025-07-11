@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.dao.AllocationRetWarehouseDao;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.entity.AllocationRetWarehouseEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.repository.AllocationRetWarehouseRepository;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,5 +39,10 @@ public class AllocationRetWarehouseRepositoryImpl extends ServiceImpl<Allocation
         LambdaQueryWrapper<AllocationRetWarehouseEntity> lqw = new LambdaQueryWrapper<>();
         lqw.in(AllocationRetWarehouseEntity::getAllocationRetWarehouseId, allocationRetWarehouseIds);
         return this.list(lqw);
+    }
+
+    @Override
+    public List<AllocationRetWarehouseExcelVO> getListRetMaintainenceDesc(AllocationRetWarehouseQueryForm queryForm) {
+        return this.getBaseMapper().query(queryForm);
     }
 }

@@ -27,9 +27,9 @@ public class AllocationRetWarehouseBaseForm {
     private String allocateColor;
 
     @Schema(description = "领用位置",
-        minimum = "0",
-        maximum = "40",
-        example = "10"
+            minimum = "0",
+            maximum = "40",
+            example = "10"
     )
     @Min(0)
     @Max(40)
@@ -69,6 +69,10 @@ public class AllocationRetWarehouseBaseForm {
     @Schema(description = "返仓原因")
     @Length(max = 255, message = "返仓原因最多255字符")
     private String retWarehouseReason;
+
+    @Schema(description = "具体原因")
+    @Length(max = 255, message = "返仓原因最多255字符")
+    private String retWarehouseRealReason;
 
     @Schema(description = "备注")
     @Length(max = 255, message = "备注最多255字符")

@@ -84,13 +84,13 @@ public class MonthlyStatisticSheet extends SheetGenerator {
         MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS[cnt++] = "其他";
         MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS[cnt++] = "共计";
         // 1.1 批量预加载维修记录数据（避免循环内多次查询）返仓记录相关
-        Map<String, List<MaintainingRecordEntity>> reasonRecordsMap1 = statisticRepository.batchQueryMachineData(startDate, endDate, MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS, RETMAINTAINENCEREASONTYPES).stream().collect(Collectors.groupingBy(MaintainingRecordEntity::getRetMaintainenceReason));
+        Map<String, List<MaintainingRecordEntity>> reasonRecordsMap1 = statisticRepository.batchQueryMachineData(startDate, endDate, MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS, RETMAINTAINENCEREASONTYPES, machineType).stream().collect(Collectors.groupingBy(MaintainingRecordEntity::getRetMaintainenceReason));
 
         // 1.2 批量预加载维修记录数据（避免循环内多次查询）维修时间记录相关
-        Map<String, List<MaintainingRecordEntity>> reasonRecordsMap2 = statisticRepository.batchQueryMachineData2(startDate, endDate, MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS, RETMAINTAINENCEREASONTYPES).stream().collect(Collectors.groupingBy(MaintainingRecordEntity::getRetMaintainenceReason));
+        Map<String, List<MaintainingRecordEntity>> reasonRecordsMap2 = statisticRepository.batchQueryMachineData2(startDate, endDate, MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS, RETMAINTAINENCEREASONTYPES, machineType).stream().collect(Collectors.groupingBy(MaintainingRecordEntity::getRetMaintainenceReason));
 
         // 1.3 批量预加载维修仓数据（避免循环内多次查询）
-        Map<String, List<MaintainingSprinklerEntity>> sprinklerMap = statisticRepository.batchQuerySprinklerData(startDate, endDate, MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS, RETMAINTAINENCEREASONTYPES).stream().collect(Collectors.groupingBy(MaintainingSprinklerEntity::getRetMaintainenceReason));
+        Map<String, List<MaintainingSprinklerEntity>> sprinklerMap = statisticRepository.batchQuerySprinklerData(startDate, endDate, MONTHLYMACHINERETWAREHOUSESPRINKLERHEADERS, RETMAINTAINENCEREASONTYPES, machineType, Boolean.FALSE).stream().collect(Collectors.groupingBy(MaintainingSprinklerEntity::getRetMaintainenceReason));
         // 2. 使用并行流优化统计（利用多核CPU）
         Map<String, Long> warehouseCountMap = reasonRecordsMap1.values().stream().flatMap(List::stream).collect(Collectors.groupingByConcurrent(MaintainingRecordEntity::getRetWarehouseType, Collectors.counting()));
         Map<String, Map<String, Long>> retWarehouseTypeMap = new HashMap<>();

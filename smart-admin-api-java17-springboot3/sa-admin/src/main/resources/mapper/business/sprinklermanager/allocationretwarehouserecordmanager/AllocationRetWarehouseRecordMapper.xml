@@ -6,7 +6,8 @@
             resultType="net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseRecordVO">
         SELECT arwr.*
         FROM t_allocation_ret_warehouse_record arwr
-        WHERE arwr.record_id = #{recordId} AND arwr.deleted_flag = #{deletedFlag}
+        WHERE arwr.record_id = #{recordId}
+          AND arwr.deleted_flag = #{deletedFlag}
     </select>
     <select id="queryPage"
             resultType="net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseRecordVO">
@@ -16,6 +17,9 @@
             <foreach item="id" collection="distinctIds" open="(" separator="," close=")">
                 #{id}
             </foreach>
+            <if test="markedFlag!=null">
+                AND marked_flag = #{markedFlag}
+            </if>
         </where>
         <!-- 分页参数由插件自动追加（如MySQL追加LIMIT） -->
         ORDER BY t_allocation_ret_warehouse_record.create_time DESC
@@ -25,7 +29,8 @@
         SELECT t_allocation_ret_warehouse_record.*,
         t_allocation_ret_warehouse.*
         FROM t_allocation_ret_warehouse_record
-        LEFT JOIN t_allocation_ret_warehouse on t_allocation_ret_warehouse_record.record_id = t_allocation_ret_warehouse.record_id
+        LEFT JOIN t_allocation_ret_warehouse on t_allocation_ret_warehouse_record.record_id =
+        t_allocation_ret_warehouse.record_id
         <where>
             t_allocation_ret_warehouse.deleted_flag = #{queryForm.deletedFlag}
             <if test="queryForm.allocateSprinklerSerial != null and queryForm.allocateSprinklerSerial != ''">
@@ -78,6 +83,10 @@
 
             <if test="queryForm.retWarehouseReason != null and queryForm.retWarehouseReason != ''">
                 AND INSTR(ret_warehouse_reason,#{queryForm.retWarehouseReason})
+            </if>
+
+            <if test="queryForm.retWarehouseRealReason != null and queryForm.retWarehouseRealReason != ''">
+                AND INSTR(ret_warehouse_real_reason,#{queryForm.retWarehouseRealReason})
             </if>
 
             <if test="queryForm.note != null and queryForm.note != ''">

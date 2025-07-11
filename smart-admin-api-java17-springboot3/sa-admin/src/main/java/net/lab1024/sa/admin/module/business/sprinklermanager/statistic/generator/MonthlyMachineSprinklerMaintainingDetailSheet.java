@@ -20,6 +20,7 @@ public class MonthlyMachineSprinklerMaintainingDetailSheet extends SheetGenerato
 //    private static final String[] MONTHLYMACHINESPRINKLERMAINTAININGDETAILHEADERS = {"大昌德1#", "大昌德2#", "宇华1#", "宇华2#", "宇华3#", "华都1#", "华都2#", "大昌祥1#", "大昌祥2#", "大昌祥扫描机", "鸿大北海1#大机", "鸿大北海2#大机", "鸿大北海3#大机", "吉盛祥1#", "吉盛祥2#", "绍肖1#", "绍肖2#", "绍肖3#", "绍肖4#", "沙印1#", "沙印2#", "宏强1#", "宏强2#", "宏强3#", "稽山1#", "稽山2#", "盛兴1#", "盛兴2#", "超超1#", "超超2#", "宜滨1#", "宜滨2#", "恒晨1#", "恒晨3C1#", "洁彩纺一号车间", "洁彩纺二号车间", "金楚1#大机", "鸿大北海1#小机", "鸿大北海2#小机", "鸿大北海3#小机", "鸿大北海5#小机", "轮转机", "其他", "共计"};
     private static final String[] MONTHLYMAINTAININGRESULTTYPESVO = {"清洗好可用", "破损", "RMA", "维护中", "小计"};
     private static final String[] MAINTAININGRESULTTYPES = {"可用仓", "破损仓", "RMA", "维护中"};
+    private static String machineType = null;
 
     public MonthlyMachineSprinklerMaintainingDetailSheet(StatisticRepository statisticRepository) {
         this.statisticRepository = statisticRepository;
@@ -27,6 +28,7 @@ public class MonthlyMachineSprinklerMaintainingDetailSheet extends SheetGenerato
 
     @Override
     public void generateSheet(ExcelWriter excelWriter, LocalDate startDate, LocalDate endDate, String machineType) throws ExcelGenerateException {
+        this.machineType = machineType;
         WriteSheet sheet = FastExcel.writerSheet("每月各机台喷头维护明细").head(buildComplexHeader()).build();
         excelWriter.write(calculateMonthlyData(startDate, endDate, machineType), sheet);
     }
@@ -39,7 +41,7 @@ public class MonthlyMachineSprinklerMaintainingDetailSheet extends SheetGenerato
         rowSummary.add(formattedDate);
         rowSummary.add(MONTHLYMAINTAININGRESULTTYPESVO[MONTHLYMAINTAININGRESULTTYPESVO.length - 1]);
 
-        List<MachineEntity> machines = statisticRepository.batchQueryMachineName("samba");
+        List<MachineEntity> machines = statisticRepository.batchQueryMachineName(machineType);
 
         String[] MONTHLYMACHINESPRINKLERMAINTAININGDETAILHEADERS = new String[machines.size() + 2];
         int cnt = 0;
@@ -76,10 +78,10 @@ public class MonthlyMachineSprinklerMaintainingDetailSheet extends SheetGenerato
         Long total = 0L;
         for (int j = 0; j < MONTHLYMACHINESPRINKLERMAINTAININGDETAILHEADERS.length - 1; j++) {
             Long count1 = statisticRepository.batchQueryMachineData6(
-                    startDate, endDate, MONTHLYMACHINESPRINKLERMAINTAININGDETAILHEADERS[j]
+                    startDate, endDate, MONTHLYMACHINESPRINKLERMAINTAININGDETAILHEADERS[j], machineType, Boolean.FALSE
             ).stream().count();
             Long count2 = statisticRepository.batchQuerySprinklerData3(
-                    startDate, endDate, MONTHLYMACHINESPRINKLERMAINTAININGDETAILHEADERS[j]
+                    startDate, endDate, MONTHLYMACHINESPRINKLERMAINTAININGDETAILHEADERS[j], machineType, Boolean.FALSE
             ).stream().count();
             Long value = count1 + count2;
             row.add(value);
@@ -98,7 +100,7 @@ public class MonthlyMachineSprinklerMaintainingDetailSheet extends SheetGenerato
     }
 
     private List<List<String>> buildComplexHeader() {
-        List<MachineEntity> machines = statisticRepository.batchQueryMachineName("samba");
+        List<MachineEntity> machines = statisticRepository.batchQueryMachineName(machineType);
 
         String[] MONTHLYMACHINESPRINKLERMAINTAININGDETAILHEADERSVO = new String[2 + machines.size() + 2];
         MONTHLYMACHINESPRINKLERMAINTAININGDETAILHEADERSVO[0] = "年份月份";

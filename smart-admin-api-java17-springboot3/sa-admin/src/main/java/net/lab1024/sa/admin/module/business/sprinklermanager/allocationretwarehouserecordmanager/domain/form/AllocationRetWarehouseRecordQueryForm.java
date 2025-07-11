@@ -11,6 +11,9 @@ public class AllocationRetWarehouseRecordQueryForm {
     @Schema(description = "领用与返仓表单")
     private List<AllocationRetWarehouseCreateForm> allocationRetWarehouseCreateForm;
 
+    @Schema(description = "标记状态")
+    private Boolean markedFlag;
+
     @Schema(description = "禁用状态")
     private Boolean disabledFlag;
 

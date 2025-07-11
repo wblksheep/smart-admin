@@ -44,7 +44,7 @@ public class StatisticController {
         String watermark = AdminRequestUtil.getRequestUser().getActualName();
         watermark += SmartLocalDateUtil.format(LocalDateTime.now(), SmartDateFormatterEnum.YMD_HMS);
 
-        statisticService.getMonthlySheetStatisticExcelExportData(queryForm.getStartDate(), queryForm.getEndDate(), response, watermark);
+        statisticService.getMonthlySheetStatisticExcelExportData(queryForm.getStartDate(), queryForm.getEndDate(), queryForm.getMachineType(), response, watermark);
 
     }
 
@@ -52,6 +52,6 @@ public class StatisticController {
     @PostMapping("/sprinklermanager/statistic/monthlyStatisticSheetQuery")
     @SaCheckPermission("sprinklermanager:statistic:query")
     public ResponseDTO<List<MonthlyStatisticSheetVO>> monthlyStatisticSheetQuery(@RequestBody @Valid MonthlyStatisticSheetQueryForm queryForm) throws IOException {
-        return statisticService.getMonthlyStatisticSheet(queryForm.getStartDate(), queryForm.getEndDate());
+        return statisticService.getMonthlyStatisticSheet(queryForm.getStartDate(), queryForm.getEndDate(), queryForm.getMachineType());
     }
 }

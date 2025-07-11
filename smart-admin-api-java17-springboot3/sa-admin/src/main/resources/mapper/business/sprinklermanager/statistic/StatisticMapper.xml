@@ -18,10 +18,16 @@
                 AND DATE_FORMAT(ret_warehouse_date, '%Y-%m-%d') >= #{startDate}
             </if>
             <if test="endDate != null">
-                AND DATE_FORMAT(ret_warehouse_date, '%Y-%m-%d') &lt; #{endDate}
+                AND DATE_FORMAT(ret_warehouse_date, '%Y-%m-%d') &lt;= #{endDate}
             </if>
+            <choose>
+                <when test="machineType == 'samba'">
+                    AND t_maintaining_record.sprinkler_serial LIKE '%-%'
+                </when>
+                <when test="machineType == 'se'">
+                    AND t_maintaining_record.sprinkler_serial LIKE '66L%'  <!-- 左前缀匹配 -->
+                </when>
+            </choose>
         </where>
-
-
     </select>
 </mapper>

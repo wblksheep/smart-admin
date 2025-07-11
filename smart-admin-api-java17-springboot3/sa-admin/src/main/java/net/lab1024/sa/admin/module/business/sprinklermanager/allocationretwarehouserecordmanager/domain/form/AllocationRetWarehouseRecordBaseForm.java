@@ -7,6 +7,11 @@ import java.time.LocalDateTime;
 
 @Data
 public class AllocationRetWarehouseRecordBaseForm {
+
+
+    @Schema(description = "标记状态")
+    private Boolean markedFlag;
+
     @Schema(description = "禁用状态")
     private Boolean disabledFlag;
 

@@ -20,14 +20,10 @@ public interface AllocationRetWarehouseRecordDao extends BaseMapper<AllocationRe
     AllocationRetWarehouseRecordVO getDetail(Long recordId, Boolean deletedFlag);
 
     /**
-     * 领用与返仓记录分页查询
-     */
-
-    /**
      * 领用与返仓记录无分页查询
      */
     List<AllocationRetWarehouseRecordVO> queryPageWithoutPage(@Param("queryForm") AllocationRetWarehouseQueryForm queryForm);
 
     @DataScope(dataScopeType = DataScopeTypeEnum.ALLOCATIONRETWAREHOUSERECORD, whereInType = DataScopeWhereInTypeEnum.DEPARTMENT, joinSql = "create_user_id in (#employeeIds)")
-    List<AllocationRetWarehouseRecordVO> queryPage(Page<?> page, @Param("distinctIds") List<Long> distinctIds);
+    List<AllocationRetWarehouseRecordVO> queryPage(Page<?> page, @Param("distinctIds") List<Long> distinctIds, Boolean markedFlag);
 }

@@ -46,11 +46,17 @@ public class AllocationRetWarehouseQueryForm extends PageParam {
     @Schema(description = "返仓原因")
     private String retWarehouseReason;
 
+    @Schema(description = "具体原因")
+    private String retWarehouseRealReason;
+
     @Schema(description = "备注")
     private String note;
 
     @Schema(description = "审核状态")
     private Byte status;
+
+    @Schema(description = "标记状态")
+    private Boolean markedFlag;
 
     @Schema(description = "禁用状态")
     private Boolean disabledFlag;

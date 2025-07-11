@@ -65,6 +65,9 @@ public class AllocationRetWarehouseVO {
     @Schema(description = "返仓原因")
     private String retWarehouseReason;
 
+    @Schema(description = "具体原因")
+    private String retWarehouseRealReason;
+
     @Schema(description = "备注")
     private String note;
 

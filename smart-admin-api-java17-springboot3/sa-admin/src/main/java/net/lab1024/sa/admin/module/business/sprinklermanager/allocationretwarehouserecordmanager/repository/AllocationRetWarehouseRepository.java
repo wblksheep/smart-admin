@@ -2,10 +2,12 @@ package net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwareh
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import jakarta.validation.Valid;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.entity.AllocationRetWarehouseEntity;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseRecordQueryForm;
 //import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseRecordVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.AllocationRetWarehouseQueryForm;
+import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseVO;
 import org.apache.ibatis.annotations.Param;
 
@@ -22,4 +24,6 @@ public interface AllocationRetWarehouseRepository extends IService<AllocationRet
     List<AllocationRetWarehouseEntity> getListByRecordId(@Param("recordId") Long recordId);
 
     List<AllocationRetWarehouseEntity> getListByAllocationRetWarehouseId(@Param("allocationRetWarehouseIds") Set<Long> allocationRetWarehouseIds);
+
+    List<AllocationRetWarehouseExcelVO> getListRetMaintainenceDesc(@Param("queryForm") AllocationRetWarehouseQueryForm queryForm);
 }

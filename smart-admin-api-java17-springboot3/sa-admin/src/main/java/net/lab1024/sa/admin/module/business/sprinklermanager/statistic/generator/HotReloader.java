@@ -12,65 +12,110 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HotReloader {
-    private static final String FILE_PATH = "./config/hello2.json";
+    // 配置文件路径
+    private static final String CONFIG_FILE_PATH = "./config/config.json";
+    // 数据文件路径映射
+    private static final Map<String, String> DATA_FILE_MAP = new HashMap<String, String>() {{
+        put("samba", "./config/hello2.json");
+        put("se", "./config/hello.json");
+    }};
+
     public static Integer[][] MONTHBEGIN;
+    private static volatile String currentDataFilePath; // 当前使用的数据文件路径
 
     // 初始化时加载并启动监听线程
     public static void init() {
-        printResourcePath(); // 新增路径打印
-        loadFile();
+        printResourcePath();
+        loadConfigAndData();
         startFileWatcher();
     }
 
-    // 修改后的文件加载方法
-    private static void loadFile() {
+    // 加载配置并确定数据文件路径
+    private static void loadConfigAndData() {
         try {
-            Path fullPath = Paths.get(System.getProperty("user.dir"), FILE_PATH);
-            System.out.println("正在加载文件: " + fullPath); // 新增加载路径打印
+            // 1. 加载配置文件
+            Path configPath = Paths.get(System.getProperty("user.dir"), CONFIG_FILE_PATH);
+            System.out.println("正在加载配置文件: " + configPath);
 
-            try (InputStream is = Files.newInputStream(fullPath)) {
-                MONTHBEGIN = loadFromJson(is);
-                System.out.println("文件已重新加载");
+            MachineTypeConfig config;
+            try (InputStream is = Files.newInputStream(configPath)) {
+                config = loadConfigFromJson(is);
             }
+
+            // 2. 确定数据文件路径
+            String machineType = config.getMachinetype().getOn();
+            currentDataFilePath = DATA_FILE_MAP.getOrDefault(machineType, DATA_FILE_MAP.get("se"));
+            System.out.println("当前机器类型: " + machineType + ", 使用数据文件: " + currentDataFilePath);
+
+            // 3. 加载数据文件
+            Path dataPath = Paths.get(System.getProperty("user.dir"), currentDataFilePath);
+            System.out.println("正在加载数据文件: " + dataPath);
+
+            try (InputStream dataIs = Files.newInputStream(dataPath)) {
+                MONTHBEGIN = loadFromJson(dataIs);
+            }
+            System.out.println("数据文件已加载");
+
         } catch (Exception e) {
             System.err.println("加载失败: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    // 新增方法：打印资源路径信息
-    private static void printResourcePath() {
-        try {
-            // 获取 JAR 运行目录
-            String jarDir = System.getProperty("user.dir");
-            System.out.println("JAR运行目录: " + jarDir);
-
-            // 构建完整资源路径
-            Path fullPath = Paths.get(jarDir, FILE_PATH).toAbsolutePath();
-            System.out.println("配置文件完整路径: " + fullPath);
-
-            // 验证文件是否存在
-            if (!Files.exists(fullPath)) {
-                System.err.println("警告: 配置文件不存在于上述路径");
-            }
-        } catch (Exception e) {
-            System.err.println("路径打印失败: " + e.getMessage());
+    // 配置文件JSON解析
+    private static MachineTypeConfig loadConfigFromJson(InputStream is) throws IOException {
+        try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+            Gson gson = new Gson();
+            return gson.fromJson(reader, MachineTypeConfig.class);
+        } catch (JsonSyntaxException | JsonIOException e) {
+            throw new IOException("JSON解析失败: " + e.getMessage(), e);
         }
     }
 
+    // 数据文件JSON解析
+    public static Integer[][] loadFromJson(InputStream is) throws IOException {
+        try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+            Gson gson = new Gson();
+            Type arrayType = new TypeToken<Integer[][]>() {}.getType();
+            return gson.fromJson(reader, arrayType);
+        } catch (JsonSyntaxException | JsonIOException e) {
+            throw new IOException("JSON解析失败: " + e.getMessage(), e);
+        }
+    }
+
+    // 文件监听逻辑
     private static void startFileWatcher() {
         new Thread(() -> {
             try {
                 WatchService watchService = FileSystems.getDefault().newWatchService();
-                Paths.get(FILE_PATH).getParent().register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+                Path configDir = Paths.get(CONFIG_FILE_PATH).getParent();
+                configDir.register(watchService,
+                        StandardWatchEventKinds.ENTRY_MODIFY,
+                        StandardWatchEventKinds.ENTRY_CREATE);
 
                 while (true) {
                     WatchKey key = watchService.take();
                     for (WatchEvent<?> event : key.pollEvents()) {
-                        if (event.context().toString().equals(Paths.get(FILE_PATH).getFileName().toString())) {
-                            loadFile(); // 文件修改时触发重新加载
+                        String changedFile = event.context().toString();
+
+                        // 1. 配置文件修改时重新加载所有配置
+                        if (changedFile.equals(Paths.get(CONFIG_FILE_PATH).getFileName().toString())) {
+                            System.out.println("配置文件修改，重新加载配置...");
+                            loadConfigAndData();
+                        }
+                        // 2. 当前使用的数据文件修改时重新加载数据
+                        else if (currentDataFilePath != null &&
+                                changedFile.equals(Paths.get(currentDataFilePath).getFileName().toString())) {
+                            System.out.println("数据文件修改，重新加载数据...");
+                            Path dataPath = Paths.get(System.getProperty("user.dir"), currentDataFilePath);
+                            try (InputStream dataIs = Files.newInputStream(dataPath)) {
+                                MONTHBEGIN = loadFromJson(dataIs);
+                                System.out.println("数据文件已重新加载");
+                            }
                         }
                     }
                     key.reset();
@@ -81,13 +126,31 @@ public class HotReloader {
         }).start();
     }
 
-    public static Integer[][] loadFromJson(InputStream is) throws IOException {
-        try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-            Gson gson = new Gson();
-            Type arrayType = new TypeToken<Integer[][]>() {}.getType();
-            return gson.fromJson(reader, arrayType);
-        } catch (JsonSyntaxException | JsonIOException e) {
-            throw new IOException("JSON解析失败: " + e.getMessage(), e);
+    // 打印路径信息（保留原逻辑）
+    private static void printResourcePath() {
+        try {
+            String jarDir = System.getProperty("user.dir");
+            System.out.println("JAR运行目录: " + jarDir);
+
+            Path configPath = Paths.get(jarDir, CONFIG_FILE_PATH).toAbsolutePath();
+            System.out.println("配置文件完整路径: " + configPath);
+
+            if (!Files.exists(configPath)) {
+                System.err.println("警告: 配置文件不存在于上述路径");
+            }
+        } catch (Exception e) {
+            System.err.println("路径打印失败: " + e.getMessage());
         }
+    }
+
+    // 配置类定义
+    @Data
+    static class MachineTypeConfig {
+        private MachineType machinetype;
+    }
+
+    @Data
+    static class MachineType {
+        private String on;
     }
 }

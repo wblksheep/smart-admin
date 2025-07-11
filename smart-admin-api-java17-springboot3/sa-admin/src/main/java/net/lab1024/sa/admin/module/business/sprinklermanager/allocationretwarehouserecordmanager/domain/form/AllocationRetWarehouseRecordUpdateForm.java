@@ -15,7 +15,6 @@ public class AllocationRetWarehouseRecordUpdateForm extends AllocationRetWarehou
     private Long recordId;
 
     @Schema(description = "领用与返仓表单")
-    @Valid
     private List<AllocationRetWarehouseUpdateForm> allocationRetWarehouseUpdateForm;
 
 }

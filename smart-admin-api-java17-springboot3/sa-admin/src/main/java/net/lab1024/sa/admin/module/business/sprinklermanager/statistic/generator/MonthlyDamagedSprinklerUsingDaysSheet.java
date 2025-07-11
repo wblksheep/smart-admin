@@ -33,7 +33,7 @@ public class MonthlyDamagedSprinklerUsingDaysSheet extends SheetGenerator {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月");
         String formattedDate = startDate.format(formatter);
         List<List<Object>> data = new ArrayList<>();
-        List<MonthlyDamagedSprinklerUsingDaysVO> queryVOs = statisticRepository.listByRetDamagedAndDate(startDate, endDate);
+        List<MonthlyDamagedSprinklerUsingDaysVO> queryVOs = statisticRepository.listByRetDamagedAndDate(startDate, endDate, machineType, Boolean.FALSE);
         for (int i = 0; i < queryVOs.size(); i++) {
             List<Object> row = new ArrayList<>();
             row.add(formattedDate);

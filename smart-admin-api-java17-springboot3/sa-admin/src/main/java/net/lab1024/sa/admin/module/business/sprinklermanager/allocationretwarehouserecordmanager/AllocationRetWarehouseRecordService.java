@@ -9,6 +9,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwareho
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.entity.AllocationRetWarehouseEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.entity.AllocationRetWarehouseRecordEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.form.*;
+import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseExcelVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseRecordVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.domain.vo.AllocationRetWarehouseVO;
 import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwarehouserecordmanager.repository.AllocationRetWarehouseRecordRepository;
@@ -16,8 +17,6 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.allocationretwareho
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.repository.SprinklerRepository;
 import net.lab1024.sa.admin.module.system.role.dao.RoleEmployeeDao;
-import net.lab1024.sa.admin.module.system.role.domain.entity.RoleEmployeeEntity;
-import net.lab1024.sa.admin.module.system.role.domain.vo.RoleVO;
 import net.lab1024.sa.base.common.domain.PageResult;
 import net.lab1024.sa.base.common.domain.RequestUser;
 import net.lab1024.sa.base.common.domain.ResponseDTO;
@@ -168,67 +167,70 @@ public class AllocationRetWarehouseRecordService {
         if (Objects.isNull(recordDetail) || recordDetail.getDeletedFlag()) {
             return ResponseDTO.userErrorParam("领用与返仓记录不存在");
         }
-        List<AllocationRetWarehouseUpdateForm> updateVOs = updateVO.getAllocationRetWarehouseUpdateForm();
-        // 0.1. 提取需要校验的领用与返仓信息ID
-        Set<Long> idsToCheck = updateVOs.stream()
-                .map(AllocationRetWarehouseUpdateForm::getAllocationRetWarehouseId)
-                .collect(Collectors.toSet());
-        // 0.2. 批量查询数据库（避免N+1问题）
-        Map<Long, AllocationRetWarehouseEntity> allocationRetWarehouseEntityMap = allocationRetWarehouseRepository.getListByAllocationRetWarehouseId(idsToCheck)
-                .stream()
-                .collect(Collectors.toMap(AllocationRetWarehouseEntity::getAllocationRetWarehouseId, Function.identity()));
-        // 0.3. 有效性校验
-        if (idsToCheck.size() > allocationRetWarehouseEntityMap.size()) {
-            Set<Long> missingIds = new HashSet<>(idsToCheck);
-            missingIds.removeAll(allocationRetWarehouseEntityMap.keySet());
-            return ResponseDTO.userErrorParam("领用与返仓信息不存在:" + missingIds);
-        }
-        // 1.1. 提取需要校验的领用喷头序列号
-        Set<String> serialsToCheck = updateVOs.stream()
-                .map(AllocationRetWarehouseUpdateForm::getAllocateSprinklerSerial)
-                .filter(StringUtils::isNotBlank)
-                .collect(Collectors.toSet());
-        // 1.2. 批量查询数据库（避免N+1问题）
-        Map<String, SprinklerEntity> sprinklerMap = sprinklerRepository.getListBySprinklerSerials(new ArrayList<>(serialsToCheck))
-                .stream()
-                .collect(Collectors.toMap(SprinklerEntity::getSprinklerSerial, Function.identity()));
-
-        // 1.3. 有效性校验
-        if (serialsToCheck.size() > sprinklerMap.size()) {
-            Set<String> missingSerials = new HashSet<>(serialsToCheck);
-            missingSerials.removeAll(sprinklerMap.keySet());
-            return ResponseDTO.userErrorParam("领用喷头不存在:" + String.join(",", missingSerials));
-        }
-
-        // 2.1. 提取需要校验的返仓喷头序列号
-        Set<String> retWarehouseSerialsToCheck = updateVOs.stream()
-                .map(AllocationRetWarehouseUpdateForm::getRetWarehouseSprinklerSerial)
-                .filter(StringUtils::isNotBlank)
-                .collect(Collectors.toSet());
-        // 2.2. 批量查询数据库（避免N+1问题）
-        Map<String, SprinklerEntity> retWarehouseSprinklerMap = sprinklerRepository.getListBySprinklerSerials(new ArrayList<>(retWarehouseSerialsToCheck))
-                .stream()
-                .collect(Collectors.toMap(SprinklerEntity::getSprinklerSerial, Function.identity()));
-        // 2.3. 有效性校验
-        if (retWarehouseSerialsToCheck.size() > retWarehouseSprinklerMap.size()) {
-            Set<String> missingSerials = new HashSet<>(retWarehouseSerialsToCheck);
-            missingSerials.removeAll(retWarehouseSprinklerMap.keySet());
-            return ResponseDTO.userErrorParam("返仓喷头不存在:" + String.join(",", missingSerials));
-        }
-
-        RequestUser requestUser = SmartRequestUtil.getRequestUser();
-
         // 数据编辑
         AllocationRetWarehouseRecordEntity updateEntity = SmartBeanUtil.copy(recordDetail, AllocationRetWarehouseRecordEntity.class);
         SmartBeanUtil.copyProperties(updateVO, updateEntity);
         allocationRetWarehouseRecordRepository.updateById(updateEntity);
+        List<AllocationRetWarehouseUpdateForm> updateVOs = updateVO.getAllocationRetWarehouseUpdateForm();
+        if (updateVOs != null) {
 
-        // 使用 Stream API 的 map 操作进行数据转换，并通过 collect 直接生成列表
-        List<AllocationRetWarehouseEntity> updateAllocationRetWarehouseEntities = updateVOs.stream()
-                .map(form -> convertToEntity(form, sprinklerMap, retWarehouseSprinklerMap))
-                .collect(Collectors.toList());
+            // 0.1. 提取需要校验的领用与返仓信息ID
+            Set<Long> idsToCheck = updateVOs.stream()
+                    .map(AllocationRetWarehouseUpdateForm::getAllocationRetWarehouseId)
+                    .collect(Collectors.toSet());
+            // 0.2. 批量查询数据库（避免N+1问题）
+            Map<Long, AllocationRetWarehouseEntity> allocationRetWarehouseEntityMap = allocationRetWarehouseRepository.getListByAllocationRetWarehouseId(idsToCheck)
+                    .stream()
+                    .collect(Collectors.toMap(AllocationRetWarehouseEntity::getAllocationRetWarehouseId, Function.identity()));
+            // 0.3. 有效性校验
+            if (idsToCheck.size() > allocationRetWarehouseEntityMap.size()) {
+                Set<Long> missingIds = new HashSet<>(idsToCheck);
+                missingIds.removeAll(allocationRetWarehouseEntityMap.keySet());
+                return ResponseDTO.userErrorParam("领用与返仓信息不存在:" + missingIds);
+            }
+            // 1.1. 提取需要校验的领用喷头序列号
+            Set<String> serialsToCheck = updateVOs.stream()
+                    .map(AllocationRetWarehouseUpdateForm::getAllocateSprinklerSerial)
+                    .filter(StringUtils::isNotBlank)
+                    .collect(Collectors.toSet());
+            // 1.2. 批量查询数据库（避免N+1问题）
+            Map<String, SprinklerEntity> sprinklerMap = sprinklerRepository.getListBySprinklerSerials(new ArrayList<>(serialsToCheck))
+                    .stream()
+                    .collect(Collectors.toMap(SprinklerEntity::getSprinklerSerial, Function.identity()));
 
-        allocationRetWarehouseRepository.updateBatchById(updateAllocationRetWarehouseEntities);
+            // 1.3. 有效性校验
+            if (serialsToCheck.size() > sprinklerMap.size()) {
+                Set<String> missingSerials = new HashSet<>(serialsToCheck);
+                missingSerials.removeAll(sprinklerMap.keySet());
+                return ResponseDTO.userErrorParam("领用喷头不存在:" + String.join(",", missingSerials));
+            }
+
+            // 2.1. 提取需要校验的返仓喷头序列号
+            Set<String> retWarehouseSerialsToCheck = updateVOs.stream()
+                    .map(AllocationRetWarehouseUpdateForm::getRetWarehouseSprinklerSerial)
+                    .filter(StringUtils::isNotBlank)
+                    .collect(Collectors.toSet());
+            // 2.2. 批量查询数据库（避免N+1问题）
+            Map<String, SprinklerEntity> retWarehouseSprinklerMap = sprinklerRepository.getListBySprinklerSerials(new ArrayList<>(retWarehouseSerialsToCheck))
+                    .stream()
+                    .collect(Collectors.toMap(SprinklerEntity::getSprinklerSerial, Function.identity()));
+            // 2.3. 有效性校验
+            if (retWarehouseSerialsToCheck.size() > retWarehouseSprinklerMap.size()) {
+                Set<String> missingSerials = new HashSet<>(retWarehouseSerialsToCheck);
+                missingSerials.removeAll(retWarehouseSprinklerMap.keySet());
+                return ResponseDTO.userErrorParam("返仓喷头不存在:" + String.join(",", missingSerials));
+            }
+
+            RequestUser requestUser = SmartRequestUtil.getRequestUser();
+
+
+            // 使用 Stream API 的 map 操作进行数据转换，并通过 collect 直接生成列表
+            List<AllocationRetWarehouseEntity> updateAllocationRetWarehouseEntities = updateVOs.stream()
+                    .map(form -> convertToEntity(form, sprinklerMap, retWarehouseSprinklerMap))
+                    .collect(Collectors.toList());
+
+            allocationRetWarehouseRepository.updateBatchById(updateAllocationRetWarehouseEntities);
+        }
         return ResponseDTO.ok();
     }
 
@@ -273,4 +275,29 @@ public class AllocationRetWarehouseRecordService {
     }
 
 
+    /*
+     * 导出领用与返仓表
+     * */
+    public List<AllocationRetWarehouseExcelVO> getAllocationRetWarehouseRecordExcelExportData(@Valid AllocationRetWarehouseQueryForm queryForm) {
+        queryForm.setDeletedFlag(Boolean.FALSE);
+        List<AllocationRetWarehouseExcelVO> allocationRetWarehouseExcelVOList = allocationRetWarehouseRepository.getListRetMaintainenceDesc(queryForm);
+        return allocationRetWarehouseExcelVOList;
+    }
+
+
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseDTO<String> deleteAllocationRetWarehouseRecord(Long recordId) {
+        AllocationRetWarehouseRecordEntity records = allocationRetWarehouseRecordRepository.getById(recordId);
+        if (Objects.isNull(records) || records.getDeletedFlag()) {
+            return ResponseDTO.userErrorParam("记录不存在");
+        }
+        List<AllocationRetWarehouseEntity> recordList = allocationRetWarehouseRepository.getListByRecordId(recordId);
+        for (AllocationRetWarehouseEntity record : recordList) {
+            record.setDeletedFlag(true);
+            allocationRetWarehouseRepository.updateById(record);
+        }
+        records.setDeletedFlag(true);
+        allocationRetWarehouseRecordRepository.updateById(records);
+        return ResponseDTO.ok();
+    }
 }
