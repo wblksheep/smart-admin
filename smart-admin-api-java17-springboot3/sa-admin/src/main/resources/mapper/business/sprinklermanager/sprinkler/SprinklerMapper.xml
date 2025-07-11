@@ -210,6 +210,101 @@
             </foreach>
         </if>
     </select>
+    <select id="getList"
+            resultType="net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo.SprinklerVO">
+        SELECT t_sprinkler.*
+        FROM t_sprinkler
+        <where>
+            deleted_flag = #{queryForm.deletedFlag}
+            <if test="queryForm.purchaseDateContractNumber != null and queryForm.purchaseDateContractNumber != ''">
+                AND INSTR(purchase_date_contract_number,#{queryForm.purchaseDateContractNumber})
+            </if>
+            <if test="queryForm.sprinklerModel != null and queryForm.sprinklerModel != ''">
+                AND INSTR(sprinkler_model,#{queryForm.sprinklerModel})
+            </if>
+            <if test="queryForm.sprinklerSerial != null and queryForm.sprinklerSerial != ''">
+                AND INSTR(sprinkler_serial,#{queryForm.sprinklerSerial})
+            </if>
+            <if test="queryForm.shippingDateStartTime != null">
+                AND DATE_FORMAT(shipping_date, '%Y-%m-%d') &gt;= #{queryForm.shippingDateStartTime}
+            </if>
+            <if test="queryForm.shippingDateEndTime != null">
+                AND DATE_FORMAT(shipping_date, '%Y-%m-%d') &lt;= #{queryForm.shippingDateEndTime}
+            </if>
+            <if test="queryForm.warehouseDateStartTime != null">
+                AND DATE_FORMAT(warehouse_date, '%Y-%m-%d') &gt;= #{queryForm.warehouseDateStartTime}
+            </if>
+            <if test="queryForm.warehouseDateEndTime != null">
+                AND DATE_FORMAT(warehouse_date, '%Y-%m-%d') &lt;= #{queryForm.warehouseDateEndTime}
+            </if>
+            <if test="queryForm.allocateDateStartTime != null">
+                AND DATE_FORMAT(allocate_date, '%Y-%m-%d') &gt;= #{queryForm.allocateDateStartTime}
+            </if>
+            <if test="queryForm.allocateDateEndTime != null">
+                AND DATE_FORMAT(allocate_date, '%Y-%m-%d') &lt;= #{queryForm.allocateDateEndTime}
+            </if>
+            <if test="queryForm.allocateUser != null and queryForm.allocateUser != ''">
+                AND INSTR(allocate_user,#{queryForm.allocateUser})
+            </if>
+            <if test="queryForm.allocatePurpose != null and queryForm.allocatePurpose != ''">
+                AND INSTR(allocate_purpose,#{queryForm.allocatePurpose})
+            </if>
+            <if test="queryForm.allocatePosition != null and queryForm.allocatePosition != ''">
+                AND INSTR(allocate_position,#{queryForm.allocatePosition})
+            </if>
+            <if test="queryForm.history != null and queryForm.history != ''">
+                AND INSTR(history,#{queryForm.history})
+            </if>
+            <if test="queryForm.status != null">
+                AND status = #{queryForm.status}
+            </if>
+            <if test="queryForm.isNew != null">
+                AND is_new = #{queryForm.isNew}
+            </if>
+            <if test="queryForm.sprinklerDetail != null and queryForm.sprinklerDetail != ''">
+                AND INSTR(sprinkler_detail,#{queryForm.sprinklerDetail})
+            </if>
+            <if test="queryForm.disabledFlag != null">
+                AND disabled_flag = #{queryForm.disabledFlag}
+            </if>
+        </where>
+        <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
+            ORDER BY create_time DESC
+        </if>
+        <if test="queryForm.sortItemList != null and !queryForm.sortItemList.isEmpty()">
+            ORDER BY
+            <foreach collection="queryForm.sortItemList" item="sortItem" separator=",">
+                <choose>
+                    <!-- 特殊处理颜色位置排序 -->
+                    <when test="sortItem.column == 'allocate_position'">
+                        CASE
+                        WHEN LEFT(allocate_position, 2) = 'LK' THEN 7
+                        WHEN LEFT(allocate_position, 1) = 'K' THEN 1
+                        WHEN LEFT(allocate_position, 1) = 'C' THEN 2
+                        WHEN LEFT(allocate_position, 1) = 'M' THEN 3
+                        WHEN LEFT(allocate_position, 1) = 'Y' THEN 4
+                        WHEN LEFT(allocate_position, 1) = 'O' THEN 5
+                        WHEN LEFT(allocate_position, 1) = 'B' THEN 6
+                        WHEN LEFT(allocate_position, 1) = 'R' THEN 8
+                        ELSE 0 -- 显式处理未匹配情况
+                        END,
+                        CAST(REGEXP_REPLACE(allocate_position, '[^0-9]', '') AS UNSIGNED) ${sortItem.isAsc ? 'ASC' : 'DESC'}
+                    </when>
+                    <!-- 特殊处理喷头序列号排序 -->
+                    <when test="sortItem.column == 'sprinkler_serial'">
+                        CASE WHEN sprinkler_serial REGEXP '^\\w{6}-\\d{2}$' THEN 0 ELSE 1 END ${sortItem.isAsc ? 'ASC' : 'DESC'},
+                        SUBSTRING(sprinkler_serial, 1, 6) ${sortItem.isAsc ? 'ASC' : 'DESC'},
+                        CAST(SUBSTRING(sprinkler_serial, 8, 2) AS UNSIGNED) ${sortItem.isAsc ? 'ASC' : 'DESC'}
+                    </when>
+                    <!-- 其他字段常规排序 -->
+                    <otherwise>
+                        <!-- 安全处理字段名防止SQL注入 -->
+                        `${sortItem.column}` ${sortItem.isAsc ? 'ASC' : 'DESC'}
+                    </otherwise>
+                </choose>
+            </foreach>
+        </if>
+    </select>
 
     <update id="deleteSprinkler">
         UPDATE t_sprinkler

@@ -47,8 +47,8 @@ public class SprinklerController {
     @Operation(summary = "分页查询全部喷头模块 @author 芦苇")
     @PostMapping("/sprinklermanager/sprinkler/page/query")
     @SaCheckPermission("sprinklermanager:sprinkler:query")
-    public ResponseDTO<PageResult<SprinklerVO>> queryByPage(@RequestBody @Valid SprinklerQueryForm queryForm) {
-        return sprinklerService.queryByPage(queryForm);
+    public ResponseDTO<PageResult<SprinklerVO>> queryByPage(@RequestBody @Valid SprinklerQueryFormList queryFormList) {
+        return sprinklerService.queryByPage(queryFormList);
     }
 
     @Operation(summary = "分页查询各仓喷头模块 @author 芦苇")

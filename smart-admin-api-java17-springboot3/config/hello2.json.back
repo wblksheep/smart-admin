@@ -1,28 +1,51 @@
-[
-    [13,9,20,2,9,2,10,0,8,1,0,8,20,102],
-    [5,3,8,7,9,0,6,0,3,0,0,4,20,65],
-    [8,5,22,1,8,1,7,0,6,0,0,4,20,82]
-,
-    [11,11,11,3,9,1,10,0,3,1,0,3,20,83]
-]
-
 {
   "pageNum": 1,
   "pageSize": 10,
-  "allocateSprinklerSerial": null,
-  "allocateSprinklerModel": null,
-  "allocatePurpose": null,
-  "allocateColor": null,
-  "allocatePosition": null,
-  "allocateSprinklerIsNew": null,
-  "retWarehouseSprinklerSerial": null,
-  "retWarehouseSprinklerModel": null,
-  "retWarehouseMachine": null,
-  "retWarehouseColor": null,
-  "retWarehousePosition": null,
-  "retWarehouseSprinklerIsNew": null,
-  "retWarehouseReason": null,
-  "note": null,
-  "status": null,
-  "disabledFlag": null
+  "searchCount": true,
+  "sortItemList": [
+    {
+      "isAsc": true,
+      "column": "string"
+    }
+  ],
+  "queryFormList": [
+    {
+      "purchaseDateContractNumber": null,
+      "sprinklerModel": null,
+      "sprinklerSerial": null,
+      "shippingDateStartTime": null,
+      "shippingDateEndTime": null,
+      "warehouseDateStartTime": null,
+      "warehouseDateEndTime": null,
+      "allocateDateStartTime": null,
+      "allocateDateEndTime": null,
+      "allocateUser": null,
+      "allocatePurpose": null,
+      "allocatePosition": null,
+      "history": null,
+      "status": null,
+      "isNew": null,
+      "sprinklerDetail": null,
+      "disabledFlag": null
+    },
+    {
+      "purchaseDateContractNumber": null,
+      "sprinklerModel": null,
+      "sprinklerSerial": null,
+      "shippingDateStartTime": null,
+      "shippingDateEndTime": null,
+      "warehouseDateStartTime": null,
+      "warehouseDateEndTime": null,
+      "allocateDateStartTime": null,
+      "allocateDateEndTime": null,
+      "allocateUser": null,
+      "allocatePurpose": null,
+      "allocatePosition": null,
+      "history": null,
+      "status": null,
+      "isNew": null,
+      "sprinklerDetail": null,
+      "disabledFlag": null
+    }
+  ]
 }

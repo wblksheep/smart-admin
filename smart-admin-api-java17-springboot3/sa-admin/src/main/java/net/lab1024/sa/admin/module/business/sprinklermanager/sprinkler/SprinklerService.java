@@ -6,7 +6,6 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.lab1024.sa.admin.module.business.oa.enterprise.dao.EnterpriseDao;
-import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeChineseEnum;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.constant.RepositorySprinklerTypeEnum;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.UsableSprinklerEntity;
@@ -77,10 +76,20 @@ public class SprinklerService {
     /**
      * 分页查询全部喷头模块
      */
-    public ResponseDTO<PageResult<SprinklerVO>> queryByPage(SprinklerQueryForm queryForm) {
-        queryForm.setDeletedFlag(Boolean.FALSE);
-        Page<?> page = SmartPageUtil.convert2PageQueryBySprinklerSerial(queryForm);
-        List<SprinklerVO> sprinklerList = sprinklerRepository.getListByQueryPage(page, queryForm);
+    public ResponseDTO<PageResult<SprinklerVO>> queryByPage(@Valid SprinklerQueryFormList queryFormList) {
+        List<SprinklerQueryForm> queryForms = queryFormList.getQueryFormList();
+//        Page<?> page = SmartPageUtil.convert2PageQueryBySprinklerSerial(queryForm);
+        List<SprinklerVO> sprinklerList = new ArrayList<>();
+        if (queryForms != null) {
+//            List<List<SprinklerVO>> sprinklerList = new ArrayList<>();
+
+            for (SprinklerQueryForm queryForm : queryForms) {
+                queryForm.setDeletedFlag(Boolean.FALSE);
+                sprinklerList.addAll(sprinklerRepository.getList(queryForm));
+            }
+        }
+        Page<?> page = SmartPageUtil.convert2PageQueryBySprinklerSerial(queryFormList);
+        page.setTotal(sprinklerList.size());
         PageResult<SprinklerVO> pageResult = SmartPageUtil.convert2PageResult(page, sprinklerList);
         return ResponseDTO.ok(pageResult);
     }

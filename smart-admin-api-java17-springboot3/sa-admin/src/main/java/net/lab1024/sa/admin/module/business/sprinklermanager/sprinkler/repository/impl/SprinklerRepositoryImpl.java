@@ -56,4 +56,9 @@ public class SprinklerRepositoryImpl extends ServiceImpl<SprinklerDao, Sprinkler
         return this.getBaseMapper().selectOne(lqw);
     }
 
+    @Override
+    public List<SprinklerVO> getList(SprinklerQueryForm queryForm) {
+        return this.getBaseMapper().getList(queryForm);
+    }
+
 }

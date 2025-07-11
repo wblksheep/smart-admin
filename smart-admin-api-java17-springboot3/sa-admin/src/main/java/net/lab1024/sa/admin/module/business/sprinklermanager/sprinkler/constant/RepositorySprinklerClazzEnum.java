@@ -4,10 +4,10 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.fo
 
 public enum RepositorySprinklerClazzEnum {
     USABLE(0, UsableSprinklerImportForm.class),
-    MACHINE(1, MachineSprinklerImportForm.class),
-    MAINTAINING(2, MaintainingSprinklerImportForm.class),
-    DAMAGED(3, DamagedSprinklerImportForm.class),
-    RMA(4, RmaSprinklerImportForm.class),
+//    MACHINE(1, MachineSprinklerImportForm.class),
+//    MAINTAINING(2, MaintainingSprinklerImportForm.class),
+//    DAMAGED(3, DamagedSprinklerImportForm.class),
+//    RMA(4, RmaSprinklerImportForm.class),
     ;
 
     private final int code;

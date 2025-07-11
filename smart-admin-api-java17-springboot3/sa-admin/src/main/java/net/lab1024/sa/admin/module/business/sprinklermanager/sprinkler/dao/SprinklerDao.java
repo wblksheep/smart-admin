@@ -50,6 +50,8 @@ public interface SprinklerDao extends BaseMapper<SprinklerEntity> {
 
     List<SprinklerExcelVO> selectExcelExportData(@Param("queryForm") SprinklerQueryForm queryForm);
 
+    List<SprinklerVO> getList(@Param("queryForm") SprinklerQueryForm queryForm);
+
 //    /**
 //     * 查询导出的数据
 //     *

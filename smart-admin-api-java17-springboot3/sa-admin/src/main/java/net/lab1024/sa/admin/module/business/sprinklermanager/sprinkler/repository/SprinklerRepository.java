@@ -11,6 +11,7 @@ import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.vo
 import org.apache.ibatis.annotations.Param;
 import org.hibernate.validator.constraints.Length;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface SprinklerRepository extends IService<SprinklerEntity> {
@@ -20,7 +21,9 @@ public interface SprinklerRepository extends IService<SprinklerEntity> {
 
     List<SprinklerExcelVO> selectSprinklerExcelExportData(@Param("queryForm") SprinklerQueryForm queryForm);
 
-    SprinklerEntity queryBySprinklerSerial(@Param("sprinklerSerial") String sprinklerSerial,@Param("excludeSprinklerId") Long sprinklerId, Boolean deletedFlag);
+    SprinklerEntity queryBySprinklerSerial(@Param("sprinklerSerial") String sprinklerSerial, @Param("excludeSprinklerId") Long sprinklerId, Boolean deletedFlag);
 
     SprinklerEntity getBySprinklerSerial(String sprinklerSerial);
+
+    List<SprinklerVO> getList(@Param("queryForm") SprinklerQueryForm queryForm);
 }
