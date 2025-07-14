@@ -16,7 +16,8 @@ import org.hibernate.validator.constraints.Length;
         @JsonSubTypes.Type(value = MachineSprinklerUpdateForm.class, name = "MACHINE_REPOSITORY"),
         @JsonSubTypes.Type(value = MaintainingSprinklerUpdateForm.class, name = "MAINTAINING_REPOSITORY"),
         @JsonSubTypes.Type(value = DamagedSprinklerUpdateForm.class, name = "DAMAGED_REPOSITORY"),
-        @JsonSubTypes.Type(value = RmaSprinklerUpdateForm.class, name = "RMA_REPOSITORY")
+        @JsonSubTypes.Type(value = RmaSprinklerUpdateForm.class, name = "RMA_REPOSITORY"),
+        @JsonSubTypes.Type(value = AllocatingSprinlerUpdateForm.class, name = "ALLOCATING_REPOSITORY")
 })
 @Data
 public abstract class BaseUpdateForm {

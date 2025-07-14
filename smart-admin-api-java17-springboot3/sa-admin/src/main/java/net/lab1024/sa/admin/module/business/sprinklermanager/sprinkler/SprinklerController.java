@@ -119,7 +119,7 @@ public class SprinklerController {
     @Operation(summary = "编辑各仓喷头 @author 芦苇")
     @PostMapping("/sprinklermanager/repositorysprinkler/update")
     @SaCheckPermission("sprinklermanager:repositorysprinkler:update")
-    public ResponseDTO<String> updateSprinkler(@RequestBody @Valid BaseUpdateForm updateVO, @RequestParam @Valid @Min(0) @Max(4) Byte type) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, NoSuchFieldException {
+    public ResponseDTO<String> updateSprinkler(@RequestBody @Valid BaseUpdateForm updateVO, @RequestParam @Valid @Min(0) @Max(5) Byte type) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, NoSuchFieldException {
         RequestUser requestUser = SmartRequestUtil.getRequestUser();
         updateVO.setCreateUserId(requestUser.getUserId());
         updateVO.setCreateUserName(requestUser.getUserName());

@@ -38,7 +38,7 @@
                 AND INSTR(t_maintaining_sprinkler.customer,#{joinForm.customer})
             </if>
             <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
-                ORDER BY t_sprinkler.create_time DESC
+                ORDER BY t_maintaining_sprinkler.ret_maintainence_date DESC
             </if>
         </where>
     </select>
@@ -79,7 +79,7 @@
                 AND INSTR(t_maintaining_sprinkler.customer,#{joinForm.customer})
             </if>
             <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
-                ORDER BY t_sprinkler.create_time DESC
+                ORDER BY t_maintaining_sprinkler.ret_maintainence_date DESC
             </if>
         </where>
     </select>

@@ -38,7 +38,7 @@
                 AND INSTR(t_damaged_sprinkler.real_damaged_reason,#{joinForm.realDamagedReason})
             </if>
             <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
-                ORDER BY t_sprinkler.create_time DESC
+                ORDER BY t_damaged_sprinkler.ret_warehouse_date DESC
             </if>
         </where>
     </select>
@@ -79,7 +79,7 @@
                 AND INSTR(t_damaged_sprinkler.real_damaged_reason,#{joinForm.realDamagedReason})
             </if>
             <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
-                ORDER BY t_sprinkler.create_time DESC
+                ORDER BY t_damaged_sprinkler.ret_warehouse_date DESC
             </if>
         </where>
     </select>

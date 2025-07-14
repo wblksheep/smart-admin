@@ -33,10 +33,10 @@
                 AND INSTR(t_rma_sprinkler.ret_maintainence_reason,#{joinForm.retMaintainenceReason})
             </if>
             <if test="joinForm.retWarehouseDateStartTime != null">
-                AND DATE_FORMAT(t_rma_sprinkler.ret_maintainence_date, '%Y-%m-%d') &gt;= #{joinForm.retWarehouseDateStartTime}
+                AND DATE_FORMAT(t_rma_sprinkler.ret_warehouse_date, '%Y-%m-%d') &gt;= #{joinForm.retWarehouseDateStartTime}
             </if>
             <if test="joinForm.retWarehouseDateEndTime != null">
-                AND DATE_FORMAT(t_rma_sprinkler.ret_maintainence_date, '%Y-%m-%d') &lt;= #{joinForm.retWarehouseDateEndTime}
+                AND DATE_FORMAT(t_rma_sprinkler.ret_warehouse_date, '%Y-%m-%d') &lt;= #{joinForm.retWarehouseDateEndTime}
             </if>
             <if test="joinForm.customer != null and joinForm.customer != ''">
                 AND INSTR(t_rma_sprinkler.customer,#{joinForm.customer})
@@ -48,7 +48,7 @@
                 AND INSTR(t_rma_sprinkler.warehouse_check,#{joinForm.warehouseCheck})
             </if>
             <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
-                ORDER BY t_sprinkler.create_time DESC
+                ORDER BY t_rma_sprinkler.ret_warehouse_date DESC
             </if>
         </where>
     </select>
@@ -84,10 +84,10 @@
                 AND INSTR(t_rma_sprinkler.ret_maintainence_reason,#{joinForm.retMaintainenceReason})
             </if>
             <if test="joinForm.retWarehouseDateStartTime != null">
-                AND DATE_FORMAT(t_rma_sprinkler.ret_maintainence_date, '%Y-%m-%d') &gt;= #{joinForm.retWarehouseDateStartTime}
+                AND DATE_FORMAT(t_rma_sprinkler.ret_warehouse_date, '%Y-%m-%d') &gt;= #{joinForm.retWarehouseDateStartTime}
             </if>
             <if test="joinForm.retWarehouseDateEndTime != null">
-                AND DATE_FORMAT(t_rma_sprinkler.ret_maintainence_date, '%Y-%m-%d') &lt;= #{joinForm.retWarehouseDateEndTime}
+                AND DATE_FORMAT(t_rma_sprinkler.ret_warehouse_date, '%Y-%m-%d') &lt;= #{joinForm.retWarehouseDateEndTime}
             </if>
             <if test="joinForm.customer != null and joinForm.customer != ''">
                 AND INSTR(t_rma_sprinkler.customer,#{joinForm.customer})
@@ -99,7 +99,7 @@
                 AND INSTR(t_rma_sprinkler.warehouse_check,#{joinForm.warehouseCheck})
             </if>
             <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
-                ORDER BY t_sprinkler.create_time DESC
+                ORDER BY t_rma_sprinkler.ret_warehouse_date DESC
             </if>
         </where>
     </select>

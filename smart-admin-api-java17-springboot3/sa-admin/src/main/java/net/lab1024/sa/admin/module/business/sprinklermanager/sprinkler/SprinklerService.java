@@ -79,16 +79,16 @@ public class SprinklerService {
     public ResponseDTO<PageResult<SprinklerVO>> queryByPage(@Valid SprinklerQueryFormList queryFormList) {
         List<SprinklerQueryForm> queryForms = queryFormList.getQueryFormList();
 //        Page<?> page = SmartPageUtil.convert2PageQueryBySprinklerSerial(queryForm);
+        Page<?> page = SmartPageUtil.convert2PageQuery(queryFormList);
         List<SprinklerVO> sprinklerList = new ArrayList<>();
         if (queryForms != null) {
 //            List<List<SprinklerVO>> sprinklerList = new ArrayList<>();
 
             for (SprinklerQueryForm queryForm : queryForms) {
                 queryForm.setDeletedFlag(Boolean.FALSE);
-                sprinklerList.addAll(sprinklerRepository.getList(queryForm));
+                sprinklerList.addAll(sprinklerRepository.getListByQueryPage(page, queryForm));
             }
         }
-        Page<?> page = SmartPageUtil.convert2PageQueryBySprinklerSerial(queryFormList);
         page.setTotal(sprinklerList.size());
         PageResult<SprinklerVO> pageResult = SmartPageUtil.convert2PageResult(page, sprinklerList);
         return ResponseDTO.ok(pageResult);

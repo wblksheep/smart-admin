@@ -49,7 +49,7 @@
             </if>
         </where>
         <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
-            ORDER BY create_time DESC
+            ORDER BY ret_warehouse_date DESC
         </if>
     </select>
 
