@@ -26,8 +26,8 @@ public class MaintainingSprinklerUpdateForm extends BaseUpdateForm{
     @Schema(description = "返修客户")
     private String customer;
 
-    @ExcelProperty("所在仓status")
-    @Schema(description = "所在仓status")
+    @ExcelProperty("所在仓")
+    @Schema(description = "所在仓")
     private Byte status;
 
 }

@@ -140,8 +140,8 @@ public class SprinklerController {
 
     @Operation(summary = "导出全部喷头信息 @author 芦苇")
     @PostMapping("/sprinklermanager/sprinkler/exportSprinklerExcel")
-    public void exportSprinklerExcel(@RequestBody @Valid SprinklerQueryForm queryForm, HttpServletResponse response) throws IOException {
-        List<SprinklerExcelVO> data = sprinklerService.getSprinklerExcelExportData(queryForm);
+    public void exportSprinklerExcel(@RequestBody @Valid SprinklerQueryFormList queryForms, HttpServletResponse response) throws IOException {
+        List<SprinklerExcelVO> data = sprinklerService.getSprinklerExcelExportData(queryForms);
         if (CollectionUtils.isEmpty(data)) {
             SmartResponseUtil.write(response, ResponseDTO.userErrorParam("暂无数据"));
             return;

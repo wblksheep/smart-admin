@@ -7,30 +7,21 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * 喷头信息
+ * 可用仓喷头所有信息
  *
  * @Author 海印: 芦苇
  */
 @Data
-public class SprinklerVO extends BaseSprinklerVO {
+public class AllocatingSprinklerVO extends BaseSprinklerVO {
 
     @Schema(description = "喷头ID")
     private Long sprinklerId;
 
-    @Schema(description = "购入日期（合同编号）")
-    private String purchaseDateContractNumber;
-
-    @Schema(description = "喷头型号")
-    private String sprinklerModel;
-
     @Schema(description = "喷头序列号")
     private String sprinklerSerial;
 
-    @Schema(description = "发货日期")
-    private LocalDate shippingDate;
-
-    @Schema(description = "入仓日期")
-    private LocalDate warehouseDate;
+    @Schema(description = "喷头型号")
+    private String sprinklerModel;
 
     @Schema(description = "领用日期")
     private LocalDate allocateDate;
@@ -38,29 +29,11 @@ public class SprinklerVO extends BaseSprinklerVO {
     @Schema(description = "领用人")
     private String allocateUser;
 
-    @Schema(description = "领用用途")
-    private String allocatePurpose;
-
-    @Schema(description = "位置")
-    private String allocatePosition;
-
-    @Schema(description = "电压")
-    private Float voltage;
-
-    @Schema(description = "jetsout")
-    private Float jetsoutNew;
-
-    @Schema(description = "历史")
-    private String history;
-
-    @Schema(description = "所在仓")
-    private Byte status;
-
     @Schema(description = "新旧喷头")
     private Boolean isNew;
 
-    @Schema(description = "喷头详情")
-    private String sprinklerDetail;
+    @Schema(description = "所在仓")
+    private Byte status;
 
     @Schema(description = "禁用状态")
     private Boolean disabledFlag;

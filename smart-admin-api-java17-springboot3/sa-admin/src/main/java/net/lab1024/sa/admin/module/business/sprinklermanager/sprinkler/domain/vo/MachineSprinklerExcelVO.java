@@ -30,7 +30,4 @@ public class MachineSprinklerExcelVO extends BaseSprinklerExcelVO{
     @ExcelProperty("位置")
     private String allocatePosition;
 
-    @ExcelProperty("历史")
-    private String history;
-
 }

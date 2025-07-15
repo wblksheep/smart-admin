@@ -57,7 +57,7 @@ public class SprinklerQueryForm extends PageParam {
     @Schema(description = "历史")
     private String history;
 
-    @Schema(description = "所在仓status")
+    @Schema(description = "所在仓")
     private Byte status;
 
     @Schema(description = "新旧喷头")

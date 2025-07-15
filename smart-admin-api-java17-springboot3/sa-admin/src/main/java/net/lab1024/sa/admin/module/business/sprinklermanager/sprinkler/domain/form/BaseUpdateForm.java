@@ -17,7 +17,7 @@ import org.hibernate.validator.constraints.Length;
         @JsonSubTypes.Type(value = MaintainingSprinklerUpdateForm.class, name = "MAINTAINING_REPOSITORY"),
         @JsonSubTypes.Type(value = DamagedSprinklerUpdateForm.class, name = "DAMAGED_REPOSITORY"),
         @JsonSubTypes.Type(value = RmaSprinklerUpdateForm.class, name = "RMA_REPOSITORY"),
-        @JsonSubTypes.Type(value = AllocatingSprinlerUpdateForm.class, name = "ALLOCATING_REPOSITORY")
+        @JsonSubTypes.Type(value = AllocatingSprinklerUpdateForm.class, name = "ALLOCATING_REPOSITORY")
 })
 @Data
 public abstract class BaseUpdateForm {
@@ -42,7 +42,7 @@ public abstract class BaseUpdateForm {
     private Boolean disabledFlag;
 
     @ExcelIgnore
-    @Schema(description = "创建人", hidden = true)
+    @Schema(description = "创建人ID", hidden = true)
     private Long createUserId;
 
     @ExcelIgnore

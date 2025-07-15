@@ -26,8 +26,8 @@ public class UsableSprinklerCreateForm extends BaseCreateForm{
     @Schema(description = "领用时备注1")
     private String allocateNote1;
 
-    @ExcelProperty("所在仓status")
-    @Schema(description = "所在仓status")
+    @ExcelProperty("所在仓")
+    @Schema(description = "所在仓")
     private Byte status;
 
 }

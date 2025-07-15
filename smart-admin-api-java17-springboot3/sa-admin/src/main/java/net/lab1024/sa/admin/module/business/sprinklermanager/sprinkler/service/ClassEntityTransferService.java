@@ -189,9 +189,20 @@ public class ClassEntityTransferService {
                 return transferImportToUpdate((DamagedSprinklerImportForm) vo);
             case 4:
                 return transferImportToUpdate((RmaSprinklerImportForm) vo);
+            case 5:
+                return transferImportToUpdate((AllocatingSprinklerImportForm) vo);
             default:
                 throw new BusinessException("未知的仓库类型" + type);
         }
+    }
+
+    private AllocatingSprinklerUpdateForm transferImportToUpdate(AllocatingSprinklerImportForm form) {
+        // 使用Bean拷贝工具优化属性复制
+        AllocatingSprinklerUpdateForm updateVO = SmartBeanUtil.copy(form, AllocatingSprinklerUpdateForm.class);
+        if (!form.getStatus().equals("领用中")) {
+            throw new BusinessException(String.format("喷头序列号 %s 的仓参数非法: %s", form.getSprinklerSerial(), form.getStatus()));
+        }
+        return updateVO;
     }
 
     private RmaSprinklerUpdateForm transferImportToUpdate(RmaSprinklerImportForm form) {

@@ -30,6 +30,8 @@ public class TypeService {
     private DamagedSprinklerRepository damagedSprinklerRepository;
     @Resource
     private RmaSprinklerRepository rmaSprinklerRepository;
+    @Resource
+    private AllocatingSprinklerRepository allocatingSprinklerRepository;
 
 
     public BaseIService<?> getCachedRepository(Byte type) {
@@ -73,6 +75,8 @@ public class TypeService {
                 return damagedSprinklerRepository;
             case "RmaSprinklerEntity":
                 return rmaSprinklerRepository;
+            case "AllocatingSprinklerEntity":
+                return allocatingSprinklerRepository;
             default:
                 throw new IllegalArgumentException("未知的类：" + clazz.getSimpleName());
         }
@@ -90,6 +94,8 @@ public class TypeService {
                 return DamagedSprinklerEntity.class;
             case 4:
                 return RmaSprinklerEntity.class;
+            case 5:
+                return AllocatingSprinklerEntity.class;
             default:
                 throw new IllegalArgumentException("未知的类型：" + type);
         }
@@ -132,6 +138,8 @@ public class TypeService {
                 return DamagedSprinklerImportForm.class;
             case 4:
                 return RmaSprinklerImportForm.class;
+            case 5:
+                return AllocatingSprinklerImportForm.class;
             default:
                 throw new IllegalArgumentException("未知的类型：" + type);
         }

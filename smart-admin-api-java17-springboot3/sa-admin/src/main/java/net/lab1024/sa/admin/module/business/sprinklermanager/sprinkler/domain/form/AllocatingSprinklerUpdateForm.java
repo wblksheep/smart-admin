@@ -2,11 +2,10 @@ package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.f
 
 import cn.idev.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class MachineSprinklerUpdateForm extends BaseUpdateForm {
+public class AllocatingSprinklerUpdateForm extends BaseUpdateForm {
 
     @ExcelProperty("所在仓")
     @Schema(description = "所在仓")

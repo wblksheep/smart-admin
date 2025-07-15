@@ -40,6 +40,8 @@ public class RepositorySprinklerTransferStrategyFactory {
                 return (byte) 3;
             case "RmaSprinklerEntity":
                 return (byte) 4;
+            case "AllocatingSprinklerEntity":
+                return (byte) 5;
             default:
                 throw new IllegalArgumentException("未知的类：" + clazz.getSimpleName());
         }

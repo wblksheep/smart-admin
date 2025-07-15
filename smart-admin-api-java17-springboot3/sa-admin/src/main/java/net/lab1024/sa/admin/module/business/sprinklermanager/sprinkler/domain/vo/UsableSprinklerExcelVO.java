@@ -31,9 +31,6 @@ public class UsableSprinklerExcelVO extends BaseSprinklerExcelVO{
     @ExcelProperty("jetsout")
     private Float jetsoutNew;
 
-    @ExcelProperty("历史")
-    private String history;
-
     @ExcelProperty("新旧喷头")
     private String isNew;
 

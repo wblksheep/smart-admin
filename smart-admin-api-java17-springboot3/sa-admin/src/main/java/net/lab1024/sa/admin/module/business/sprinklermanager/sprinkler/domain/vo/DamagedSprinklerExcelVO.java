@@ -18,9 +18,6 @@ public class DamagedSprinklerExcelVO extends BaseSprinklerExcelVO{
     @ExcelProperty("返仓日期")
     private LocalDate retWarehouseDate;
 
-    @ExcelProperty("历史")
-    private String history;
-
     @ExcelProperty("备注1")
     private String note1;
 

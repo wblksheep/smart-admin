@@ -22,7 +22,7 @@ public class DamagedSprinklerVO extends BaseSprinklerVO{
     @Schema(description = "返仓日期")
     private LocalDate retWarehouseDate;
 
-    @Schema(description = "所在仓status")
+    @Schema(description = "所在仓")
     private Byte status;
 
     @Schema(description = "备注1")

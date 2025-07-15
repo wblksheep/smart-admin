@@ -16,8 +16,8 @@ public class MachineSprinklerCreateForm extends BaseCreateForm{
     @Schema(description = "历史")
     private String history;
 
-    @ExcelProperty("所在仓status")
-    @Schema(description = "所在仓status")
+    @ExcelProperty("所在仓")
+    @Schema(description = "所在仓")
     private Byte status;
 
 }

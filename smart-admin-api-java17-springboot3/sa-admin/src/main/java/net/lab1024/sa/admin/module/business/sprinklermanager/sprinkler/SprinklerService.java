@@ -132,9 +132,15 @@ public class SprinklerService {
     /**
      * 获取导出数据
      */
-    public List<SprinklerExcelVO> getSprinklerExcelExportData(@Valid SprinklerQueryForm queryForm) {
-        queryForm.setDeletedFlag(false);
-        return sprinklerRepository.selectSprinklerExcelExportData(queryForm);
+    public List<SprinklerExcelVO> getSprinklerExcelExportData(@Valid SprinklerQueryFormList queryForms) {
+        List<SprinklerExcelVO> sprinklerExcelVOList = new ArrayList<>();
+        if (queryForms != null) {
+            for (SprinklerQueryForm queryForm : queryForms.getQueryFormList()) {
+                queryForm.setDeletedFlag(false);
+                sprinklerExcelVOList.addAll(sprinklerRepository.selectSprinklerExcelExportData(queryForm));
+            }
+        }
+        return sprinklerExcelVOList;
     }
 
 

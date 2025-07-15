@@ -34,8 +34,8 @@ public class DamagedSprinklerCreateForm extends BaseCreateForm{
     @Schema(description = "具体破损原因")
     private String realDamagedReason;
 
-    @ExcelProperty("所在仓status")
-    @Schema(description = "所在仓status")
+    @ExcelProperty("所在仓")
+    @Schema(description = "所在仓")
     private Byte status;
 
     @ExcelIgnore

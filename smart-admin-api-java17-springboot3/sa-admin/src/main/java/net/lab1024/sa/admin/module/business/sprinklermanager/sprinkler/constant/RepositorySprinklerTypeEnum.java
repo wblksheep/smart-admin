@@ -40,6 +40,11 @@ public enum RepositorySprinklerTypeEnum implements BaseEnum {
      * RMA
      */
     RMA_REPOSITORY((byte)4, "rma"),
+
+    /**
+     * 领用中
+     */
+    ALLOCATING_REPOSITORY((byte)5, "allocating"),
     ;
 
     // 状态值映射缓存（优化查询性能）

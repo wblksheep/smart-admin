@@ -121,7 +121,7 @@ public class MachineSprinklerDataProcessor implements DataProcessor<MachineSprin
             // 9. 返回处理结果（结果信息优化）
             return ResponseDTO.okMsg(invalidSerials.isEmpty() ? "处理成功" : "处理成功，但存在无效数据");
         }catch (NullPointerException e){
-            return ResponseDTO.userErrorParam("所在仓status不能为空");
+            return ResponseDTO.userErrorParam("所在仓不能为空");
         }
     }
 

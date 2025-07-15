@@ -88,6 +88,8 @@ public class SprinklerExcelVO {
             case (byte) 4:
                 this.status = "rma";
                 break;
+            case (byte) 5:
+                this.status = "领用中";
             default:
                 throw new RuntimeException("非法的仓库状态");
         }

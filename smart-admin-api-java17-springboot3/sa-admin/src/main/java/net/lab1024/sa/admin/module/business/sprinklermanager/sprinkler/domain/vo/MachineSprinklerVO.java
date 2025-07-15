@@ -35,7 +35,7 @@ public class MachineSprinklerVO extends BaseSprinklerVO{
     @Schema(description = "位置")
     private String allocatePosition;
 
-    @Schema(description = "所在仓status")
+    @Schema(description = "所在仓")
     private Byte status;
 
     @Schema(description = "禁用状态")

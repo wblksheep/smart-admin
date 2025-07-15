@@ -43,8 +43,8 @@ public class RmaSprinklerCreateForm extends BaseCreateForm{
     @Schema(description = "系统核对")
     private String warehouseCheck;
 
-    @ExcelProperty("所在仓status")
-    @Schema(description = "所在仓status")
+    @ExcelProperty("所在仓")
+    @Schema(description = "所在仓")
     private Byte status;
 
     @ExcelIgnore

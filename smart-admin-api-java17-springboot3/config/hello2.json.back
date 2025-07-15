@@ -1,51 +1,34 @@
 {
   "pageNum": 1,
   "pageSize": 10,
-  "searchCount": true,
-  "sortItemList": [
-    {
-      "isAsc": true,
-      "column": "string"
-    }
-  ],
-  "queryFormList": [
-    {
-      "purchaseDateContractNumber": null,
-      "sprinklerModel": null,
-      "sprinklerSerial": null,
-      "shippingDateStartTime": null,
-      "shippingDateEndTime": null,
-      "warehouseDateStartTime": null,
-      "warehouseDateEndTime": null,
-      "allocateDateStartTime": null,
-      "allocateDateEndTime": null,
-      "allocateUser": null,
-      "allocatePurpose": null,
-      "allocatePosition": null,
-      "history": null,
-      "status": null,
-      "isNew": null,
-      "sprinklerDetail": null,
-      "disabledFlag": null
-    },
-    {
-      "purchaseDateContractNumber": null,
-      "sprinklerModel": null,
-      "sprinklerSerial": null,
-      "shippingDateStartTime": null,
-      "shippingDateEndTime": null,
-      "warehouseDateStartTime": null,
-      "warehouseDateEndTime": null,
-      "allocateDateStartTime": null,
-      "allocateDateEndTime": null,
-      "allocateUser": null,
-      "allocatePurpose": null,
-      "allocatePosition": null,
-      "history": null,
-      "status": null,
-      "isNew": null,
-      "sprinklerDetail": null,
-      "disabledFlag": null
-    }
-  ]
+  "searchCount": null,
+  "sortItemList": null,
+  "queryForm": {
+    "pageNum": 1,
+    "pageSize": 10,
+    "searchCount": null,
+    "sortItemList": null,
+    "purchaseDateContractNumber": null,
+    "sprinklerModel": null,
+    "sprinklerSerial": null,
+    "shippingDateStartTime": null,
+    "shippingDateEndTime": null,
+    "warehouseDateStartTime": null,
+    "warehouseDateEndTime": null,
+    "allocateDateStartTime": null,
+    "allocateDateEndTime": null,
+    "allocateUser": null,
+    "allocatePurpose": null,
+    "allocatePosition": null,
+    "history": null,
+    "status": null,
+    "isNew": null,
+    "sprinklerDetail": null,
+    "disabledFlag": null
+  },
+  "joinQueryForm": {
+    "sceneType": null,
+    "disabledFlag": null
+  },
+  "sceneType": null
 }

@@ -12,9 +12,13 @@ public class BaseSprinklerExcelVO {
     @ExcelProperty("所在仓")
     private String status;
 
+    @ExcelProperty("历史")
+    private String history;
+
     public String getStatus() {
         return this.status;
     }
+
     public void setStatus(Byte status) {
         switch (status) {
             case (byte) 0:
@@ -31,6 +35,9 @@ public class BaseSprinklerExcelVO {
                 break;
             case (byte) 4:
                 this.status = "rma";
+                break;
+            case (byte) 5:
+                this.status = "领用中";
                 break;
             default:
                 throw new RuntimeException("非法的仓库状态");

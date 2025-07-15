@@ -58,8 +58,8 @@ public class SprinklerCreateForm extends BaseCreateForm {
     private String history;
 
 
-    @ExcelProperty("所在仓status")
-    @Schema(description = "所在仓status")
+    @ExcelProperty("所在仓")
+    @Schema(description = "所在仓")
     private Byte status;
 
     @ExcelProperty("新旧喷头")

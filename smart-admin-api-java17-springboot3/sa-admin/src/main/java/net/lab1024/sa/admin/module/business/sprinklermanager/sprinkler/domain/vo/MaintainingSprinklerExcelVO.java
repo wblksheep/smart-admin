@@ -27,8 +27,4 @@ public class MaintainingSprinklerExcelVO extends BaseSprinklerExcelVO{
      @ExcelProperty("返修客户")
     private String customer;
 
-     @ExcelProperty("历史")
-    private String history;
-
-
 }

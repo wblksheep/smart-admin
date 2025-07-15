@@ -14,8 +14,8 @@ public class SprinklerCreateBO {
     @Length(max = 20, message = "sprinklerSerial最多20字符")
     private String sprinklerSerial;
 
-    @ExcelProperty("所在仓status")
-    @Schema(description = "所在仓status")
+    @ExcelProperty("所在仓")
+    @Schema(description = "所在仓")
     private Byte status;
 
 

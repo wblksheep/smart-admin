@@ -1,5 +1,6 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.transfer.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import jakarta.annotation.Resource;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.MaintainingSprinklerEntity;
@@ -35,8 +36,14 @@ public class MaintainingSprinklerTransferStrategy implements RepositorySprinkler
         if (Objects.isNull(curEntity) || curEntity.getDeletedFlag()) {
             throw new TransferRepositoryException("原仓喷头不存在");
         }
-        curEntity.setDeletedFlag(Boolean.TRUE);
-        maintainingSprinklerRepository.updateById(curEntity);
+        LambdaUpdateWrapper<MaintainingSprinklerEntity> uw = new LambdaUpdateWrapper<>();
+        uw.eq(MaintainingSprinklerEntity::getSprinklerId, curEntity.getSprinklerId())
+                .set(MaintainingSprinklerEntity::getRetMaintainenceDate, null)
+                .set(MaintainingSprinklerEntity::getRetMaintainenceReason, null)
+                .set(MaintainingSprinklerEntity::getRealReason, null)
+                .set(MaintainingSprinklerEntity::getCustomer, null)
+                .set(MaintainingSprinklerEntity::getDeletedFlag, Boolean.TRUE); // 非null字段也可在此设置
+        maintainingSprinklerRepository.update(null, uw);
     }
 
     @Override

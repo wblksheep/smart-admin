@@ -35,20 +35,7 @@ public class RmaSprinklerUpdateForm extends BaseUpdateForm{
     @Schema(description = "系统核对")
     private String warehouseCheck;
 
-    @ExcelProperty("所在仓status")
-    @Schema(description = "所在仓status")
+    @ExcelProperty("所在仓")
+    @Schema(description = "所在仓")
     private Byte status;
-
-    @ExcelIgnore
-    @Schema(description = "禁用状态")
-    @NotNull(message = "禁用状态不能为空")
-    private Boolean disabledFlag;
-
-    @ExcelIgnore
-    @Schema(description = "创建人", hidden = true)
-    private Long createUserId;
-
-    @ExcelIgnore
-    @Schema(description = "创建人", hidden = true)
-    private String createUserName;
 }

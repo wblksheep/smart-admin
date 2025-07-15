@@ -105,9 +105,9 @@ public class SprinklerEntity {
     private String history;
 
     /**
-     * 所在仓status
+     * 所在仓
      */
-    @DataTracerFieldLabel("所在仓status")
+    @DataTracerFieldLabel("所在仓")
     private Byte status;
 
     /**

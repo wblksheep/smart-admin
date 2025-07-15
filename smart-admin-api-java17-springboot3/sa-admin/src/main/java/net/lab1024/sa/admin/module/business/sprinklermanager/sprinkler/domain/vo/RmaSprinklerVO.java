@@ -31,7 +31,7 @@ public class RmaSprinklerVO extends BaseSprinklerVO{
     @Schema(description = "返修客户")
     private String customer;
 
-    @Schema(description = "所在仓status")
+    @Schema(description = "所在仓")
     private Byte status;
 
     @Schema(description = "RMA地点")
