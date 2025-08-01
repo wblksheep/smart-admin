@@ -68,6 +68,7 @@ public class StatisticService {
      * 查询每月统计模块
      */
     public ResponseDTO<List<MonthlyStatisticSheetVO>> getMonthlyStatisticSheet(LocalDate startDate, LocalDate endDate, String machineType) throws IOException {
+        updateMachineType(machineType);
         MonthlyStatisticSheet statisticSheet = factory.createMonthlyStatisticSheet();
         try {
             List<MonthlyStatisticExcelVO> datas = statisticSheet.calculateMonthlyData(startDate, endDate, machineType, Boolean.FALSE);

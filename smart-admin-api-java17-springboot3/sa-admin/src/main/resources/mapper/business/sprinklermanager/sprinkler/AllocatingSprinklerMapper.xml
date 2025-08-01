@@ -35,7 +35,7 @@
             </if>
         </where>
         <if test="queryForm.sortItemList == null or queryForm.sortItemList.size == 0">
-            ORDER BY t_sprinkler.create_time DESC
+            ORDER BY t_sprinkler.allocate_date DESC
         </if>
         <if test="queryForm.sortItemList != null and !queryForm.sortItemList.isEmpty()">
             ORDER BY

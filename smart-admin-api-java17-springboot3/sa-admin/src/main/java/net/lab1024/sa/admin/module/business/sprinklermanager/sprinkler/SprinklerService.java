@@ -89,7 +89,7 @@ public class SprinklerService {
                 sprinklerList.addAll(sprinklerRepository.getListByQueryPage(page, queryForm));
             }
         }
-        page.setTotal(sprinklerList.size());
+//        page.setTotal(sprinklerList.size());
         PageResult<SprinklerVO> pageResult = SmartPageUtil.convert2PageResult(page, sprinklerList);
         return ResponseDTO.ok(pageResult);
     }
