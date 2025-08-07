@@ -1,6 +1,8 @@
 package net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.strategy.transfer.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import jakarta.annotation.Resource;
+import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.MaintainingSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.SprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.domain.entity.UsableSprinklerEntity;
 import net.lab1024.sa.admin.module.business.sprinklermanager.sprinkler.exception.TransferRepositoryException;
@@ -38,6 +40,13 @@ public class UsableSprinklerTransferStrategy implements RepositorySprinklerTrans
         }
         curEntity.setDeletedFlag(Boolean.TRUE);
         usableSprinklerRepository.updateById(curEntity);
+        LambdaUpdateWrapper<UsableSprinklerEntity> uw = new LambdaUpdateWrapper<>();
+        uw.eq(UsableSprinklerEntity::getSprinklerId, curEntity.getSprinklerId())
+                .set(UsableSprinklerEntity::getRetWarehouseDate, null)
+                .set(UsableSprinklerEntity::getAllocateLimitation, null)
+                .set(UsableSprinklerEntity::getAllocateNote1, null)
+                .set(UsableSprinklerEntity::getDeletedFlag, Boolean.TRUE); // 非null字段也可在此设置
+        usableSprinklerRepository.update(null, uw);
     }
 
     @Override

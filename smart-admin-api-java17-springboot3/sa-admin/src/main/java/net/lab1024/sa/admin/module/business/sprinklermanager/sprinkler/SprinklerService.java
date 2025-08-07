@@ -356,6 +356,7 @@ public class SprinklerService {
         Class<T> baseImportFormClass = (Class<T>) typeService.getCachedImportForm(type);
         //使用收集器一次性完成字段设置，避免冗余操作
         List<T> importVOs = ExcelUtil.importExcelByClass(file, baseImportFormClass).stream().peek(vo -> initImportVO(vo, requestUser)) // 提取字段设置为独立方法
+                .filter(vo -> (vo.getStatus() != null))
                 .toList();
         List<? extends BaseUpdateForm> updateVOs = importVOs.stream().map(vo -> transferService.transferImportToUpdate(vo, type)).toList();
         updateVOs.forEach(vo -> {
