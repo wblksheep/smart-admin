@@ -245,12 +245,6 @@ public class ClassEntityTransferService {
                 throw new BusinessException(String.format("喷头序列号 %s 的%s失败: %s", form.getSprinklerSerial(), fieldName, e.getMessage()));
             }
         });
-        if (form == null) {
-            throw new BusinessException("空消息异常");
-        }
-        if (form.getStatus() == null) {
-            throw new BusinessException("空状态异常");
-        }
         if (!form.getStatus().equals("rma")) {
             throw new BusinessException(String.format("喷头序列号 %s 的仓参数非法: %s", form.getSprinklerSerial(), form.getStatus()));
         }
